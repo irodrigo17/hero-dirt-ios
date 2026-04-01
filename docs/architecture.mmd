@@ -1,0 +1,81 @@
+graph TD
+    subgraph App["App Entry"]
+        RainClaudeApp["RainClaudeApp"]
+        ContentView["ContentView<br/><i>TabView</i>"]
+    end
+
+    subgraph Views["Views"]
+        MapExploreView["MapExploreView<br/><i>Map + Search + Overlay</i>"]
+        SavedPlacesView["SavedPlacesView<br/><i>Saved places list</i>"]
+        LocationRainfallSheet["LocationRainfallSheet<br/><i>Location detail sheet</i>"]
+        RainfallCardView["RainfallCardView<br/><i>Rainfall summary card</i>"]
+        RainfallOverlayControls["RainfallOverlayControls<br/><i>Timeframe, opacity, legend</i>"]
+        SearchBar["SearchBar<br/><i>UISearchBar wrapper</i>"]
+    end
+
+    subgraph Services["Services"]
+        PlaceStore["PlaceStore<br/><i>ObservableObject</i><br/>CRUD + persistence"]
+        RainfallGridService["RainfallGridService<br/><i>ObservableObject</i><br/>Grid fetch + bitmap render"]
+        WeatherService["WeatherService<br/><i>static</i><br/>Open-Meteo API client"]
+        RainfallColorScale["RainfallColorScale<br/><i>static</i><br/>mm → RGBA mapping"]
+    end
+
+    subgraph Models["Models"]
+        Place["Place<br/><i>Codable struct</i>"]
+        RainfallSummary["RainfallSummary<br/><i>1d/2d/3d/7d + daysSinceRain</i>"]
+        DailyRainfall["DailyRainfall<br/><i>date + amount</i>"]
+        RainfallTimeframe["RainfallTimeframe<br/><i>enum: 1d/2d/3d/7d</i>"]
+        RainfallGridBounds["RainfallGridBounds<br/><i>lat/lon extent</i>"]
+    end
+
+    subgraph External["External APIs"]
+        OpenMeteo["Open-Meteo API<br/><i>Precipitation data</i>"]
+        MapKit["Apple MapKit<br/><i>Map, search, geocoding</i>"]
+    end
+
+    RainClaudeApp -->|"@StateObject"| PlaceStore
+    RainClaudeApp -->|renders| ContentView
+    ContentView -->|tab 1| MapExploreView
+    ContentView -->|tab 2| SavedPlacesView
+
+    MapExploreView -->|"@EnvironmentObject"| PlaceStore
+    MapExploreView -->|"@StateObject"| RainfallGridService
+    MapExploreView -->|presents| LocationRainfallSheet
+    MapExploreView -->|contains| SearchBar
+    MapExploreView -->|contains| RainfallOverlayControls
+    MapExploreView -->|reads| RainfallTimeframe
+    MapExploreView ---|uses| MapKit
+
+    RainfallGridService -->|fetches via| WeatherService
+    RainfallGridService -->|colors via| RainfallColorScale
+    RainfallGridService -->|reads| RainfallTimeframe
+    RainfallGridService -->|stores| RainfallSummary
+    RainfallGridService -->|exposes| RainfallGridBounds
+
+    WeatherService -->|calls| OpenMeteo
+    WeatherService -->|parses into| DailyRainfall
+    WeatherService -->|returns| RainfallSummary
+
+    LocationRainfallSheet -->|"@EnvironmentObject"| PlaceStore
+    LocationRainfallSheet -->|fetches via| WeatherService
+    LocationRainfallSheet -->|renders| RainfallCardView
+    LocationRainfallSheet -->|reads| Place
+    LocationRainfallSheet ---|uses| MapKit
+
+    SavedPlacesView -->|"@EnvironmentObject"| PlaceStore
+    SavedPlacesView -->|fetches via| WeatherService
+    SavedPlacesView -->|reads| Place
+    SavedPlacesView -->|displays| RainfallSummary
+
+    RainfallCardView -->|displays| RainfallSummary
+    RainfallOverlayControls -->|binds| RainfallTimeframe
+    RainfallOverlayControls -->|legend from| RainfallColorScale
+
+    PlaceStore -->|persists| Place
+    RainfallSummary -->|computed from| DailyRainfall
+
+    style App fill:#e8f4fd,stroke:#4a90d9
+    style Views fill:#f0f8e8,stroke:#6ab04c
+    style Services fill:#fff3e0,stroke:#f0932b
+    style Models fill:#fce4ec,stroke:#e17055
+    style External fill:#f3e5f5,stroke:#8e44ad

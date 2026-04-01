@@ -1,0 +1,543 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1410941503817B5C5E75A233 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */; };
+		1D7AA7D4E4290E972BAF5A1E /* RainClaudeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E285C4281DD9C4ABFD5E6F0 /* RainClaudeApp.swift */; };
+		30AB008D141C44FBCCCD9B11 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744879444057483CC6661630 /* WeatherService.swift */; };
+		769F32724E1E563BE1D39F2E /* PlaceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67A5237BA565EB2FF746B50 /* PlaceStore.swift */; };
+		78515DF55F43F5201709D0E6 /* RainfallData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */; };
+		9B2BE3499ABFA92D39B5F8B3 /* RainfallCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */; };
+		A2C2CA39B6A30286CC5B81BE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB0F8584B7ADED8B4099F75 /* ContentView.swift */; };
+		AA1111110000000000000001 /* RainfallOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000001 /* RainfallOverlay.swift */; };
+		AA1111110000000000000002 /* RainfallColorScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000002 /* RainfallColorScale.swift */; };
+		AA1111110000000000000003 /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000003 /* RainfallGridService.swift */; };
+		AA1111110000000000000004 /* RainfallOverlayControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000004 /* RainfallOverlayControls.swift */; };
+		BB2A3BBEBC1605581F8E40ED /* LocationRainfallSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */; };
+		C200A36C09D984FE4A6A074F /* SavedPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */; };
+		C7A7B3A5364CF2C0353E79C5 /* MapExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F81B48B2FECDB1A26677D74 /* MapExploreView.swift */; };
+		CC0000030000000000000001 /* PlaceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* PlaceStoreTests.swift */; };
+		CC0000030000000000000002 /* PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000002 /* PlaceTests.swift */; };
+		CC0000030000000000000003 /* RainfallColorScaleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000003 /* RainfallColorScaleTests.swift */; };
+		CC0000030000000000000004 /* RainfallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000004 /* RainfallDataTests.swift */; };
+		CC0000030000000000000005 /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000005 /* RainfallOverlayTests.swift */; };
+		CC0000030000000000000006 /* WeatherServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000006 /* WeatherServiceTests.swift */; };
+		D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0229A259C104D045364369B /* Place.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CC0000090000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D2D0010115B4746A03DE7BEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B90D90D0D58F1AD5E0E5EFA7;
+			remoteInfo = RainClaude;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallCardView.swift; sourceTree = "<group>"; };
+		01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
+		36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRainfallSheet.swift; sourceTree = "<group>"; };
+		6E285C4281DD9C4ABFD5E6F0 /* RainClaudeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainClaudeApp.swift; sourceTree = "<group>"; };
+		744879444057483CC6661630 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		88CC3FF9DE1058CB0FD2C828 /* RainClaude.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RainClaude.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BB0F8584B7ADED8B4099F75 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8F8930ED95B981ED29139237 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9F81B48B2FECDB1A26677D74 /* MapExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapExploreView.swift; sourceTree = "<group>"; };
+		A0229A259C104D045364369B /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+		AA2222220000000000000001 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
+		AA2222220000000000000002 /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
+		AA2222220000000000000003 /* RainfallGridService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallGridService.swift; sourceTree = "<group>"; };
+		AA2222220000000000000004 /* RainfallOverlayControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayControls.swift; sourceTree = "<group>"; };
+		C67A5237BA565EB2FF746B50 /* PlaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStore.swift; sourceTree = "<group>"; };
+		CC0000010000000000000001 /* PlaceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStoreTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000002 /* PlaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000003 /* RainfallColorScaleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScaleTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000004 /* RainfallDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallDataTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000005 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000006 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
+		CC0000020000000000000001 /* RainClaudeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RainClaudeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DD0000010000000000000001 /* RainClaude.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RainClaude.entitlements; sourceTree = "<group>"; };
+		F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CC0000070000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2573663466FA359DC7B01BC4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				88CC3FF9DE1058CB0FD2C828 /* RainClaude.app */,
+				CC0000020000000000000001 /* RainClaudeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		80044E09560C3E5C1FA09803 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				C67A5237BA565EB2FF746B50 /* PlaceStore.swift */,
+				AA2222220000000000000002 /* RainfallColorScale.swift */,
+				AA2222220000000000000003 /* RainfallGridService.swift */,
+				744879444057483CC6661630 /* WeatherService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		B6CCE8C79FA17EE161F06CCA = {
+			isa = PBXGroup;
+			children = (
+				D35C9F48128C12A5B95636E3 /* RainClaude */,
+				CC0000040000000000000001 /* RainClaudeTests */,
+				2573663466FA359DC7B01BC4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CC0000040000000000000001 /* RainClaudeTests */ = {
+			isa = PBXGroup;
+			children = (
+				CC0000010000000000000001 /* PlaceStoreTests.swift */,
+				CC0000010000000000000002 /* PlaceTests.swift */,
+				CC0000010000000000000003 /* RainfallColorScaleTests.swift */,
+				CC0000010000000000000004 /* RainfallDataTests.swift */,
+				CC0000010000000000000005 /* RainfallOverlayTests.swift */,
+				CC0000010000000000000006 /* WeatherServiceTests.swift */,
+			);
+			path = RainClaudeTests;
+			sourceTree = "<group>";
+		};
+		CE20BECDFF7954DCCEF48C93 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A0229A259C104D045364369B /* Place.swift */,
+				01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */,
+				AA2222220000000000000001 /* RainfallOverlay.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D35C9F48128C12A5B95636E3 /* RainClaude */ = {
+			isa = PBXGroup;
+			children = (
+				E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */,
+				8BB0F8584B7ADED8B4099F75 /* ContentView.swift */,
+				8F8930ED95B981ED29139237 /* Info.plist */,
+				DD0000010000000000000001 /* RainClaude.entitlements */,
+				6E285C4281DD9C4ABFD5E6F0 /* RainClaudeApp.swift */,
+				CE20BECDFF7954DCCEF48C93 /* Models */,
+				80044E09560C3E5C1FA09803 /* Services */,
+				F12C72166610C9B7D2C46B36 /* Views */,
+			);
+			path = RainClaude;
+			sourceTree = "<group>";
+		};
+		F12C72166610C9B7D2C46B36 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */,
+				9F81B48B2FECDB1A26677D74 /* MapExploreView.swift */,
+				00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */,
+				AA2222220000000000000004 /* RainfallOverlayControls.swift */,
+				F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B90D90D0D58F1AD5E0E5EFA7 /* RainClaude */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 733BA460AD3B4E4BDB37D9E7 /* Build configuration list for PBXNativeTarget "RainClaude" */;
+			buildPhases = (
+				BD3AD1D75917CCA4073483C9 /* Sources */,
+				7B64B386972C9628B8BD7A54 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RainClaude;
+			packageProductDependencies = (
+			);
+			productName = RainClaude;
+			productReference = 88CC3FF9DE1058CB0FD2C828 /* RainClaude.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CC0000050000000000000001 /* RainClaudeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC0000110000000000000001 /* Build configuration list for PBXNativeTarget "RainClaudeTests" */;
+			buildPhases = (
+				CC0000060000000000000001 /* Sources */,
+				CC0000070000000000000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CC0000080000000000000001 /* PBXTargetDependency */,
+			);
+			name = RainClaudeTests;
+			productName = RainClaudeTests;
+			productReference = CC0000020000000000000001 /* RainClaudeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D2D0010115B4746A03DE7BEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					B90D90D0D58F1AD5E0E5EFA7 = {
+						DevelopmentTeam = "";
+					};
+					CC0000050000000000000001 = {
+						DevelopmentTeam = "";
+						TestTargetID = B90D90D0D58F1AD5E0E5EFA7;
+					};
+				};
+			};
+			buildConfigurationList = FF2C27C849B6247008664468 /* Build configuration list for PBXProject "RainClaude" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B6CCE8C79FA17EE161F06CCA;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B90D90D0D58F1AD5E0E5EFA7 /* RainClaude */,
+				CC0000050000000000000001 /* RainClaudeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7B64B386972C9628B8BD7A54 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1410941503817B5C5E75A233 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD3AD1D75917CCA4073483C9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A2C2CA39B6A30286CC5B81BE /* ContentView.swift in Sources */,
+				BB2A3BBEBC1605581F8E40ED /* LocationRainfallSheet.swift in Sources */,
+				C7A7B3A5364CF2C0353E79C5 /* MapExploreView.swift in Sources */,
+				D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */,
+				769F32724E1E563BE1D39F2E /* PlaceStore.swift in Sources */,
+				1D7AA7D4E4290E972BAF5A1E /* RainClaudeApp.swift in Sources */,
+				9B2BE3499ABFA92D39B5F8B3 /* RainfallCardView.swift in Sources */,
+				AA1111110000000000000002 /* RainfallColorScale.swift in Sources */,
+				78515DF55F43F5201709D0E6 /* RainfallData.swift in Sources */,
+				AA1111110000000000000003 /* RainfallGridService.swift in Sources */,
+				AA1111110000000000000001 /* RainfallOverlay.swift in Sources */,
+				AA1111110000000000000004 /* RainfallOverlayControls.swift in Sources */,
+				C200A36C09D984FE4A6A074F /* SavedPlacesView.swift in Sources */,
+				30AB008D141C44FBCCCD9B11 /* WeatherService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC0000060000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC0000030000000000000001 /* PlaceStoreTests.swift in Sources */,
+				CC0000030000000000000002 /* PlaceTests.swift in Sources */,
+				CC0000030000000000000003 /* RainfallColorScaleTests.swift in Sources */,
+				CC0000030000000000000004 /* RainfallDataTests.swift in Sources */,
+				CC0000030000000000000005 /* RainfallOverlayTests.swift in Sources */,
+				CC0000030000000000000006 /* WeatherServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CC0000080000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B90D90D0D58F1AD5E0E5EFA7 /* RainClaude */;
+			targetProxy = CC0000090000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		19D57BB9B573A1ADAF6440AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = RainClaude/RainClaude.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RainClaude/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RainClaude can use your location to center the map.";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.app;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		52ED147AD8B54472D4894DAA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = RainClaude/RainClaude.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RainClaude/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RainClaude can use your location to center the map.";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.app;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		6EC38D89F3EA0852AC2EC6D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A8CEAD127076EE9FD13EDA3F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CC0000100000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RainClaude.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RainClaude";
+			};
+			name = Debug;
+		};
+		CC0000100000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RainClaude.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RainClaude";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		733BA460AD3B4E4BDB37D9E7 /* Build configuration list for PBXNativeTarget "RainClaude" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52ED147AD8B54472D4894DAA /* Debug */,
+				19D57BB9B573A1ADAF6440AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CC0000110000000000000001 /* Build configuration list for PBXNativeTarget "RainClaudeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC0000100000000000000001 /* Debug */,
+				CC0000100000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF2C27C849B6247008664468 /* Build configuration list for PBXProject "RainClaude" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8CEAD127076EE9FD13EDA3F /* Debug */,
+				6EC38D89F3EA0852AC2EC6D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D2D0010115B4746A03DE7BEA /* Project object */;
+}
