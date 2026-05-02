@@ -2,7 +2,7 @@ import SwiftUI
 import CoreLocation
 
 @main
-struct RainClaudeApp: App {
+struct HeroDirtApp: App {
     @StateObject private var placeStore = PlaceStore()
     private let locationManager = CLLocationManager()
 

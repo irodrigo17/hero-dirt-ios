@@ -1,4 +1,4 @@
-# RainClaude iOS
+# Hero Dirt iOS
 
 A native iOS app for tracking accumulated rainfall anywhere on the map. Search for outdoor places, save your favorites, and visualize precipitation with a smooth, interactive color-coded overlay.
 
@@ -21,7 +21,7 @@ The app follows a layered SwiftUI architecture with four groups: **App**, **View
 ```mermaid
 graph TD
     subgraph App["App Entry"]
-        RainClaudeApp["RainClaudeApp"]
+        HeroDirtApp["HeroDirtApp"]
         ContentView["ContentView<br/><i>TabView</i>"]
     end
 
@@ -54,8 +54,8 @@ graph TD
         MapKit["Apple MapKit<br/><i>Map, search, geocoding</i>"]
     end
 
-    RainClaudeApp -->|"@StateObject"| PlaceStore
-    RainClaudeApp -->|renders| ContentView
+    HeroDirtApp -->|"@StateObject"| PlaceStore
+    HeroDirtApp -->|renders| ContentView
     ContentView -->|tab 1| MapExploreView
     ContentView -->|tab 2| SavedPlacesView
 
@@ -98,7 +98,7 @@ graph TD
 
 ### Layers
 
-**App** -- `RainClaudeApp` is the entry point. It creates the `PlaceStore` as a `@StateObject` and injects it into the SwiftUI environment. `ContentView` is a `TabView` routing between the two main screens.
+**App** -- `HeroDirtApp` is the entry point. It creates the `PlaceStore` as a `@StateObject` and injects it into the SwiftUI environment. `ContentView` is a `TabView` routing between the two main screens.
 
 **Views** -- Six view types, split across two tabs:
 
@@ -141,10 +141,10 @@ graph TD
 ## Building
 
 ```bash
-xcodebuild -scheme RainClaude -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+xcodebuild -scheme HeroDirt -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
-Or open `RainClaude.xcodeproj` in Xcode.
+Or open `HeroDirt.xcodeproj` in Xcode.
 
 ## APIs
 

@@ -1,6 +1,6 @@
 graph TD
     subgraph App["App Entry"]
-        RainClaudeApp["RainClaudeApp"]
+        HeroDirtApp["HeroDirtApp"]
         ContentView["ContentView<br/><i>TabView</i>"]
     end
 
@@ -33,8 +33,8 @@ graph TD
         MapKit["Apple MapKit<br/><i>Map, search, geocoding</i>"]
     end
 
-    RainClaudeApp -->|"@StateObject"| PlaceStore
-    RainClaudeApp -->|renders| ContentView
+    HeroDirtApp -->|"@StateObject"| PlaceStore
+    HeroDirtApp -->|renders| ContentView
     ContentView -->|tab 1| MapExploreView
     ContentView -->|tab 2| SavedPlacesView
 

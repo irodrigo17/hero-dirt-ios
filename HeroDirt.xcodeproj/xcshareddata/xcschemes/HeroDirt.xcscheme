@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B90D90D0D58F1AD5E0E5EFA7"
-               BuildableName = "RainClaude.app"
-               BlueprintName = "RainClaude"
-               ReferencedContainer = "container:RainClaude.xcodeproj">
+               BuildableName = "HeroDirt.app"
+               BlueprintName = "HeroDirt"
+               ReferencedContainer = "container:HeroDirt.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,9 +35,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CC0000050000000000000001"
-               BuildableName = "RainClaudeTests.xctest"
-               BlueprintName = "RainClaudeTests"
-               ReferencedContainer = "container:RainClaude.xcodeproj">
+               BuildableName = "HeroDirtTests.xctest"
+               BlueprintName = "HeroDirtTests"
+               ReferencedContainer = "container:HeroDirt.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -57,9 +57,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B90D90D0D58F1AD5E0E5EFA7"
-            BuildableName = "RainClaude.app"
-            BlueprintName = "RainClaude"
-            ReferencedContainer = "container:RainClaude.xcodeproj">
+            BuildableName = "HeroDirt.app"
+            BlueprintName = "HeroDirt"
+            ReferencedContainer = "container:HeroDirt.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -74,9 +74,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B90D90D0D58F1AD5E0E5EFA7"
-            BuildableName = "RainClaude.app"
-            BlueprintName = "RainClaude"
-            ReferencedContainer = "container:RainClaude.xcodeproj">
+            BuildableName = "HeroDirt.app"
+            BlueprintName = "HeroDirt"
+            ReferencedContainer = "container:HeroDirt.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

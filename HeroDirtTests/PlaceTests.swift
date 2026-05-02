@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import CoreLocation
-@testable import RainClaude
+@testable import HeroDirt
 
 struct PlaceTests {
 

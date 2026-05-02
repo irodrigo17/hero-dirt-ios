@@ -1,6 +1,6 @@
 import Testing
 import CoreLocation
-@testable import RainClaude
+@testable import HeroDirt
 
 struct RainfallOverlayTests {
 

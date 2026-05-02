@@ -1,6 +1,6 @@
 import Testing
 import SwiftUI
-@testable import RainClaude
+@testable import HeroDirt
 
 struct RainfallColorScaleTests {
 

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>RainClaude can use your location to center the map.</string>
+    <string>Hero Dirt can use your location to center the map.</string>
     <key>UILaunchScreen</key>
     <dict>
         <key>BackgroundColor</key>

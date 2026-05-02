@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1410941503817B5C5E75A233 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */; };
-		1D7AA7D4E4290E972BAF5A1E /* RainClaudeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E285C4281DD9C4ABFD5E6F0 /* RainClaudeApp.swift */; };
+		1D7AA7D4E4290E972BAF5A1E /* HeroDirtApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */; };
 		30AB008D141C44FBCCCD9B11 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744879444057483CC6661630 /* WeatherService.swift */; };
 		769F32724E1E563BE1D39F2E /* PlaceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67A5237BA565EB2FF746B50 /* PlaceStore.swift */; };
 		78515DF55F43F5201709D0E6 /* RainfallData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */; };
@@ -36,7 +36,7 @@
 			containerPortal = D2D0010115B4746A03DE7BEA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B90D90D0D58F1AD5E0E5EFA7;
-			remoteInfo = RainClaude;
+			remoteInfo = HeroDirt;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -44,9 +44,9 @@
 		00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallCardView.swift; sourceTree = "<group>"; };
 		01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
 		36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRainfallSheet.swift; sourceTree = "<group>"; };
-		6E285C4281DD9C4ABFD5E6F0 /* RainClaudeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainClaudeApp.swift; sourceTree = "<group>"; };
+		6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
 		744879444057483CC6661630 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
-		88CC3FF9DE1058CB0FD2C828 /* RainClaude.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RainClaude.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		88CC3FF9DE1058CB0FD2C828 /* HeroDirt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BB0F8584B7ADED8B4099F75 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8F8930ED95B981ED29139237 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9F81B48B2FECDB1A26677D74 /* MapExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapExploreView.swift; sourceTree = "<group>"; };
@@ -62,9 +62,9 @@
 		CC0000010000000000000004 /* RainfallDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallDataTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000005 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000006 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
-		CC0000020000000000000001 /* RainClaudeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RainClaudeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC0000020000000000000001 /* HeroDirtTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DD0000010000000000000001 /* RainClaude.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RainClaude.entitlements; sourceTree = "<group>"; };
+		DD0000010000000000000001 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
 		F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,8 +82,8 @@
 		2573663466FA359DC7B01BC4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				88CC3FF9DE1058CB0FD2C828 /* RainClaude.app */,
-				CC0000020000000000000001 /* RainClaudeTests.xctest */,
+				88CC3FF9DE1058CB0FD2C828 /* HeroDirt.app */,
+				CC0000020000000000000001 /* HeroDirtTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,13 +102,13 @@
 		B6CCE8C79FA17EE161F06CCA = {
 			isa = PBXGroup;
 			children = (
-				D35C9F48128C12A5B95636E3 /* RainClaude */,
-				CC0000040000000000000001 /* RainClaudeTests */,
+				D35C9F48128C12A5B95636E3 /* HeroDirt */,
+				CC0000040000000000000001 /* HeroDirtTests */,
 				2573663466FA359DC7B01BC4 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		CC0000040000000000000001 /* RainClaudeTests */ = {
+		CC0000040000000000000001 /* HeroDirtTests */ = {
 			isa = PBXGroup;
 			children = (
 				CC0000010000000000000001 /* PlaceStoreTests.swift */,
@@ -118,7 +118,7 @@
 				CC0000010000000000000005 /* RainfallOverlayTests.swift */,
 				CC0000010000000000000006 /* WeatherServiceTests.swift */,
 			);
-			path = RainClaudeTests;
+			path = HeroDirtTests;
 			sourceTree = "<group>";
 		};
 		CE20BECDFF7954DCCEF48C93 /* Models */ = {
@@ -131,19 +131,19 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		D35C9F48128C12A5B95636E3 /* RainClaude */ = {
+		D35C9F48128C12A5B95636E3 /* HeroDirt */ = {
 			isa = PBXGroup;
 			children = (
 				E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */,
 				8BB0F8584B7ADED8B4099F75 /* ContentView.swift */,
 				8F8930ED95B981ED29139237 /* Info.plist */,
-				DD0000010000000000000001 /* RainClaude.entitlements */,
-				6E285C4281DD9C4ABFD5E6F0 /* RainClaudeApp.swift */,
+				DD0000010000000000000001 /* HeroDirt.entitlements */,
+				6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */,
 				CE20BECDFF7954DCCEF48C93 /* Models */,
 				80044E09560C3E5C1FA09803 /* Services */,
 				F12C72166610C9B7D2C46B36 /* Views */,
 			);
-			path = RainClaude;
+			path = HeroDirt;
 			sourceTree = "<group>";
 		};
 		F12C72166610C9B7D2C46B36 /* Views */ = {
@@ -161,9 +161,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B90D90D0D58F1AD5E0E5EFA7 /* RainClaude */ = {
+		B90D90D0D58F1AD5E0E5EFA7 /* HeroDirt */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 733BA460AD3B4E4BDB37D9E7 /* Build configuration list for PBXNativeTarget "RainClaude" */;
+			buildConfigurationList = 733BA460AD3B4E4BDB37D9E7 /* Build configuration list for PBXNativeTarget "HeroDirt" */;
 			buildPhases = (
 				BD3AD1D75917CCA4073483C9 /* Sources */,
 				7B64B386972C9628B8BD7A54 /* Resources */,
@@ -172,16 +172,16 @@
 			);
 			dependencies = (
 			);
-			name = RainClaude;
+			name = HeroDirt;
 			packageProductDependencies = (
 			);
-			productName = RainClaude;
-			productReference = 88CC3FF9DE1058CB0FD2C828 /* RainClaude.app */;
+			productName = HeroDirt;
+			productReference = 88CC3FF9DE1058CB0FD2C828 /* HeroDirt.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CC0000050000000000000001 /* RainClaudeTests */ = {
+		CC0000050000000000000001 /* HeroDirtTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CC0000110000000000000001 /* Build configuration list for PBXNativeTarget "RainClaudeTests" */;
+			buildConfigurationList = CC0000110000000000000001 /* Build configuration list for PBXNativeTarget "HeroDirtTests" */;
 			buildPhases = (
 				CC0000060000000000000001 /* Sources */,
 				CC0000070000000000000001 /* Frameworks */,
@@ -191,9 +191,9 @@
 			dependencies = (
 				CC0000080000000000000001 /* PBXTargetDependency */,
 			);
-			name = RainClaudeTests;
-			productName = RainClaudeTests;
-			productReference = CC0000020000000000000001 /* RainClaudeTests.xctest */;
+			name = HeroDirtTests;
+			productName = HeroDirtTests;
+			productReference = CC0000020000000000000001 /* HeroDirtTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -214,7 +214,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FF2C27C849B6247008664468 /* Build configuration list for PBXProject "RainClaude" */;
+			buildConfigurationList = FF2C27C849B6247008664468 /* Build configuration list for PBXProject "HeroDirt" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -227,8 +227,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B90D90D0D58F1AD5E0E5EFA7 /* RainClaude */,
-				CC0000050000000000000001 /* RainClaudeTests */,
+				B90D90D0D58F1AD5E0E5EFA7 /* HeroDirt */,
+				CC0000050000000000000001 /* HeroDirtTests */,
 			);
 		};
 /* End PBXProject section */
@@ -254,7 +254,7 @@
 				C7A7B3A5364CF2C0353E79C5 /* MapExploreView.swift in Sources */,
 				D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */,
 				769F32724E1E563BE1D39F2E /* PlaceStore.swift in Sources */,
-				1D7AA7D4E4290E972BAF5A1E /* RainClaudeApp.swift in Sources */,
+				1D7AA7D4E4290E972BAF5A1E /* HeroDirtApp.swift in Sources */,
 				9B2BE3499ABFA92D39B5F8B3 /* RainfallCardView.swift in Sources */,
 				AA1111110000000000000002 /* RainfallColorScale.swift in Sources */,
 				78515DF55F43F5201709D0E6 /* RainfallData.swift in Sources */,
@@ -284,7 +284,7 @@
 /* Begin PBXTargetDependency section */
 		CC0000080000000000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = B90D90D0D58F1AD5E0E5EFA7 /* RainClaude */;
+			target = B90D90D0D58F1AD5E0E5EFA7 /* HeroDirt */;
 			targetProxy = CC0000090000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -294,20 +294,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = RainClaude/RainClaude.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RainClaude/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RainClaude can use your location to center the map.";
+				INFOPLIST_FILE = HeroDirt/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -318,20 +318,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = RainClaude/RainClaude.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = RainClaude/Info.plist;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "RainClaude can use your location to center the map.";
+				INFOPLIST_FILE = HeroDirt/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -477,11 +477,11 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.tests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RainClaude.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RainClaude";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HeroDirt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HeroDirt";
 			};
 			name = Debug;
 		};
@@ -499,18 +499,18 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rainclaude.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.tests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RainClaude.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RainClaude";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HeroDirt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HeroDirt";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		733BA460AD3B4E4BDB37D9E7 /* Build configuration list for PBXNativeTarget "RainClaude" */ = {
+		733BA460AD3B4E4BDB37D9E7 /* Build configuration list for PBXNativeTarget "HeroDirt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				52ED147AD8B54472D4894DAA /* Debug */,
@@ -519,7 +519,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		CC0000110000000000000001 /* Build configuration list for PBXNativeTarget "RainClaudeTests" */ = {
+		CC0000110000000000000001 /* Build configuration list for PBXNativeTarget "HeroDirtTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC0000100000000000000001 /* Debug */,
@@ -528,7 +528,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		FF2C27C849B6247008664468 /* Build configuration list for PBXProject "RainClaude" */ = {
+		FF2C27C849B6247008664468 /* Build configuration list for PBXProject "HeroDirt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A8CEAD127076EE9FD13EDA3F /* Debug */,
