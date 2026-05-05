@@ -53,18 +53,13 @@ struct LocationRainfallSheet: View {
                 .padding()
             }
             .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(
+                Text(placeName)
+            )
+            .navigationSubtitle(
+                Text(categorySubtitle ?? "")
+            )
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    VStack(spacing: 1) {
-                        Text(placeName)
-                            .font(.headline)
-                        if let subtitle = categorySubtitle {
-                            Text(subtitle)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
