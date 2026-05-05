@@ -103,9 +103,26 @@ struct MapExploreView: View {
                 }
 
                 ForEach(placeStore.places) { place in
-                    Marker(place.name, coordinate: place.coordinate)
-                        .tint(.orange)
-                        .tag(place.id)
+                    Annotation(place.name, coordinate: place.coordinate, anchor: .bottom) {
+                        Button {
+                            selectedCoordinate = place.coordinate
+                            selectedPlaceID = place.id
+                            selectedMapItem = nil
+                            hasSelection = false
+                            showingSheet = true
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(.orange)
+                                    .frame(width: 32, height: 32)
+                                Image(systemName: "mappin")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(.white)
+                            }
+                            .shadow(color: .black.opacity(0.2), radius: 3, y: 2)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
             .mapControls {
@@ -211,19 +228,6 @@ struct MapExploreView: View {
 
     private func handleSelectionChange(_ newValue: MapSelection<UUID>?) {
         guard let selection = newValue else { return }
-
-        // Check if it's a saved place
-        for place in placeStore.places {
-            if selection == MapSelection(place.id) {
-                mapSelection = nil
-                selectedCoordinate = place.coordinate
-                selectedPlaceID = place.id
-                selectedMapItem = nil
-                hasSelection = false
-                showingSheet = true
-                return
-            }
-        }
 
         // It's a map feature — leave mapSelection set so MapKit plays its native
         // selection animation, then resolve to MKMapItem for the sheet
