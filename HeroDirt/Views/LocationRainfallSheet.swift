@@ -23,8 +23,8 @@ struct LocationRainfallSheet: View {
         return placeStore.placeNear(latitude: coordinate.latitude, longitude: coordinate.longitude)
     }
 
-    private var categorySubtitle: String? {
-        mapItem?.pointOfInterestCategory?.displayName
+    private var subtitle: String? {
+        mapItem?.pointOfInterestCategory?.displayName ?? mapItem?.addressRepresentations?.cityWithContext
     }
 
     var body: some View {
@@ -57,7 +57,7 @@ struct LocationRainfallSheet: View {
                 Text(placeName)
             )
             .navigationSubtitle(
-                Text(categorySubtitle ?? "")
+                Text(subtitle ?? "")
             )
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
