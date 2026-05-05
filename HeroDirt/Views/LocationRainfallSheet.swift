@@ -15,6 +15,7 @@ struct LocationRainfallSheet: View {
     @State private var errorMessage: String?
     @State private var showingRenameAlert = false
     @State private var editingName = ""
+    @State private var resolvedMapItem: MKMapItem?
 
     private var savedPlace: Place? {
         if let placeID, let place = placeStore.places.first(where: { $0.id == placeID }) {
@@ -23,8 +24,10 @@ struct LocationRainfallSheet: View {
         return placeStore.placeNear(latitude: coordinate.latitude, longitude: coordinate.longitude)
     }
 
+    private var effectiveMapItem: MKMapItem? { mapItem ?? resolvedMapItem }
+
     private var subtitle: String? {
-        mapItem?.pointOfInterestCategory?.displayName ?? mapItem?.addressRepresentations?.cityWithContext
+        effectiveMapItem?.pointOfInterestCategory?.displayName ?? effectiveMapItem?.addressRepresentations?.cityWithContext
     }
 
     var body: some View {
@@ -122,12 +125,27 @@ struct LocationRainfallSheet: View {
     }
 
     // MARK: - Data Loading
+    
+    func fetchMapItem(from identifier: MKMapItem.Identifier?) async -> MKMapItem? {
+        guard let identifier else { return nil }
+        let request = MKMapItemRequest(mapItemIdentifier: identifier)
+        
+        do {
+            let mapItem = try await request.mapItem
+            return mapItem
+        } catch {
+            return nil
+        }
+    }
 
     private func loadData() async {
         placeName = "Loading..."
         rainfallSummary = nil
+        resolvedMapItem = nil
         isLoading = true
         errorMessage = nil
+
+        resolvedMapItem = await fetchMapItem(from: savedPlace?.mapItemId)
 
         if let saved = savedPlace {
             placeName = saved.name
@@ -176,14 +194,19 @@ struct LocationRainfallSheet: View {
             placeStore.removePlace(existing)
         } else {
             placeStore.addPlace(
-                Place(name: placeName, latitude: coordinate.latitude, longitude: coordinate.longitude)
+                Place(
+                    name: placeName,
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude,
+                    mapItemId: mapItem?.identifier
+                )
             )
         }
     }
 
     private func openInMaps() {
-        if let mapItem {
-            mapItem.openInMaps()
+        if let item = effectiveMapItem {
+            item.openInMaps()
         } else {
             let item = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
             item.name = placeName
