@@ -82,9 +82,13 @@ struct LocationRainfallSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .task {
+        .task(id: loadKey) {
             await loadData()
         }
+    }
+
+    private var loadKey: String {
+        "\(coordinate.latitude),\(coordinate.longitude),\(placeID?.uuidString ?? "")"
     }
 
     // MARK: - Action Bar
@@ -120,6 +124,11 @@ struct LocationRainfallSheet: View {
     // MARK: - Data Loading
 
     private func loadData() async {
+        placeName = "Loading..."
+        rainfallSummary = nil
+        isLoading = true
+        errorMessage = nil
+
         if let saved = savedPlace {
             placeName = saved.name
         } else if let name = mapItem?.name {
@@ -129,6 +138,7 @@ struct LocationRainfallSheet: View {
             if let request = MKReverseGeocodingRequest(location: location) {
                 do {
                     let mapItems = try await request.mapItems
+                    guard !Task.isCancelled else { return }
                     if let item = mapItems.first,
                        let cityContext = item.addressRepresentations?.cityWithContext {
                         placeName = cityContext
@@ -136,6 +146,7 @@ struct LocationRainfallSheet: View {
                         placeName = formatCoordinate()
                     }
                 } catch {
+                    guard !Task.isCancelled else { return }
                     placeName = formatCoordinate()
                 }
             } else {
@@ -149,6 +160,7 @@ struct LocationRainfallSheet: View {
                 longitude: coordinate.longitude
             )
         } catch {
+            guard !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
         }
 
