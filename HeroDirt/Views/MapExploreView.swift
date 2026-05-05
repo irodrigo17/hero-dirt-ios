@@ -153,6 +153,11 @@ struct MapExploreView: View {
                 }
                 .padding(12)
             }
+            .onAppear {
+                if placeStore.places.isEmpty {
+                    cameraPosition = .userLocation(fallback: .automatic)
+                }
+            }
             .onChange(of: overlayVisible) { _, visible in
                 if visible {
                     gridService.refetch()
