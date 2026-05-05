@@ -175,6 +175,9 @@ struct MapExploreView: View {
                     cameraPosition = .userLocation(fallback: .automatic)
                 }
             }
+            .onChange(of: isSearchFocused) { _, isFocused in
+                if isFocused { showingSheet = false }
+            }
             .onChange(of: showingSheet) { _, isShowing in
                 if isShowing {
                     Task { @MainActor in centerAboveSheet(selectedCoordinate) }
