@@ -7,7 +7,7 @@ struct LocationRainfallSheet: View {
 
     let coordinate: CLLocationCoordinate2D
     var placeID: UUID? = nil
-    var initialName: String? = nil
+    var mapItem: MKMapItem? = nil
 
     @State private var placeName = "Loading..."
     @State private var rainfallSummary: RainfallSummary?
@@ -103,8 +103,8 @@ struct LocationRainfallSheet: View {
         // Use saved name if available
         if let saved = savedPlace {
             placeName = saved.name
-        } else if let initialName {
-            placeName = initialName
+        } else if let name = mapItem?.name {
+            placeName = name
         } else {
             // Reverse geocode
             let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -153,8 +153,12 @@ struct LocationRainfallSheet: View {
     }
 
     private func openInMaps() {
-        let mapItem = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
-        mapItem.name = placeName
-        mapItem.openInMaps()
+        if let mapItem {
+            mapItem.openInMaps()
+        } else {
+            let item = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
+            item.name = placeName
+            item.openInMaps()
+        }
     }
 }

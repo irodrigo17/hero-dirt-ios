@@ -76,8 +76,7 @@ struct MapExploreView: View {
     @State private var showingSheet = false
     @State private var mapSelection: MapSelection<UUID>?
     @State private var selectedPlaceID: UUID?
-    @State private var pendingTapTask: Task<Void, Never>?
-    @State private var selectedMapItemName: String?
+    @State private var selectedMapItem: MKMapItem?
 
     @State private var searchText = ""
     @State private var searchResults: [MKMapItem] = []
@@ -113,9 +112,27 @@ struct MapExploreView: View {
                 MapCompass()
                 MapScaleView()
             }
-            .simultaneousGesture(SpatialTapGesture().onEnded { value in
-                handleMapTap(value.location, proxy: proxy)
+            .simultaneousGesture(SpatialTapGesture().onEnded { _ in
+                if isSearchFocused {
+                    isSearchFocused = false
+                    searchResults = []
+                }
             })
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0.5)
+                    .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
+                    .onEnded { value in
+                        if case .second(true, let drag) = value,
+                           let location = drag?.location,
+                           let coordinate = proxy.convert(location, from: .local) {
+                            selectedCoordinate = coordinate
+                            selectedPlaceID = nil
+                            selectedMapItem = nil
+                            hasSelection = true
+                            showingSheet = true
+                        }
+                    }
+            )
             .onChange(of: mapSelection) { _, newValue in
                 handleSelectionChange(newValue)
             }
@@ -158,6 +175,11 @@ struct MapExploreView: View {
                     cameraPosition = .userLocation(fallback: .automatic)
                 }
             }
+            .onChange(of: showingSheet) { _, isShowing in
+                if isShowing {
+                    Task { @MainActor in centerAboveSheet(selectedCoordinate) }
+                }
+            }
             .onChange(of: overlayVisible) { _, visible in
                 if visible {
                     gridService.refetch()
@@ -171,11 +193,11 @@ struct MapExploreView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingSheet) {
+        .sheet(isPresented: $showingSheet, onDismiss: { mapSelection = nil }) {
             LocationRainfallSheet(
                 coordinate: selectedCoordinate,
                 placeID: selectedPlaceID,
-                initialName: selectedMapItemName
+                mapItem: selectedMapItem
             )
             .environmentObject(placeStore)
         }
@@ -183,53 +205,46 @@ struct MapExploreView: View {
 
     // MARK: - Map Interaction
 
-    private func handleMapTap(_ screenPosition: CGPoint, proxy: MapProxy) {
-        if isSearchFocused {
-            isSearchFocused = false
-            searchResults = []
-            return
-        }
-        guard let coordinate = proxy.convert(screenPosition, from: .local) else { return }
-        pendingTapTask?.cancel()
-        pendingTapTask = Task {
-            try? await Task.sleep(for: .milliseconds(200))
-            guard !Task.isCancelled else { return }
-            selectedCoordinate = coordinate
-            selectedPlaceID = nil
-            selectedMapItemName = nil
-            hasSelection = true
-            showingSheet = true
-        }
-    }
-
     private func handleSelectionChange(_ newValue: MapSelection<UUID>?) {
-        pendingTapTask?.cancel()
         guard let selection = newValue else { return }
-        mapSelection = nil
 
         // Check if it's a saved place
         for place in placeStore.places {
             if selection == MapSelection(place.id) {
+                mapSelection = nil
                 selectedCoordinate = place.coordinate
                 selectedPlaceID = place.id
-                selectedMapItemName = nil
+                selectedMapItem = nil
                 hasSelection = false
                 showingSheet = true
                 return
             }
         }
 
-        // It's a map feature — resolve to MKMapItem
+        // It's a map feature — leave mapSelection set so MapKit plays its native
+        // selection animation, then resolve to MKMapItem for the sheet
         if let feature = selection.feature {
             Task {
                 if let item = try? await MKMapItemRequest(feature: feature).mapItem {
-                    selectedCoordinate = item.location.coordinate
+                    selectedCoordinate = item.placemark.coordinate
                     selectedPlaceID = nil
-                    selectedMapItemName = item.name
-                    hasSelection = true
+                    selectedMapItem = item
+                    hasSelection = false
                     showingSheet = true
                 }
             }
+        }
+    }
+
+    // 0.25 = half the sheet height (50% detent) expressed as a fraction of the latitude span
+    private func centerAboveSheet(_ coordinate: CLLocationCoordinate2D) {
+        guard let region = visibleRegion else { return }
+        let newCenter = CLLocationCoordinate2D(
+            latitude: coordinate.latitude - region.span.latitudeDelta * 0.25,
+            longitude: coordinate.longitude
+        )
+        withAnimation(.easeInOut(duration: 0.4)) {
+            cameraPosition = .region(MKCoordinateRegion(center: newCenter, span: region.span))
         }
     }
 
@@ -406,6 +421,7 @@ struct MapExploreView: View {
         ))
         selectedCoordinate = coordinate
         selectedPlaceID = nil
+        selectedMapItem = item
         hasSelection = true
         searchResults = []
         searchText = ""
