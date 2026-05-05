@@ -63,8 +63,8 @@
 		CC0000010000000000000005 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000006 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
 		CC0000020000000000000001 /* HeroDirtTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DD0000010000000000000001 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
+		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -205,9 +205,6 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					B90D90D0D58F1AD5E0E5EFA7 = {
-						DevelopmentTeam = "";
-					};
 					CC0000050000000000000001 = {
 						DevelopmentTeam = "";
 						TestTargetID = B90D90D0D58F1AD5E0E5EFA7;
@@ -297,7 +294,7 @@
 				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K3CQQKBR25;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
@@ -321,7 +318,7 @@
 				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K3CQQKBR25;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
