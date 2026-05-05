@@ -83,6 +83,8 @@ struct MapExploreView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var isSearchFocused = false
 
+    @State private var resolvedCategories: [UUID: MKPointOfInterestCategory] = [:]
+
     // Rainfall overlay
     @StateObject private var gridService = RainfallGridService()
     @State private var overlayVisible = false
@@ -111,11 +113,12 @@ struct MapExploreView: View {
                             hasSelection = false
                             showingSheet = true
                         } label: {
+                            let category = resolvedCategories[place.id]
                             ZStack {
                                 Circle()
-                                    .fill(.orange)
+                                    .fill(category?.iconColor ?? .orange)
                                     .frame(width: 32, height: 32)
-                                Image(systemName: "mappin")
+                                Image(systemName: category?.sfSymbol ?? "mappin")
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundStyle(.white)
                             }
@@ -192,6 +195,9 @@ struct MapExploreView: View {
                     cameraPosition = .userLocation(fallback: .automatic)
                 }
             }
+            .task(id: placeStore.places.map(\.id)) {
+                await fetchResolvedCategories()
+            }
             .onChange(of: isSearchFocused) { _, isFocused in
                 if isFocused { showingSheet = false }
             }
@@ -225,6 +231,23 @@ struct MapExploreView: View {
     }
 
     // MARK: - Map Interaction
+
+    private func fetchResolvedCategories() async {
+        await withTaskGroup(of: (UUID, MKPointOfInterestCategory?).self) { group in
+            for place in placeStore.places {
+                guard let mapItemId = place.mapItemId, resolvedCategories[place.id] == nil else { continue }
+                group.addTask {
+                    let item = try? await MKMapItemRequest(mapItemIdentifier: mapItemId).mapItem
+                    return (place.id, item?.pointOfInterestCategory)
+                }
+            }
+            for await (id, category) in group {
+                if let category {
+                    resolvedCategories[id] = category
+                }
+            }
+        }
+    }
 
     private func handleSelectionChange(_ newValue: MapSelection<UUID>?) {
         guard let selection = newValue else { return }
