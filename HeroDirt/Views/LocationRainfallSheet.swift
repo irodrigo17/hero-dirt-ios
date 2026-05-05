@@ -23,10 +23,16 @@ struct LocationRainfallSheet: View {
         return placeStore.placeNear(latitude: coordinate.latitude, longitude: coordinate.longitude)
     }
 
+    private var categorySubtitle: String? {
+        mapItem?.pointOfInterestCategory?.displayName
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    actionBar
+                    
                     if isLoading {
                         ProgressView("Loading rainfall data...")
                             .padding(.top, 40)
@@ -46,35 +52,24 @@ struct LocationRainfallSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(placeName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 1) {
+                        Text(placeName)
+                            .font(.headline)
+                        if let subtitle = categorySubtitle {
+                            Text(subtitle)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    HStack(spacing: 12) {
-                        Button {
-                            openInMaps()
-                        } label: {
-                            Image(systemName: "map")
-                        }
-                        .disabled(isLoading)
-
-                        Button {
-                            editingName = placeName
-                            showingRenameAlert = true
-                        } label: {
-                            Image(systemName: "pencil")
-                        }
-                        .disabled(isLoading)
-
-                        Button {
-                            toggleSaved()
-                        } label: {
-                            Image(systemName: savedPlace != nil ? "star.fill" : "star")
-                        }
-                        .disabled(isLoading)
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.primary)
                     }
                 }
             }
@@ -97,16 +92,44 @@ struct LocationRainfallSheet: View {
         }
     }
 
+    // MARK: - Action Bar
+
+    private var actionBar: some View {
+        HStack(spacing: 12) {
+            SheetActionButton(
+                icon: savedPlace != nil ? "star.fill" : "star",
+                label: savedPlace != nil ? "Saved" : "Save",
+                isPrimary: true,
+                isDisabled: isLoading,
+                action: toggleSaved
+            )
+            SheetActionButton(
+                icon: "map",
+                label: "Maps",
+                isPrimary: false,
+                isDisabled: isLoading,
+                action: openInMaps
+            )
+            SheetActionButton(
+                icon: "pencil",
+                label: "Rename",
+                isPrimary: false,
+                isDisabled: isLoading
+            ) {
+                editingName = placeName
+                showingRenameAlert = true
+            }
+        }
+    }
+
     // MARK: - Data Loading
 
     private func loadData() async {
-        // Use saved name if available
         if let saved = savedPlace {
             placeName = saved.name
         } else if let name = mapItem?.name {
             placeName = name
         } else {
-            // Reverse geocode
             let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
             if let request = MKReverseGeocodingRequest(location: location) {
                 do {
@@ -125,7 +148,6 @@ struct LocationRainfallSheet: View {
             }
         }
 
-        // Fetch rainfall
         do {
             rainfallSummary = try await WeatherService.fetchRainfall(
                 latitude: coordinate.latitude,
@@ -159,6 +181,88 @@ struct LocationRainfallSheet: View {
             let item = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
             item.name = placeName
             item.openInMaps()
+        }
+    }
+}
+
+// MARK: - Action Button
+
+private struct SheetActionButton: View {
+    let icon: String
+    let label: String
+    let isPrimary: Bool
+    let isDisabled: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                Text(label)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .foregroundStyle(isPrimary ? .white : .blue)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(isPrimary ? Color.blue : Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
+        }
+        .disabled(isDisabled)
+    }
+}
+
+// MARK: - POI Category Display Name
+
+private extension MKPointOfInterestCategory {
+    var displayName: String {
+        switch self {
+        case .amusementPark:   return "Amusement Park"
+        case .aquarium:        return "Aquarium"
+        case .atm:             return "ATM"
+        case .bakery:          return "Bakery"
+        case .bank:            return "Bank"
+        case .beach:           return "Beach"
+        case .brewery:         return "Brewery"
+        case .cafe:            return "Café"
+        case .campground:      return "Campground"
+        case .carRental:       return "Car Rental"
+        case .evCharger:       return "EV Charger"
+        case .fireStation:     return "Fire Station"
+        case .fitnessCenter:   return "Fitness Center"
+        case .foodMarket:      return "Food Market"
+        case .gasStation:      return "Gas Station"
+        case .hospital:        return "Hospital"
+        case .hotel:           return "Hotel"
+        case .laundry:         return "Laundry"
+        case .library:         return "Library"
+        case .marina:          return "Marina"
+        case .movieTheater:    return "Movie Theater"
+        case .museum:          return "Museum"
+        case .nationalPark:    return "National Park"
+        case .nightlife:       return "Nightlife"
+        case .park:            return "Park"
+        case .parking:         return "Parking"
+        case .pharmacy:        return "Pharmacy"
+        case .police:          return "Police"
+        case .postOffice:      return "Post Office"
+        case .publicTransport: return "Public Transport"
+        case .restaurant:      return "Restaurant"
+        case .restroom:        return "Restroom"
+        case .school:          return "School"
+        case .stadium:         return "Stadium"
+        case .store:           return "Store"
+        case .theater:         return "Theater"
+        case .university:      return "University"
+        case .winery:          return "Winery"
+        case .zoo:             return "Zoo"
+        default:
+            // Strip "MKPOICategory" prefix and insert spaces before capitals
+            let raw = rawValue.replacingOccurrences(of: "MKPOICategory", with: "")
+            return raw.unicodeScalars.reduce("") { result, scalar in
+                let char = Character(scalar)
+                return result.isEmpty ? String(char) : char.isUppercase ? "\(result) \(char)" : "\(result)\(char)"
+            }
         }
     }
 }
