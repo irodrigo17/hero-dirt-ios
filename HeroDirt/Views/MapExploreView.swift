@@ -281,6 +281,8 @@ struct MapExploreView: View {
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 10)
                             }
+                            .buttonStyle(.plain)
+                            
                             if item != searchResults.last {
                                 Divider().padding(.leading, 12)
                             }
@@ -288,7 +290,8 @@ struct MapExploreView: View {
                     }
                 }
                 .scrollBounceBehavior(.basedOnSize)
-                .frame(maxHeight: containerHeight * 0.5)
+                .scrollIndicators(.visible)
+                .frame(maxHeight: containerHeight * 0.70)
                 .fixedSize(horizontal: false, vertical: true)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                 .padding(.horizontal, 8)
@@ -342,53 +345,16 @@ struct MapExploreView: View {
     }
 
     private func runSearch(query: String) async {
-        guard let region = visibleRegion else {
-            // Fallback: general search only
-            await runGeneralSearch(query: query)
-            return
-        }
-
-        // Run outdoor POI search and general search in parallel
-        async let outdoorResults = runOutdoorPOISearch(query: query, region: region)
-        async let generalResults = runGeneralSearchResults(query: query, region: region)
-
-        let outdoor = await outdoorResults
-        let general = await generalResults
-
-        // Merge: outdoor POI results first, then general (deduplicated)
-        var seen = Set<String>()
-        var merged: [MKMapItem] = []
-        for item in outdoor + general {
-            let key = "\(item.name ?? "")_\(String(format: "%.4f", item.location.coordinate.latitude))_\(String(format: "%.4f", item.location.coordinate.longitude))"
-            if seen.insert(key).inserted {
-                merged.append(item)
-            }
-        }
-        searchResults = merged
+        searchResults = await runGeneralSearchResults(query: query, region: visibleRegion)
     }
 
-    private func runOutdoorPOISearch(query: String, region: MKCoordinateRegion) async -> [MKMapItem] {
-        let poiRequest = MKLocalPointsOfInterestRequest(coordinateRegion: region)
-        poiRequest.pointOfInterestFilter = MKPointOfInterestFilter(including: Self.outdoorCategories)
-        let search = MKLocalSearch(request: poiRequest)
-        do {
-            let response = try await search.start()
-            let queryLower = query.lowercased()
-            // Filter POI results to those matching the search query
-            return response.mapItems.filter { item in
-                let name = (item.name ?? "").lowercased()
-                let address = (item.address?.fullAddress ?? "").lowercased()
-                return name.contains(queryLower) || address.contains(queryLower)
-            }
-        } catch {
-            return []
-        }
-    }
-
-    private func runGeneralSearchResults(query: String, region: MKCoordinateRegion) async -> [MKMapItem] {
+    private func runGeneralSearchResults(query: String, region: MKCoordinateRegion?) async -> [MKMapItem] {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
-        request.region = region
+        if let region = region {
+            request.region = region
+        }
+        request.resultTypes = .init(arrayLiteral: .pointOfInterest)
         let search = MKLocalSearch(request: request)
         do {
             let response = try await search.start()
@@ -397,23 +363,7 @@ struct MapExploreView: View {
             return []
         }
     }
-
-    private func runGeneralSearch(query: String) async {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
-        let search = MKLocalSearch(request: request)
-        do {
-            let response = try await search.start()
-            searchResults = response.mapItems
-        } catch {
-            searchResults = []
-        }
-    }
-
-    private static let outdoorCategories: [MKPointOfInterestCategory] = [
-        .hiking
-    ]
-
+    
     private func selectSearchResult(_ item: MKMapItem) {
         let coordinate = item.location.coordinate
         cameraPosition = .region(MKCoordinateRegion(
