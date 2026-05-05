@@ -200,6 +200,7 @@ struct MapExploreView: View {
                 mapItem: selectedMapItem
             )
             .environmentObject(placeStore)
+            .presentationBackgroundInteraction(.enabled)
         }
     }
 
@@ -226,7 +227,7 @@ struct MapExploreView: View {
         if let feature = selection.feature {
             Task {
                 if let item = try? await MKMapItemRequest(feature: feature).mapItem {
-                    selectedCoordinate = item.placemark.coordinate
+                    selectedCoordinate = item.location.coordinate
                     selectedPlaceID = nil
                     selectedMapItem = item
                     hasSelection = false

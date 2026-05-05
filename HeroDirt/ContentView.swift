@@ -9,7 +9,7 @@ struct ContentView: View {
                 }
             SavedPlacesView()
                 .tabItem {
-                    Label("Places", systemImage: "star.fill")
+                    Label("Saved", systemImage: "star.fill")
                 }
         }
     }
