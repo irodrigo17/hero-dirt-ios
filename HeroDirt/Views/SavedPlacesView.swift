@@ -3,6 +3,7 @@ import SwiftUI
 struct SavedPlacesListView: View {
     @EnvironmentObject private var placeStore: PlaceStore
     var onSelectPlace: (Place) -> Void = { _ in }
+    var selectedDetent: PresentationDetent
 
     @State private var rainfallData: [UUID: RainfallSummary] = [:]
     @State private var loadingPlaces: Set<UUID> = []
@@ -39,12 +40,13 @@ struct SavedPlacesListView: View {
             )
         } else {
             VStack(spacing: 0) {
-                Text("Saved places")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                if selectedDetent != .fraction(0.1) {
+                    Text("Saved places")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                }
                 List {
                     ForEach(placeStore.places) { place in
                         Button {

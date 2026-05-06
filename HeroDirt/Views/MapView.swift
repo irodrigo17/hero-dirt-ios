@@ -178,7 +178,8 @@ struct MapView: View {
                     onSearchFocusChanged: { focused in
                         selectedDetent = focused ? .large : .medium
                     },
-                    visibleRegion: visibleRegion
+                    visibleRegion: visibleRegion,
+                    selectedDetent: selectedDetent
                 )
                 .presentationDetents([.fraction(0.1), .medium, .large], selection: $selectedDetent)
                 .presentationBackgroundInteraction(.enabled)

@@ -6,11 +6,13 @@ struct SheetView: View {
     var onSelectSearchResult: (MKMapItem) -> Void = { _ in }
     var onSearchFocusChanged: (Bool) -> Void = { _ in }
     var visibleRegion: MKCoordinateRegion? = nil
+    var selectedDetent: PresentationDetent
 
     @State private var searchText = ""
     @State private var isSearchFocused = false
     @State private var searchResults: [MKMapItem] = []
     @State private var searchTask: Task<Void, Never>?
+    
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,7 +35,7 @@ struct SheetView: View {
                     }
                 )
             } else {
-                SavedPlacesListView(onSelectPlace: onSelectPlace)
+                SavedPlacesListView(onSelectPlace: onSelectPlace, selectedDetent: selectedDetent)
             }
         }
         .onChange(of: isSearchFocused) { _, focused in
