@@ -119,8 +119,13 @@ struct SavedPlacesView: View {
                 description: Text("Tap anywhere on the map to check rainfall, then tap the star to save it here.")
             )
         } else {
-            List {
-                Section(header: Text("Saved places")) {
+            VStack(spacing: 0) {
+                Text("Saved places")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                List {
                     ForEach(placeStore.places) { place in
                         Button {
                             onSelectPlace(place)
@@ -151,10 +156,10 @@ struct SavedPlacesView: View {
                         placeStore.removePlaces(at: offsets)
                     }
                 }
-            }
-            .listStyle(.plain)
-            .refreshable {
-                await loadAllRainfall()
+                .listStyle(.plain)
+                .refreshable {
+                    await loadAllRainfall()
+                }
             }
         }
     }
