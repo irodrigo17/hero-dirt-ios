@@ -9,41 +9,25 @@ struct SheetView: View {
     var selectedDetent: PresentationDetent
 
     @State private var searchText = ""
-    @State private var isSearchFocused = false
     @State private var searchResults: [MKMapItem] = []
     @State private var searchTask: Task<Void, Never>?
-    
 
     var body: some View {
-        VStack(spacing: 0) {
-            SearchBar(
-                text: $searchText,
-                isFocused: $isSearchFocused,
-                onSearchTapped: {
-                    searchTask?.cancel()
-                    guard !searchText.isEmpty else { return }
-                    searchTask = Task { await runSearch(query: searchText) }
-                }
+        NavigationStack {
+            SearchableContent(
+                searchResults: searchResults,
+                selectedDetent: selectedDetent,
+                onSelectPlace: onSelectPlace,
+                onSelectSearchResult: onSelectSearchResult,
+                onIsSearchingChanged: onSearchFocusChanged
             )
-            .padding(8)
-            if isSearchFocused {
-                SearchResultsView(
-                    searchResults: searchResults,
-                    onSelectResult: { item in
-                        isSearchFocused = false
-                        onSelectSearchResult(item)
-                    }
-                )
-            } else {
-                SavedPlacesListView(onSelectPlace: onSelectPlace, selectedDetent: selectedDetent)
-            }
-        }
-        .onChange(of: isSearchFocused) { _, focused in
-            onSearchFocusChanged(focused)
-            if !focused {
-                searchText = ""
-                searchResults = []
+            .navigationTitle("Saved places")
+            .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search places")
+            .navigationBarTitleDisplayMode(.inline)
+            .onSubmit(of: .search) {
                 searchTask?.cancel()
+                guard !searchText.isEmpty else { return }
+                searchTask = Task { await runSearch(query: searchText) }
             }
         }
         .onChange(of: searchText) { _, newValue in
@@ -72,6 +56,36 @@ struct SheetView: View {
             searchResults = response.mapItems
         } catch {
             searchResults = []
+        }
+    }
+}
+
+private struct SearchableContent: View {
+    let searchResults: [MKMapItem]
+    let selectedDetent: PresentationDetent
+    var onSelectPlace: (Place) -> Void
+    var onSelectSearchResult: (MKMapItem) -> Void
+    var onIsSearchingChanged: (Bool) -> Void
+
+    @Environment(\.isSearching) private var isSearching
+    @Environment(\.dismissSearch) private var dismissSearch
+
+    var body: some View {
+        Group {
+            if isSearching {
+                SearchResultsView(
+                    searchResults: searchResults,
+                    onSelectResult: { item in
+                        dismissSearch()
+                        onSelectSearchResult(item)
+                    }
+                )
+            } else {
+                SavedPlacesListView(onSelectPlace: onSelectPlace, selectedDetent: selectedDetent)
+            }
+        }
+        .onChange(of: isSearching) { _, newValue in
+            onIsSearchingChanged(newValue)
         }
     }
 }

@@ -161,7 +161,7 @@ struct MapView: View {
                 visibleRegion: visibleRegion,
                 selectedDetent: selectedDetent
             )
-            .presentationDetents([.fraction(0.1), .medium, .large], selection: $selectedDetent)
+            .presentationDetents([.fraction(0.09), .medium, .large], selection: $selectedDetent)
             .presentationBackgroundInteraction(.enabled)
             .interactiveDismissDisabled(true)
             .sheet(isPresented: $showingPlaceDetails, onDismiss: {

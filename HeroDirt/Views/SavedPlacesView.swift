@@ -40,13 +40,6 @@ struct SavedPlacesListView: View {
             )
         } else {
             VStack(spacing: 0) {
-                if selectedDetent != .fraction(0.1) {
-                    Text("Saved places")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 16)
-                }
                 List {
                     ForEach(placeStore.places) { place in
                         Button {
