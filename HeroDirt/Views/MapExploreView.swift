@@ -218,7 +218,11 @@ struct MapExploreView: View {
                 selectedPlaceID = place.id
                 selectedMapItem = nil
                 hasSelection = false
-                showingSheet = true  // triggers centerAboveSheet via onChange(of: showingSheet)
+                if showingSheet {
+                    Task { @MainActor in centerAboveSheet(place.coordinate) }
+                } else {
+                    showingSheet = true  // triggers centerAboveSheet via onChange(of: showingSheet)
+                }
                 pendingPlace = nil
             }
             .background {

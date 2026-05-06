@@ -7,10 +7,10 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             MapExploreView(pendingPlace: $pendingPlace)
-                .tabItem {
-                    Label("Map", systemImage: "map")
-                }
-                .tag(0)
+            .tabItem {
+                Label("Map", systemImage: "map")
+            }
+            .tag(0)
             SavedPlacesView(onSelectPlace: { place in
                 pendingPlace = place
                 selectedTab = 0
