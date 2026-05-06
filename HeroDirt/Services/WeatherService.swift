@@ -94,15 +94,12 @@ enum WeatherService {
     static func fetchRainForecast(latitude: Double, longitude: Double) async throws -> RainForecast {
         let location = CLLocation(latitude: latitude, longitude: longitude)
         let daily = try await WeatherKit.WeatherService.shared.weather(for: location, including: .daily)
-        print("daily: \(daily.forecast.count)")
 
         let amounts = daily.forecast.prefix(7).map {
             $0.precipitationAmountByType.rainfall.converted(to: .millimeters).value
         }
-        print("amounts: \(amounts)")
 
         func sum(_ n: Int) -> Double { amounts.prefix(n).reduce(0, +) }
-        print("sum: \(sum(1))")
 
         return RainForecast(
             next1Day: sum(1),
