@@ -11,11 +11,14 @@ struct ContentView: View {
                     Label("Map", systemImage: "map")
                 }
                 .tag(0)
-            SavedPlacesView()
-                .tabItem {
-                    Label("Saved", systemImage: "star.fill")
-                }
-                .tag(1)
+            SavedPlacesView(onSelectPlace: { place in
+                pendingPlace = place
+                selectedTab = 0
+            })
+            .tabItem {
+                Label("Saved", systemImage: "star.fill")
+            }
+            .tag(1)
         }
     }
 }

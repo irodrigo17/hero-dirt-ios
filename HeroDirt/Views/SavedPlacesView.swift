@@ -3,6 +3,7 @@ import MapKit
 
 struct SavedPlacesView: View {
     @EnvironmentObject private var placeStore: PlaceStore
+    var onSelectPlace: (Place) -> Void = { _ in }
 
     @State private var rainfallData: [UUID: RainfallSummary] = [:]
     @State private var loadingPlaces: Set<UUID> = []
@@ -22,16 +23,21 @@ struct SavedPlacesView: View {
                 } else {
                     List {
                         ForEach(placeStore.places) { place in
-                            PlaceRow(
-                                place: place,
-                                rainfall: rainfallData[place.id],
-                                isLoading: loadingPlaces.contains(place.id),
-                                error: errors[place.id],
-                                onRename: {
-                                    editingName = place.name
-                                    renamingPlace = place
-                                }
-                            )
+                            Button {
+                                onSelectPlace(place)
+                            } label: {
+                                PlaceRow(
+                                    place: place,
+                                    rainfall: rainfallData[place.id],
+                                    isLoading: loadingPlaces.contains(place.id),
+                                    error: errors[place.id],
+                                    onRename: {
+                                        editingName = place.name
+                                        renamingPlace = place
+                                    }
+                                )
+                            }
+                            .buttonStyle(.plain)
                             .swipeActions(edge: .leading) {
                                 Button {
                                     editingName = place.name
