@@ -16,7 +16,7 @@ struct SavedPlacesView: View {
             Group {
                 if placeStore.places.isEmpty {
                     ContentUnavailableView(
-                        "No Saved Places",
+                        "No saved places",
                         systemImage: "star",
                         description: Text("Tap anywhere on the map to check rainfall, then tap the star to save it here.")
                     )
@@ -55,7 +55,8 @@ struct SavedPlacesView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Saved Places")
+            .navigationTitle("Saved places")
+            .navigationBarTitleDisplayMode(.inline)
             .refreshable {
                 await loadAllRainfall()
             }

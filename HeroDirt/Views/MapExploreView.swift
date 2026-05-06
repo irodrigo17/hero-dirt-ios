@@ -74,6 +74,7 @@ struct MapExploreView: View {
     @State private var selectedCoordinate = CLLocationCoordinate2D()
     @State private var hasSelection = false
     @State private var sheetPresented = true
+    @State private var selectedDetent: PresentationDetent = .medium
     @State private var showingPlaceDetails = false
     @State private var mapSelection: MapSelection<UUID>?
     @State private var selectedPlaceID: UUID?
@@ -252,7 +253,7 @@ struct MapExploreView: View {
                     hasSelection = false
                     showingPlaceDetails = true
                 })
-                .presentationDetents([.fraction(0.4), .medium, .large])
+                .presentationDetents([.fraction(0.25), .medium, .large], selection: $selectedDetent)
                 .presentationBackgroundInteraction(.enabled)
                 .interactiveDismissDisabled(true)
             }
