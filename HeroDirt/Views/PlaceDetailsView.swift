@@ -1,7 +1,7 @@
 import SwiftUI
 import MapKit
 
-struct LocationRainfallSheet: View {
+struct PlaceDetailsView: View {
     @EnvironmentObject private var placeStore: PlaceStore
     @Environment(\.dismiss) private var dismiss
 

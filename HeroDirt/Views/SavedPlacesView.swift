@@ -1,12 +1,8 @@
 import SwiftUI
-import MapKit
 
-struct SavedPlacesView: View {
+struct SavedPlacesListView: View {
     @EnvironmentObject private var placeStore: PlaceStore
     var onSelectPlace: (Place) -> Void = { _ in }
-    var onSelectSearchResult: (MKMapItem) -> Void = { _ in }
-    var onSearchFocusChanged: (Bool) -> Void = { _ in }
-    var visibleRegion: MKCoordinateRegion? = nil
 
     @State private var rainfallData: [UUID: RainfallSummary] = [:]
     @State private var loadingPlaces: Set<UUID> = []
@@ -14,104 +10,27 @@ struct SavedPlacesView: View {
     @State private var renamingPlace: Place?
     @State private var editingName = ""
 
-    @State private var searchText = ""
-    @State private var isSearchFocused = false
-    @State private var searchResults: [MKMapItem] = []
-    @State private var searchTask: Task<Void, Never>?
-
     var body: some View {
-        VStack(spacing: 0) {
-            SearchBar(
-                text: $searchText,
-                isFocused: $isSearchFocused,
-                onSearchTapped: {
-                    searchTask?.cancel()
-                    guard !searchText.isEmpty else { return }
-                    searchTask = Task { await runSearch(query: searchText) }
-                }
-            )
-            .padding(8)
-            
-            if isSearchFocused {
-                searchResultsContent
-            } else {
-                savedPlacesContent
-            }
-        }
-        .task {
-            await loadAllRainfall()
-        }
-        .onChange(of: isSearchFocused) { _, focused in
-            onSearchFocusChanged(focused)
-            if !focused {
-                searchText = ""
-                searchResults = []
-                searchTask?.cancel()
-            }
-        }
-        .onChange(of: searchText) { _, newValue in
-            searchTask?.cancel()
-            guard !newValue.isEmpty else {
-                searchResults = []
-                return
-            }
-            searchTask = Task {
-                try? await Task.sleep(for: .milliseconds(400))
-                guard !Task.isCancelled else { return }
-                await runSearch(query: newValue)
-            }
-        }
-        .alert("Rename", isPresented: Binding(
-            get: { renamingPlace != nil },
-            set: { if !$0 { renamingPlace = nil } }
-        )) {
-            TextField("Name", text: $editingName)
-            Button("Save") {
-                let trimmed = editingName.trimmingCharacters(in: .whitespaces)
-                if let place = renamingPlace, !trimmed.isEmpty {
-                    placeStore.renamePlace(place, to: trimmed)
-                }
-                renamingPlace = nil
-            }
-            Button("Cancel", role: .cancel) { renamingPlace = nil }
-        }
-    }
-
-    @ViewBuilder
-    private var searchResultsContent: some View {
-        if searchResults.isEmpty {
-            Spacer()
-        } else {
-            List {
-                ForEach(searchResults, id: \.self) { item in
-                    Button {
-                        isSearchFocused = false
-                        onSelectSearchResult(item)
-                    } label: {
-                        HStack(spacing: 10) {
-                            POICategoryIcon(category: item.pointOfInterestCategory)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.name ?? "Unknown")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.primary)
-                                if let subtitle = item.placemark.title, subtitle != item.name {
-                                    Text(subtitle)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                }
-                            }
-                        }
+        content
+            .task { await loadAllRainfall() }
+            .alert("Rename", isPresented: Binding(
+                get: { renamingPlace != nil },
+                set: { if !$0 { renamingPlace = nil } }
+            )) {
+                TextField("Name", text: $editingName)
+                Button("Save") {
+                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
+                    if let place = renamingPlace, !trimmed.isEmpty {
+                        placeStore.renamePlace(place, to: trimmed)
                     }
-                    .buttonStyle(.plain)
+                    renamingPlace = nil
                 }
+                Button("Cancel", role: .cancel) { renamingPlace = nil }
             }
-            .listStyle(.plain)
-        }
     }
 
     @ViewBuilder
-    private var savedPlacesContent: some View {
+    private var content: some View {
         if placeStore.places.isEmpty {
             ContentUnavailableView(
                 "No saved places",
@@ -121,10 +40,11 @@ struct SavedPlacesView: View {
         } else {
             VStack(spacing: 0) {
                 Text("Saved places")
-                    .font(.headline)
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                 List {
                     ForEach(placeStore.places) { place in
                         Button {
@@ -161,21 +81,6 @@ struct SavedPlacesView: View {
                     await loadAllRainfall()
                 }
             }
-        }
-    }
-
-    private func runSearch(query: String) async {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
-        if let region = visibleRegion {
-            request.region = region
-        }
-        request.resultTypes = [.pointOfInterest, .physicalFeature]
-        do {
-            let response = try await MKLocalSearch(request: request).start()
-            searchResults = response.mapItems
-        } catch {
-            searchResults = []
         }
     }
 

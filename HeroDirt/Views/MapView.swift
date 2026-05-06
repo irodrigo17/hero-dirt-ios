@@ -141,7 +141,7 @@ struct MapView: View {
             Task { @MainActor in sheetPresented = true }
         }) {
             if showingPlaceDetails {
-                LocationRainfallSheet(
+                PlaceDetailsView(
                     coordinate: selectedCoordinate,
                     placeID: selectedPlaceID,
                     mapItem: selectedMapItem,
@@ -155,7 +155,7 @@ struct MapView: View {
                 .presentationDetents([.medium, .large])
                 .presentationBackgroundInteraction(.enabled)
             } else {
-                SavedPlacesView(
+                SheetView(
                     onSelectPlace: { place in
                         selectedCoordinate = place.coordinate
                         selectedPlaceID = place.id

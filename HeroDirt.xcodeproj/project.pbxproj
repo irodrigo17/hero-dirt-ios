@@ -18,17 +18,19 @@
 		AA1111110000000000000002 /* RainfallColorScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000002 /* RainfallColorScale.swift */; };
 		AA1111110000000000000003 /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000003 /* RainfallGridService.swift */; };
 		AA1111110000000000000004 /* RainfallOverlayControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000004 /* RainfallOverlayControls.swift */; };
-		BB2A3BBEBC1605581F8E40ED /* LocationRainfallSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */; };
+		BB2A3BBEBC1605581F8E40ED /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */; };
 		C200A36C09D984FE4A6A074F /* SavedPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */; };
 		C7A7B3A5364CF2C0353E79C5 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F81B48B2FECDB1A26677D74 /* MapView.swift */; };
-		CC1111110000000000000001 /* MapSearchOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000001 /* MapSearchOverlay.swift */; };
-		CC1111110000000000000002 /* MKPointOfInterestCategory+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */; };
 		CC0000030000000000000001 /* PlaceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* PlaceStoreTests.swift */; };
 		CC0000030000000000000002 /* PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000002 /* PlaceTests.swift */; };
 		CC0000030000000000000003 /* RainfallColorScaleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000003 /* RainfallColorScaleTests.swift */; };
 		CC0000030000000000000004 /* RainfallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000004 /* RainfallDataTests.swift */; };
 		CC0000030000000000000005 /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000005 /* RainfallOverlayTests.swift */; };
 		CC0000030000000000000006 /* WeatherServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000006 /* WeatherServiceTests.swift */; };
+		CC1111110000000000000001 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000001 /* SearchBar.swift */; };
+		CC1111110000000000000002 /* MKPointOfInterestCategory+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */; };
+		CC1111110000000000000003 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000003 /* SearchResultsView.swift */; };
+		CC1111110000000000000004 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000004 /* SheetView.swift */; };
 		D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0229A259C104D045364369B /* Place.swift */; };
 /* End PBXBuildFile section */
 
@@ -45,7 +47,7 @@
 /* Begin PBXFileReference section */
 		00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallCardView.swift; sourceTree = "<group>"; };
 		01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
-		36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRainfallSheet.swift; sourceTree = "<group>"; };
+		36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
 		6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
 		744879444057483CC6661630 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		88CC3FF9DE1058CB0FD2C828 /* HeroDirt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,8 +55,6 @@
 		8F8930ED95B981ED29139237 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9F81B48B2FECDB1A26677D74 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		A0229A259C104D045364369B /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
-		CC2222220000000000000001 /* MapSearchOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapSearchOverlay.swift; sourceTree = "<group>"; };
-		CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MKPointOfInterestCategory+Display.swift"; sourceTree = "<group>"; };
 		AA2222220000000000000001 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
 		AA2222220000000000000002 /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
 		AA2222220000000000000003 /* RainfallGridService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallGridService.swift; sourceTree = "<group>"; };
@@ -67,6 +67,10 @@
 		CC0000010000000000000005 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000006 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
 		CC0000020000000000000001 /* HeroDirtTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC2222220000000000000001 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MKPointOfInterestCategory+Display.swift"; sourceTree = "<group>"; };
+		CC2222220000000000000003 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
+		CC2222220000000000000004 /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
 		DD0000010000000000000001 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
 		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
@@ -153,13 +157,15 @@
 		F12C72166610C9B7D2C46B36 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				36F07BDA81B746CEF21AD2D9 /* LocationRainfallSheet.swift */,
+				36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */,
 				CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */,
 				9F81B48B2FECDB1A26677D74 /* MapView.swift */,
-				CC2222220000000000000001 /* MapSearchOverlay.swift */,
+				CC2222220000000000000001 /* SearchBar.swift */,
+				CC2222220000000000000004 /* SheetView.swift */,
 				00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */,
 				AA2222220000000000000004 /* RainfallOverlayControls.swift */,
 				F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */,
+				CC2222220000000000000003 /* SearchResultsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -253,10 +259,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2C2CA39B6A30286CC5B81BE /* ContentView.swift in Sources */,
-				BB2A3BBEBC1605581F8E40ED /* LocationRainfallSheet.swift in Sources */,
+				BB2A3BBEBC1605581F8E40ED /* PlaceDetailsView.swift in Sources */,
 				C7A7B3A5364CF2C0353E79C5 /* MapView.swift in Sources */,
-				CC1111110000000000000001 /* MapSearchOverlay.swift in Sources */,
+				CC1111110000000000000001 /* SearchBar.swift in Sources */,
 				CC1111110000000000000002 /* MKPointOfInterestCategory+Display.swift in Sources */,
+				CC1111110000000000000003 /* SearchResultsView.swift in Sources */,
+				CC1111110000000000000004 /* SheetView.swift in Sources */,
 				D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */,
 				769F32724E1E563BE1D39F2E /* PlaceStore.swift in Sources */,
 				1D7AA7D4E4290E972BAF5A1E /* HeroDirtApp.swift in Sources */,
