@@ -13,7 +13,6 @@ struct SavedPlacesListView: View {
 
     var body: some View {
         content
-            .task { await loadAllRainfall() }
             .alert("Rename", isPresented: Binding(
                 get: { renamingPlace != nil },
                 set: { if !$0 { renamingPlace = nil } }
@@ -72,15 +71,16 @@ struct SavedPlacesListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .refreshable {
-                    await loadAllRainfall()
-                }
+                .refreshable { await loadAllRainfall() }
+                .task(id: placeStore.places.map(\.id)) { await loadAllRainfall() }
             }
         }
     }
 
     private func loadAllRainfall() async {
-        let placesToLoad = placeStore.places
+        let placesToLoad = placeStore.places.filter {
+            rainfallData[$0.id] == nil && !loadingPlaces.contains($0.id)
+        }
         for place in placesToLoad {
             loadingPlaces.insert(place.id)
         }
