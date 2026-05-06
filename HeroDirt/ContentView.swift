@@ -2,10 +2,11 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab = 0
+    @State private var pendingPlace: Place? = nil
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            MapExploreView()
+            MapExploreView(pendingPlace: $pendingPlace)
                 .tabItem {
                     Label("Map", systemImage: "map")
                 }

@@ -69,6 +69,7 @@ struct SearchBar: UIViewRepresentable {
 
 struct MapExploreView: View {
     @EnvironmentObject private var placeStore: PlaceStore
+    @Binding var pendingPlace: Place?
 
     @State private var cameraPosition: MapCameraPosition = .automatic
     @State private var selectedCoordinate = CLLocationCoordinate2D()
@@ -211,6 +212,15 @@ struct MapExploreView: View {
                     gridService.refetch()
                 }
             }
+            .onChange(of: pendingPlace) { _, place in
+                guard let place else { return }
+                selectedCoordinate = place.coordinate  // must be set before showingSheet=true
+                selectedPlaceID = place.id
+                selectedMapItem = nil
+                hasSelection = false
+                showingSheet = true  // triggers centerAboveSheet via onChange(of: showingSheet)
+                pendingPlace = nil
+            }
             .background {
                 GeometryReader { geo in
                     Color.clear
@@ -269,13 +279,13 @@ struct MapExploreView: View {
 
     // 0.25 = half the sheet height (50% detent) expressed as a fraction of the latitude span
     private func centerAboveSheet(_ coordinate: CLLocationCoordinate2D) {
-        guard let region = visibleRegion else { return }
+        let span = visibleRegion?.span ?? MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
         let newCenter = CLLocationCoordinate2D(
-            latitude: coordinate.latitude - region.span.latitudeDelta * 0.25,
+            latitude: coordinate.latitude - span.latitudeDelta * 0.25,
             longitude: coordinate.longitude
         )
         withAnimation(.easeInOut(duration: 0.4)) {
-            cameraPosition = .region(MKCoordinateRegion(center: newCenter, span: region.span))
+            cameraPosition = .region(MKCoordinateRegion(center: newCenter, span: span))
         }
     }
 
