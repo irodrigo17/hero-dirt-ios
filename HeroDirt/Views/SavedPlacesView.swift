@@ -34,9 +34,10 @@ struct SavedPlacesView: View {
                             )
                             .swipeActions(edge: .leading) {
                                 Button {
-                                    openInMaps(place)
+                                    editingName = place.name
+                                    renamingPlace = place
                                 } label: {
-                                    Label("Maps", systemImage: "map")
+                                    Label("Edit", systemImage: "pencil")
                                 }
                                 .tint(.blue)
                             }
@@ -45,6 +46,7 @@ struct SavedPlacesView: View {
                             placeStore.removePlaces(at: offsets)
                         }
                     }
+                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Saved Places")
@@ -126,12 +128,7 @@ private struct PlaceRow: View {
             HStack {
                 Text(place.name)
                     .font(.headline)
-                Button(action: onRename) {
-                    Image(systemName: "pencil")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
+                    .lineLimit(1)
                 Spacer()
                 if let rainfall {
                     lastRainBadge(rainfall)
