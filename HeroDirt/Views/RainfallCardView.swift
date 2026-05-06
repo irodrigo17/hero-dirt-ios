@@ -5,6 +5,17 @@ struct RainfallCardView: View {
 
     var body: some View {
         VStack(spacing: 16) {
+            // Title
+            HStack {
+                Text("Rainfall")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Spacer()
+                Text("Past days")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            
             // Rainfall totals grid
             HStack(spacing: 10) {
                 rainfallTile("1 day", value: summary.last1Day)

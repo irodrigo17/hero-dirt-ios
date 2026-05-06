@@ -6,8 +6,6 @@ struct RainForecastCardView: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                Image(systemName: "cloud.rain.fill")
-                    .foregroundStyle(.blue)
                 Text("Rain Forecast")
                     .font(.subheadline)
                     .fontWeight(.semibold)
