@@ -4,9 +4,10 @@ struct RainfallOverlayControls: View {
     @Binding var isVisible: Bool
     @Binding var timeframe: RainfallTimeframe
     @Binding var opacity: Double
+    
+    @State private var isExpanded: Bool = false
+    
     let isLoading: Bool
-
-    @State private var isExpanded = false
 
     var body: some View {
         toggleButton
@@ -24,12 +25,7 @@ struct RainfallOverlayControls: View {
 
     private var toggleButton: some View {
         Button {
-            if isVisible {
-                isExpanded.toggle()
-            } else {
-                isVisible = true
-                isExpanded = true
-            }
+            isExpanded.toggle()
         } label: {
             ZStack {
                 if isLoading {
@@ -42,7 +38,7 @@ struct RainfallOverlayControls: View {
             }
             .frame(width: 44, height: 44)
         }
-        .tint(isVisible ? .blue : .primary)
+        .tint(isExpanded ? .blue : .primary)
         .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 8))
     }
 
@@ -51,17 +47,18 @@ struct RainfallOverlayControls: View {
     private var controlPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Rainfall Overlay")
+                Text("Rainfall overlay")
                     .font(.subheadline.weight(.semibold))
                 Spacer()
                 Button {
-                    isVisible = false
                     isExpanded = false
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }
             }
+            
+            Toggle("Enabled", isOn: $isVisible)
 
             Picker("Timeframe", selection: $timeframe) {
                 ForEach(RainfallTimeframe.allCases) { tf in
