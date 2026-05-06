@@ -1,5 +1,12 @@
 import Foundation
 
+struct RainForecast {
+    let next1Day: Double
+    let next2Days: Double
+    let next3Days: Double
+    let next7Days: Double
+}
+
 struct DailyRainfall {
     let date: Date
     let amount: Double // millimeters

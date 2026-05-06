@@ -1,4 +1,6 @@
 import Foundation
+import WeatherKit
+import CoreLocation
 
 enum WeatherService {
 
@@ -85,5 +87,28 @@ enum WeatherService {
         }
 
         return try parseResponse(data)
+    }
+
+    // MARK: - WeatherKit Forecast
+
+    static func fetchRainForecast(latitude: Double, longitude: Double) async throws -> RainForecast {
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        let daily = try await WeatherKit.WeatherService.shared.weather(for: location, including: .daily)
+        print("daily: \(daily.forecast.count)")
+
+        let amounts = daily.forecast.prefix(7).map {
+            $0.precipitationAmountByType.rainfall.converted(to: .millimeters).value
+        }
+        print("amounts: \(amounts)")
+
+        func sum(_ n: Int) -> Double { amounts.prefix(n).reduce(0, +) }
+        print("sum: \(sum(1))")
+
+        return RainForecast(
+            next1Day: sum(1),
+            next2Days: sum(2),
+            next3Days: sum(3),
+            next7Days: sum(7)
+        )
     }
 }

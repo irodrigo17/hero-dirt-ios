@@ -12,6 +12,7 @@ struct PlaceDetailsView: View {
 
     @State private var placeName = "Loading..."
     @State private var rainfallSummary: RainfallSummary?
+    @State private var rainForecast: RainForecast?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showingRenameAlert = false
@@ -48,11 +49,10 @@ struct PlaceDetailsView: View {
                         )
                     } else if let summary = rainfallSummary {
                         RainfallCardView(summary: summary)
+                        if let forecast = rainForecast {
+                            RainForecastCardView(forecast: forecast)
+                        }
                     }
-
-                    Text(String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
                 .padding()
             }
@@ -144,6 +144,7 @@ struct PlaceDetailsView: View {
     private func loadData() async {
         placeName = "Loading..."
         rainfallSummary = nil
+        rainForecast = nil
         resolvedMapItem = nil
         isLoading = true
         errorMessage = nil
@@ -175,15 +176,23 @@ struct PlaceDetailsView: View {
             }
         }
 
+        async let rainfallTask = WeatherService.fetchRainfall(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+        async let forecastTask = WeatherService.fetchRainForecast(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+
         do {
-            rainfallSummary = try await WeatherService.fetchRainfall(
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            )
+            rainfallSummary = try await rainfallTask
         } catch {
             guard !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
         }
+
+        rainForecast = try? await forecastTask
 
         isLoading = false
     }

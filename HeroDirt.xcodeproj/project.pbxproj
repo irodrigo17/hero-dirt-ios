@@ -32,6 +32,8 @@
 		CC1111110000000000000003 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000003 /* SearchResultsView.swift */; };
 		CC1111110000000000000004 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000004 /* SheetView.swift */; };
 		D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0229A259C104D045364369B /* Place.swift */; };
+		FB52A06C2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
+		FB52A06D2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +76,7 @@
 		DD0000010000000000000001 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
 		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
+		FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +160,7 @@
 		F12C72166610C9B7D2C46B36 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */,
 				36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */,
 				CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */,
 				9F81B48B2FECDB1A26677D74 /* MapView.swift */,
@@ -266,6 +270,7 @@
 				CC1111110000000000000003 /* SearchResultsView.swift in Sources */,
 				CC1111110000000000000004 /* SheetView.swift in Sources */,
 				D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */,
+				FB52A06D2FABA30400D56E52 /* RainForecastCardView.swift in Sources */,
 				769F32724E1E563BE1D39F2E /* PlaceStore.swift in Sources */,
 				1D7AA7D4E4290E972BAF5A1E /* HeroDirtApp.swift in Sources */,
 				9B2BE3499ABFA92D39B5F8B3 /* RainfallCardView.swift in Sources */,
@@ -284,6 +289,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC0000030000000000000001 /* PlaceStoreTests.swift in Sources */,
+				FB52A06C2FABA30400D56E52 /* RainForecastCardView.swift in Sources */,
 				CC0000030000000000000002 /* PlaceTests.swift in Sources */,
 				CC0000030000000000000003 /* RainfallColorScaleTests.swift in Sources */,
 				CC0000030000000000000004 /* RainfallDataTests.swift in Sources */,
