@@ -32,6 +32,7 @@
 		CC1111110000000000000003 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000003 /* SearchResultsView.swift */; };
 		CC1111110000000000000004 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000004 /* SheetView.swift */; };
 		D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0229A259C104D045364369B /* Place.swift */; };
+		DD0000030000000000000001 /* DirtConditionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000020000000000000001 /* DirtConditionCardView.swift */; };
 		FB52A06C2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
 		FB52A06D2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
 /* End PBXBuildFile section */
@@ -48,6 +49,7 @@
 
 /* Begin PBXFileReference section */
 		00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallCardView.swift; sourceTree = "<group>"; };
+		DD0000020000000000000001 /* DirtConditionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtConditionCardView.swift; sourceTree = "<group>"; };
 		01C147F3CA961EBA4A7A3F7B /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
 		36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
 		6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 		F12C72166610C9B7D2C46B36 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DD0000020000000000000001 /* DirtConditionCardView.swift */,
 				FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */,
 				36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */,
 				CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */,
@@ -264,6 +267,7 @@
 			files = (
 				A2C2CA39B6A30286CC5B81BE /* ContentView.swift in Sources */,
 				BB2A3BBEBC1605581F8E40ED /* PlaceDetailsView.swift in Sources */,
+				DD0000030000000000000001 /* DirtConditionCardView.swift in Sources */,
 				C7A7B3A5364CF2C0353E79C5 /* MapView.swift in Sources */,
 				CC1111110000000000000001 /* SearchBar.swift in Sources */,
 				CC1111110000000000000002 /* MKPointOfInterestCategory+Display.swift in Sources */,

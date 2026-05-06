@@ -82,6 +82,44 @@ struct RainfallDataTests {
         #expect(summary.daysSinceLastRain == nil)
     }
 
+    // MARK: - DirtCondition
+
+    @Test func dirtConditionWetRainedToday() {
+        // 25mm today → requiredDays≈1, daysSince=0 → wet
+        let summary = RainfallSummary(last1Day: 25, last2Days: 25, last3Days: 25, last7Days: 25, daysSinceLastRain: 0)
+        #expect(summary.dirtCondition == .wet)
+    }
+
+    @Test func dirtConditionHeroDirtAfterModerateRain() {
+        // 25mm two days ago → requiredDays≈1, daysSince=2 ∈ [1, 4] → hero dirt
+        let summary = RainfallSummary(last1Day: 0, last2Days: 0, last3Days: 25, last7Days: 25, daysSinceLastRain: 2)
+        #expect(summary.dirtCondition == .heroDirt)
+    }
+
+    @Test func dirtConditionDryAfterModerateRain() {
+        // 25mm six days ago → requiredDays≈1, daysSince=6 > 4 → dry
+        let summary = RainfallSummary(last1Day: 0, last2Days: 0, last3Days: 0, last7Days: 25, daysSinceLastRain: 6)
+        #expect(summary.dirtCondition == .dry)
+    }
+
+    @Test func dirtConditionHeroDirtAfterHeavyRain() {
+        // 100mm five days ago → requiredDays≈3.9, daysSince=5 ∈ [3.9, 6.9] → hero dirt
+        let summary = RainfallSummary(last1Day: 0, last2Days: 0, last3Days: 0, last7Days: 100, daysSinceLastRain: 5)
+        #expect(summary.dirtCondition == .heroDirt)
+    }
+
+    @Test func dirtConditionDryNoRecentRain() {
+        // No rain in 30+ days → dry
+        let summary = RainfallSummary(last1Day: 0, last2Days: 0, last3Days: 0, last7Days: 0, daysSinceLastRain: nil)
+        #expect(summary.dirtCondition == .dry)
+    }
+
+    @Test func dirtConditionWetHeavyRainStillDrying() {
+        // 100mm two days ago → requiredDays≈3.9, daysSince=2 < 3.9 → wet
+        let summary = RainfallSummary(last1Day: 0, last2Days: 0, last3Days: 100, last7Days: 100, daysSinceLastRain: 2)
+        #expect(summary.dirtCondition == .wet)
+    }
+
     // MARK: - Threshold boundary
 
     @Test func thresholdBoundary() {

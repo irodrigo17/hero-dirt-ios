@@ -1,4 +1,43 @@
 import Foundation
+import SwiftUI
+
+enum DirtCondition {
+    case wet
+    case heroDirt
+    case dry
+
+    var label: String {
+        switch self {
+        case .wet: return "Wet"
+        case .heroDirt: return "Hero Dirt"
+        case .dry: return "Dry"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .wet: return "drop.fill"
+        case .heroDirt: return "sparkles"
+        case .dry: return "sun.max.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .wet: return .blue
+        case .heroDirt: return Color(red: 1, green: 0.75, blue: 0.2)
+        case .dry: return .orange
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .wet: return "Trails are likely muddy"
+        case .heroDirt: return "Perfect conditions"
+        case .dry: return "Trails may be loose or dusty"
+        }
+    }
+}
 
 struct RainForecast {
     let next1Day: Double
@@ -36,6 +75,14 @@ struct RainfallSummary {
         last7Days = sorted.prefix(7).reduce(0) { $0 + $1.amount }
 
         daysSinceLastRain = Self.computeDaysSinceRain(sorted: sorted)
+    }
+
+    var dirtCondition: DirtCondition {
+        let daysSince = Double(daysSinceLastRain ?? 30)
+        let requiredDays = max(1.0, last7Days / 25.4)
+        if daysSince < requiredDays { return .wet }
+        if daysSince <= requiredDays + 3 { return .heroDirt }
+        return .dry
     }
 
     private static func computeDaysSinceRain(sorted: [DailyRainfall]) -> Int? {
