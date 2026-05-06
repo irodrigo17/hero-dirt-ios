@@ -22,6 +22,8 @@ struct MapView: View {
     @State private var overlayOpacity: Double = 0.3
     @State private var cameraChangeCount = 0
     @State private var visibleRegion: MKCoordinateRegion?
+    
+    private let collapsedDetent = PresentationDetent.fraction(0.09)
 
     var body: some View {
         MapReader { proxy in
@@ -103,6 +105,7 @@ struct MapView: View {
 
                     Button {
                         cameraPosition = .userLocation(fallback: .automatic)
+                        selectedDetent = collapsedDetent
                     } label: {
                         Image(systemName: "location.fill")
                             .font(.system(size: 16))
@@ -161,7 +164,7 @@ struct MapView: View {
                 visibleRegion: visibleRegion,
                 selectedDetent: selectedDetent
             )
-            .presentationDetents([.fraction(0.09), .medium, .large], selection: $selectedDetent)
+            .presentationDetents([collapsedDetent, .medium, .large], selection: $selectedDetent)
             .presentationBackgroundInteraction(.enabled)
             .interactiveDismissDisabled(true)
             .sheet(isPresented: $showingPlaceDetails, onDismiss: {
