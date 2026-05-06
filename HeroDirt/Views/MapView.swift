@@ -14,10 +14,6 @@ struct MapView: View {
     @State private var selectedPlaceID: UUID?
     @State private var selectedMapItem: MKMapItem?
 
-    @State private var searchText = ""
-    @State private var searchResults: [MKMapItem] = []
-    @State private var isSearchFocused = false
-
     @State private var resolvedCategories: [UUID: MKPointOfInterestCategory] = [:]
 
     @StateObject private var gridService = RainfallGridService()
@@ -26,7 +22,6 @@ struct MapView: View {
     @State private var overlayOpacity: Double = 0.3
     @State private var cameraChangeCount = 0
     @State private var visibleRegion: MKCoordinateRegion?
-    @State private var containerHeight: CGFloat = 800
 
     var body: some View {
         MapReader { proxy in
@@ -67,10 +62,7 @@ struct MapView: View {
                 MapScaleView()
             }
             .simultaneousGesture(SpatialTapGesture().onEnded { _ in
-                if isSearchFocused {
-                    isSearchFocused = false
-                    searchResults = []
-                }
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             })
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.5)
@@ -99,16 +91,6 @@ struct MapView: View {
             }
             .overlay {
                 rainfallImageOverlay(proxy: proxy)
-            }
-            .overlay(alignment: .top) {
-                MapSearchOverlay(
-                    searchText: $searchText,
-                    isSearchFocused: $isSearchFocused,
-                    searchResults: $searchResults,
-                    containerHeight: containerHeight,
-                    onSearch: runSearch,
-                    onSelectResult: selectSearchResult
-                )
             }
             .overlay(alignment: .bottomTrailing) {
                 VStack(alignment: .trailing, spacing: 10) {
@@ -139,31 +121,16 @@ struct MapView: View {
             .task(id: placeStore.places.map(\.id)) {
                 await fetchResolvedCategories()
             }
-            .onChange(of: isSearchFocused) { _, isFocused in
-                if isFocused && showingPlaceDetails {
-                    showingPlaceDetails = false
-                    mapSelection = nil
-                    hasSelection = false
-                }
-                if isFocused {
-                    selectedDetent = .fraction(0.25)
-                }
-            }
             .onChange(of: showingPlaceDetails) { _, isShowing in
                 if isShowing {
                     Task { @MainActor in centerAboveSheet(selectedCoordinate) }
+                } else {
+                    selectedDetent = .medium
                 }
             }
             .onChange(of: overlayVisible) { _, visible in
                 if visible {
                     gridService.refetch()
-                }
-            }
-            .background {
-                GeometryReader { geo in
-                    Color.clear
-                        .onAppear { containerHeight = geo.size.height }
-                        .onChange(of: geo.size.height) { _, h in containerHeight = h }
                 }
             }
         }
@@ -188,14 +155,32 @@ struct MapView: View {
                 .presentationDetents([.medium, .large])
                 .presentationBackgroundInteraction(.enabled)
             } else {
-                SavedPlacesView(onSelectPlace: { place in
-                    selectedCoordinate = place.coordinate
-                    selectedPlaceID = place.id
-                    selectedMapItem = nil
-                    hasSelection = false
-                    showingPlaceDetails = true
-                })
-                .presentationDetents([.fraction(0.25), .medium, .large], selection: $selectedDetent)
+                SavedPlacesView(
+                    onSelectPlace: { place in
+                        selectedCoordinate = place.coordinate
+                        selectedPlaceID = place.id
+                        selectedMapItem = nil
+                        hasSelection = false
+                        showingPlaceDetails = true
+                    },
+                    onSelectSearchResult: { item in
+                        let coordinate = item.location.coordinate
+                        cameraPosition = .region(MKCoordinateRegion(
+                            center: coordinate,
+                            span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+                        ))
+                        selectedCoordinate = coordinate
+                        selectedPlaceID = nil
+                        selectedMapItem = item
+                        hasSelection = false
+                        showingPlaceDetails = true
+                    },
+                    onSearchFocusChanged: { focused in
+                        selectedDetent = focused ? .large : .medium
+                    },
+                    visibleRegion: visibleRegion
+                )
+                .presentationDetents([.fraction(0.1), .medium, .large], selection: $selectedDetent)
                 .presentationBackgroundInteraction(.enabled)
                 .interactiveDismissDisabled(true)
             }
@@ -273,38 +258,5 @@ struct MapView: View {
                     .allowsHitTesting(false)
             }
         }
-    }
-
-    // MARK: - Search
-
-    private func runSearch(query: String) async {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
-        if let region = visibleRegion {
-            request.region = region
-        }
-        request.resultTypes = [.pointOfInterest, .physicalFeature]
-        do {
-            let response = try await MKLocalSearch(request: request).start()
-            searchResults = response.mapItems
-        } catch {
-            searchResults = []
-        }
-    }
-
-    private func selectSearchResult(_ item: MKMapItem) {
-        let coordinate = item.location.coordinate
-        cameraPosition = .region(MKCoordinateRegion(
-            center: coordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
-        ))
-        selectedCoordinate = coordinate
-        selectedPlaceID = nil
-        selectedMapItem = item
-        hasSelection = true
-        searchResults = []
-        searchText = ""
-        isSearchFocused = false
-        showingPlaceDetails = true
     }
 }
