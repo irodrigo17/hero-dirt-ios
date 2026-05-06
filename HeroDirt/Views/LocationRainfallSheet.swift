@@ -8,6 +8,7 @@ struct LocationRainfallSheet: View {
     let coordinate: CLLocationCoordinate2D
     var placeID: UUID? = nil
     var mapItem: MKMapItem? = nil
+    var onClose: (() -> Void)? = nil
 
     @State private var placeName = "Loading..."
     @State private var rainfallSummary: RainfallSummary?
@@ -64,7 +65,9 @@ struct LocationRainfallSheet: View {
             )
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: {
+                    Button {
+                        if let onClose { onClose() } else { dismiss() }
+                    } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(.primary)

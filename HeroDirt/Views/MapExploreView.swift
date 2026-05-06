@@ -69,12 +69,12 @@ struct SearchBar: UIViewRepresentable {
 
 struct MapExploreView: View {
     @EnvironmentObject private var placeStore: PlaceStore
-    @Binding var pendingPlace: Place?
 
     @State private var cameraPosition: MapCameraPosition = .automatic
     @State private var selectedCoordinate = CLLocationCoordinate2D()
     @State private var hasSelection = false
-    @State private var showingSheet = false
+    @State private var sheetPresented = true
+    @State private var showingPlaceDetails = false
     @State private var mapSelection: MapSelection<UUID>?
     @State private var selectedPlaceID: UUID?
     @State private var selectedMapItem: MKMapItem?
@@ -112,7 +112,7 @@ struct MapExploreView: View {
                             selectedPlaceID = place.id
                             selectedMapItem = nil
                             hasSelection = false
-                            showingSheet = true
+                            showingPlaceDetails = true
                         } label: {
                             let category = resolvedCategories[place.id]
                             ZStack {
@@ -150,7 +150,7 @@ struct MapExploreView: View {
                             selectedPlaceID = nil
                             selectedMapItem = nil
                             hasSelection = true
-                            showingSheet = true
+                            showingPlaceDetails = true
                         }
                     }
             )
@@ -200,9 +200,13 @@ struct MapExploreView: View {
                 await fetchResolvedCategories()
             }
             .onChange(of: isSearchFocused) { _, isFocused in
-                if isFocused { showingSheet = false }
+                if isFocused && showingPlaceDetails {
+                    showingPlaceDetails = false
+                    mapSelection = nil
+                    hasSelection = false
+                }
             }
-            .onChange(of: showingSheet) { _, isShowing in
+            .onChange(of: showingPlaceDetails) { _, isShowing in
                 if isShowing {
                     Task { @MainActor in centerAboveSheet(selectedCoordinate) }
                 }
@@ -212,19 +216,6 @@ struct MapExploreView: View {
                     gridService.refetch()
                 }
             }
-            .onChange(of: pendingPlace) { _, place in
-                guard let place else { return }
-                selectedCoordinate = place.coordinate  // must be set before showingSheet=true
-                selectedPlaceID = place.id
-                selectedMapItem = nil
-                hasSelection = false
-                if showingSheet {
-                    Task { @MainActor in centerAboveSheet(place.coordinate) }
-                } else {
-                    showingSheet = true  // triggers centerAboveSheet via onChange(of: showingSheet)
-                }
-                pendingPlace = nil
-            }
             .background {
                 GeometryReader { geo in
                     Color.clear
@@ -233,14 +224,38 @@ struct MapExploreView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingSheet, onDismiss: { mapSelection = nil }) {
-            LocationRainfallSheet(
-                coordinate: selectedCoordinate,
-                placeID: selectedPlaceID,
-                mapItem: selectedMapItem
-            )
-            .environmentObject(placeStore)
-            .presentationBackgroundInteraction(.enabled)
+        .sheet(isPresented: $sheetPresented, onDismiss: {
+            showingPlaceDetails = false
+            mapSelection = nil
+            hasSelection = false
+            Task { @MainActor in sheetPresented = true }
+        }) {
+            if showingPlaceDetails {
+                LocationRainfallSheet(
+                    coordinate: selectedCoordinate,
+                    placeID: selectedPlaceID,
+                    mapItem: selectedMapItem,
+                    onClose: {
+                        showingPlaceDetails = false
+                        mapSelection = nil
+                        hasSelection = false
+                    }
+                )
+                .environmentObject(placeStore)
+                .presentationDetents([.medium, .large])
+                .presentationBackgroundInteraction(.enabled)
+            } else {
+                SavedPlacesView(onSelectPlace: { place in
+                    selectedCoordinate = place.coordinate
+                    selectedPlaceID = place.id
+                    selectedMapItem = nil
+                    hasSelection = false
+                    showingPlaceDetails = true
+                })
+                .presentationDetents([.fraction(0.4), .medium, .large])
+                .presentationBackgroundInteraction(.enabled)
+                .interactiveDismissDisabled(true)
+            }
         }
     }
 
@@ -275,7 +290,7 @@ struct MapExploreView: View {
                     selectedPlaceID = nil
                     selectedMapItem = item
                     hasSelection = false
-                    showingSheet = true
+                    showingPlaceDetails = true
                 }
             }
         }
@@ -424,7 +439,7 @@ struct MapExploreView: View {
         searchResults = []
         searchText = ""
         isSearchFocused = false
-        showingSheet = true
+        showingPlaceDetails = true
     }
 }
 
