@@ -25,7 +25,9 @@ struct SearchBar: UIViewRepresentable {
         }
         uiView.setShowsCancelButton(isFocused, animated: true)
         if !isFocused && uiView.isFirstResponder {
-            uiView.resignFirstResponder()
+            DispatchQueue.main.async {
+                uiView.resignFirstResponder()
+            }
         }
     }
 

@@ -124,8 +124,6 @@ struct MapView: View {
             .onChange(of: showingPlaceDetails) { _, isShowing in
                 if isShowing {
                     Task { @MainActor in centerAboveSheet(selectedCoordinate) }
-                } else {
-                    selectedDetent = .medium
                 }
             }
             .onChange(of: overlayVisible) { _, visible in
@@ -135,55 +133,49 @@ struct MapView: View {
             }
         }
         .sheet(isPresented: $sheetPresented, onDismiss: {
-            showingPlaceDetails = false
-            mapSelection = nil
-            hasSelection = false
             Task { @MainActor in sheetPresented = true }
         }) {
-            if showingPlaceDetails {
+            SheetView(
+                onSelectPlace: { place in
+                    selectedCoordinate = place.coordinate
+                    selectedPlaceID = place.id
+                    selectedMapItem = nil
+                    hasSelection = false
+                    showingPlaceDetails = true
+                },
+                onSelectSearchResult: { item in
+                    let coordinate = item.location.coordinate
+                    cameraPosition = .region(MKCoordinateRegion(
+                        center: coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+                    ))
+                    selectedCoordinate = coordinate
+                    selectedPlaceID = nil
+                    selectedMapItem = item
+                    hasSelection = false
+                    showingPlaceDetails = true
+                },
+                onSearchFocusChanged: { focused in
+                    selectedDetent = focused ? .large : .medium
+                },
+                visibleRegion: visibleRegion,
+                selectedDetent: selectedDetent
+            )
+            .presentationDetents([.fraction(0.1), .medium, .large], selection: $selectedDetent)
+            .presentationBackgroundInteraction(.enabled)
+            .interactiveDismissDisabled(true)
+            .sheet(isPresented: $showingPlaceDetails, onDismiss: {
+                mapSelection = nil
+                hasSelection = false
+                selectedDetent = .medium
+            }) {
                 PlaceDetailsView(
                     coordinate: selectedCoordinate,
                     placeID: selectedPlaceID,
                     mapItem: selectedMapItem,
-                    onClose: {
-                        showingPlaceDetails = false
-                        mapSelection = nil
-                        hasSelection = false
-                    }
+                    onClose: { showingPlaceDetails = false }
                 )
                 .environmentObject(placeStore)
-                .presentationDetents([.medium, .large])
-                .presentationBackgroundInteraction(.enabled)
-            } else {
-                SheetView(
-                    onSelectPlace: { place in
-                        selectedCoordinate = place.coordinate
-                        selectedPlaceID = place.id
-                        selectedMapItem = nil
-                        hasSelection = false
-                        showingPlaceDetails = true
-                    },
-                    onSelectSearchResult: { item in
-                        let coordinate = item.location.coordinate
-                        cameraPosition = .region(MKCoordinateRegion(
-                            center: coordinate,
-                            span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
-                        ))
-                        selectedCoordinate = coordinate
-                        selectedPlaceID = nil
-                        selectedMapItem = item
-                        hasSelection = false
-                        showingPlaceDetails = true
-                    },
-                    onSearchFocusChanged: { focused in
-                        selectedDetent = focused ? .large : .medium
-                    },
-                    visibleRegion: visibleRegion,
-                    selectedDetent: selectedDetent
-                )
-                .presentationDetents([.fraction(0.1), .medium, .large], selection: $selectedDetent)
-                .presentationBackgroundInteraction(.enabled)
-                .interactiveDismissDisabled(true)
             }
         }
     }

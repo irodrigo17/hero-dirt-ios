@@ -192,9 +192,9 @@ struct PlaceDetailsView: View {
             errorMessage = error.localizedDescription
         }
 
-        rainForecast = try? await forecastTask
-
         isLoading = false
+
+        rainForecast = try? await forecastTask
     }
 
     private func formatCoordinate() -> String {
