@@ -10,11 +10,11 @@ struct RainfallOverlayControls: View {
 
     var body: some View {
         toggleButton
-            .overlay(alignment: .bottomTrailing) {
+            .overlay(alignment: .topTrailing) {
                 if isExpanded {
                     controlPanel
-                        .offset(y: -54)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .offset(x: -54)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
             .animation(.easeInOut(duration: 0.25), value: isExpanded)

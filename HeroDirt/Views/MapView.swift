@@ -92,7 +92,7 @@ struct MapView: View {
             .overlay {
                 rainfallImageOverlay(proxy: proxy)
             }
-            .overlay(alignment: .bottomTrailing) {
+            .overlay(alignment: .topTrailing) {
                 VStack(alignment: .trailing, spacing: 10) {
                     RainfallOverlayControls(
                         isVisible: $overlayVisible,
