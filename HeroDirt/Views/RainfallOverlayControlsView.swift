@@ -18,14 +18,16 @@ struct RainfallOverlayControlsView: View {
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
-            .animation(.easeInOut(duration: 0.25), value: isExpanded)
     }
 
     // MARK: - Toggle Button
 
     private var toggleButton: some View {
         Button {
-            isExpanded.toggle()
+            withAnimation(.easeInOut(duration: 0.25)) {
+                isExpanded.toggle()
+            }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         } label: {
             ZStack {
                 if isLoading {
@@ -110,7 +112,7 @@ struct RainfallLegendView: View {
                         .font(.system(size: 8))
                         .foregroundStyle(.secondary)
                     if stop.label != RainfallColorScale.stops.last?.label {
-                        Spacer()
+                        Spacer(minLength: 2)
                     }
                 }
             }

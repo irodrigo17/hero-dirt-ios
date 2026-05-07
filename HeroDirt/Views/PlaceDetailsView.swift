@@ -230,6 +230,7 @@ struct PlaceDetailsView: View {
                 )
             )
         }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     private func openInMaps() {

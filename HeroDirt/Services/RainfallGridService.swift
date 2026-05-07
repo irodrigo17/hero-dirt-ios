@@ -190,12 +190,6 @@ final class RainfallGridService: ObservableObject {
         return UIImage(cgImage: result)
     }
 
-    private func bilerp(_ v00: Double, _ v01: Double, _ v10: Double, _ v11: Double, tr: Double, tc: Double) -> Double {
-        let top = v00 + (v01 - v00) * tc
-        let bot = v10 + (v11 - v10) * tc
-        return top + (bot - top) * tr
-    }
-
     // MARK: - Grid fetching
 
     @MainActor

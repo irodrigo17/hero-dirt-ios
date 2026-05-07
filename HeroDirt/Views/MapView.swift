@@ -84,6 +84,7 @@ struct MapView: View {
                 withAnimation {
                     mapSelection = MapSelection("new-place")
                 }
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             }
             .onChange(of: mapSelection) { _, newValue in
                 handleSelectionChange(newValue)
