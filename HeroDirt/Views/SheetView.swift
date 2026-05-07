@@ -53,8 +53,10 @@ struct SheetView: View {
         request.resultTypes = [.pointOfInterest, .physicalFeature]
         do {
             let response = try await MKLocalSearch(request: request).start()
+            guard !Task.isCancelled else { return }
             searchResults = response.mapItems
         } catch {
+            guard !Task.isCancelled else { return }
             searchResults = []
         }
     }

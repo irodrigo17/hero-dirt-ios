@@ -67,7 +67,7 @@ struct MapView: View {
                     .updating($longPressDragLocation) { value, state, _ in state = value.location }
             )
             .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.2)
+                LongPressGesture(minimumDuration: 0.5)
                     .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
                     .updating($longPressActivated) { value, state, _ in
                         if case .second(true, _) = value { state = true }
@@ -117,6 +117,7 @@ struct MapView: View {
                     }
                     .tint(.primary)
                     .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 8))
+                    .accessibilityLabel("Center map on your location")
                 }
                 .padding(12)
             }

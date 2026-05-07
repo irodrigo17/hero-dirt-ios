@@ -35,7 +35,7 @@ struct SavedPlacesListView: View {
             ContentUnavailableView(
                 "No saved places",
                 systemImage: "star",
-                description: Text("Tap anywhere on the map to check rainfall, then tap the star to save it here.")
+                description: Text("Long-press anywhere on the map to check rainfall, then tap the star to save it here.")
             )
         } else {
             VStack(spacing: 0) {
@@ -208,6 +208,7 @@ private struct PlaceRow: View {
         .padding(.vertical, 6)
         .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.05),
                      in: RoundedRectangle(cornerRadius: 6))
+        .accessibilityLabel("\(label) rainfall: \(formatMM(value)) millimeters")
     }
 
     private func formatMM(_ value: Double) -> String {

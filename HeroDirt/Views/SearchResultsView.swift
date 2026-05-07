@@ -26,7 +26,11 @@ struct SearchResultsView: View {
 
     var body: some View {
         if searchResults.isEmpty {
-            Spacer()
+            ContentUnavailableView(
+                "No results found",
+                systemImage: "magnifyingglass",
+                description: Text("Try a different search term")
+            )
         } else {
             List {
                 ForEach(searchResults, id: \.self) { item in

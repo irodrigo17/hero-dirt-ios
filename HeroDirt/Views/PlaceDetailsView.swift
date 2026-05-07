@@ -43,10 +43,14 @@ struct PlaceDetailsView: View {
                             .padding(.top, 40)
                     } else if let errorMessage {
                         ContentUnavailableView(
-                            "Error",
+                            "Unable to load rainfall data",
                             systemImage: "exclamationmark.triangle",
                             description: Text(errorMessage)
-                        )
+                        ) {
+                            Button("Retry") {
+                                Task { await loadData() }
+                            }
+                        }
                     } else if let summary = rainfallSummary {
                         DirtConditionCardView(condition: summary.dirtCondition)
                         RainfallCardView(summary: summary)
@@ -73,6 +77,7 @@ struct PlaceDetailsView: View {
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(.primary)
                     }
+                    .accessibilityLabel("Close")
                 }
             }
             .alert("Rename", isPresented: $showingRenameAlert) {

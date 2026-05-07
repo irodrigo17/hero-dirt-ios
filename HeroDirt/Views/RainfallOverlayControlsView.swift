@@ -40,6 +40,7 @@ struct RainfallOverlayControlsView: View {
         }
         .tint(isExpanded ? .blue : .primary)
         .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .accessibilityLabel(isExpanded ? "Close rainfall overlay controls" : "Open rainfall overlay controls")
     }
 
     // MARK: - Control Panel
@@ -54,8 +55,11 @@ struct RainfallOverlayControlsView: View {
                     isExpanded = false
                 } label: {
                     Image(systemName: "xmark.circle.fill")
+                        .font(.title3)
                         .foregroundStyle(.secondary)
+                        .frame(minWidth: 44, minHeight: 44)
                 }
+                .accessibilityLabel("Close")
             }
             
             Toggle("Enabled", isOn: $isVisible)
