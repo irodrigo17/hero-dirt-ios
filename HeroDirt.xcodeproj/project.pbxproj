@@ -27,11 +27,14 @@
 		CC0000030000000000000004 /* RainfallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000004 /* RainfallDataTests.swift */; };
 		CC0000030000000000000005 /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000005 /* RainfallOverlayTests.swift */; };
 		CC0000030000000000000006 /* WeatherServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000006 /* WeatherServiceTests.swift */; };
+		CC0000030000000000000007 /* RainForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000007 /* RainForecastTests.swift */; };
+		CC0000030000000000000008 /* SharedUtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000008 /* SharedUtilitiesTests.swift */; };
 		CC1111110000000000000002 /* MKPointOfInterestCategory+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */; };
 		CC1111110000000000000003 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000003 /* SearchResultsView.swift */; };
 		CC1111110000000000000004 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000004 /* SheetView.swift */; };
 		D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0229A259C104D045364369B /* Place.swift */; };
 		DD0000030000000000000001 /* DirtConditionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000020000000000000001 /* DirtConditionCardView.swift */; };
+		SH1111110000000000000001 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH0000020000000000000001 /* SharedUI.swift */; };
 		FB52A06C2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
 		FB52A06D2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
 /* End PBXBuildFile section */
@@ -52,6 +55,7 @@
 		36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
 		6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
 		744879444057483CC6661630 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		SH0000020000000000000001 /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
 		88CC3FF9DE1058CB0FD2C828 /* HeroDirt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BB0F8584B7ADED8B4099F75 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8F8930ED95B981ED29139237 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -68,6 +72,8 @@
 		CC0000010000000000000004 /* RainfallDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallDataTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000005 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000006 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000007 /* RainForecastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastTests.swift; sourceTree = "<group>"; };
+		CC0000010000000000000008 /* SharedUtilitiesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUtilitiesTests.swift; sourceTree = "<group>"; };
 		CC0000020000000000000001 /* HeroDirtTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC2222220000000000000002 /* MKPointOfInterestCategory+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MKPointOfInterestCategory+Display.swift"; sourceTree = "<group>"; };
 		CC2222220000000000000003 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
@@ -128,6 +134,8 @@
 				CC0000010000000000000004 /* RainfallDataTests.swift */,
 				CC0000010000000000000005 /* RainfallOverlayTests.swift */,
 				CC0000010000000000000006 /* WeatherServiceTests.swift */,
+				CC0000010000000000000007 /* RainForecastTests.swift */,
+				CC0000010000000000000008 /* SharedUtilitiesTests.swift */,
 			);
 			path = HeroDirtTests;
 			sourceTree = "<group>";
@@ -170,6 +178,7 @@
 				AA2222220000000000000004 /* RainfallOverlayControlsView.swift */,
 				F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */,
 				CC2222220000000000000003 /* SearchResultsView.swift */,
+				SH0000020000000000000001 /* SharedUI.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -281,6 +290,7 @@
 				AA1111110000000000000004 /* RainfallOverlayControlsView.swift in Sources */,
 				C200A36C09D984FE4A6A074F /* SavedPlacesView.swift in Sources */,
 				30AB008D141C44FBCCCD9B11 /* WeatherService.swift in Sources */,
+				SH1111110000000000000001 /* SharedUI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,12 +299,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC0000030000000000000001 /* PlaceStoreTests.swift in Sources */,
-				FB52A06C2FABA30400D56E52 /* RainForecastCardView.swift in Sources */,
 				CC0000030000000000000002 /* PlaceTests.swift in Sources */,
 				CC0000030000000000000003 /* RainfallColorScaleTests.swift in Sources */,
 				CC0000030000000000000004 /* RainfallDataTests.swift in Sources */,
 				CC0000030000000000000005 /* RainfallOverlayTests.swift in Sources */,
 				CC0000030000000000000006 /* WeatherServiceTests.swift in Sources */,
+				CC0000030000000000000007 /* RainForecastTests.swift in Sources */,
+				CC0000030000000000000008 /* SharedUtilitiesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
