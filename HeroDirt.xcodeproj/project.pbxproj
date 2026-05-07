@@ -34,9 +34,8 @@
 		CC1111110000000000000004 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2222220000000000000004 /* SheetView.swift */; };
 		D10A4F2607F22D9A5CFEAE0E /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0229A259C104D045364369B /* Place.swift */; };
 		DD0000030000000000000001 /* DirtConditionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000020000000000000001 /* DirtConditionCardView.swift */; };
-		SH1111110000000000000001 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH0000020000000000000001 /* SharedUI.swift */; };
-		FB52A06C2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
 		FB52A06D2FABA30400D56E52 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */; };
+		SH1111110000000000000001 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = SH0000020000000000000001 /* SharedUI.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,7 +54,6 @@
 		36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
 		6E285C4281DD9C4ABFD5E6F0 /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
 		744879444057483CC6661630 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
-		SH0000020000000000000001 /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
 		88CC3FF9DE1058CB0FD2C828 /* HeroDirt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BB0F8584B7ADED8B4099F75 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8F8930ED95B981ED29139237 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -83,6 +81,7 @@
 		E1BD3F49EA71439A72C03EF8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
 		FB52A06B2FABA30400D56E52 /* RainForecastCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastCardView.swift; sourceTree = "<group>"; };
+		SH0000020000000000000001 /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
