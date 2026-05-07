@@ -5,15 +5,7 @@ struct RainForecastCardView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            HStack {
-                Text("Rain Forecast")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Spacer()
-                Text("Next days")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            CardHeader(title: "Rain Forecast", subtitle: "Next days")
 
             HStack(spacing: 10) {
                 forecastTile("1 day", value: forecast.next1Day)
@@ -23,7 +15,7 @@ struct RainForecastCardView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
     }
 
     private func forecastTile(_ label: String, value: Double) -> some View {
@@ -31,7 +23,7 @@ struct RainForecastCardView: View {
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(formatMM(value))
+            Text(value.formatMillimeters())
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundStyle(.blue)
@@ -43,9 +35,5 @@ struct RainForecastCardView: View {
         .padding(.vertical, 10)
         .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.06),
                      in: RoundedRectangle(cornerRadius: 8))
-    }
-
-    private func formatMM(_ value: Double) -> String {
-        value < 10 ? String(format: "%.1f", value) : String(format: "%.0f", value)
     }
 }

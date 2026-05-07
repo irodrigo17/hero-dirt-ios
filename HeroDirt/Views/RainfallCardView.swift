@@ -5,18 +5,8 @@ struct RainfallCardView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Title
-            HStack {
-                Text("Rainfall")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Spacer()
-                Text("Past days")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            // Rainfall totals grid
+            CardHeader(title: "Rainfall", subtitle: "Past days")
+
             HStack(spacing: 10) {
                 rainfallTile("1 day", value: summary.last1Day)
                 rainfallTile("2 days", value: summary.last2Days)
@@ -26,7 +16,6 @@ struct RainfallCardView: View {
 
             Divider()
 
-            // Days since last rain
             HStack {
                 Image(systemName: "cloud.rain")
                     .foregroundStyle(.blue)
@@ -39,7 +28,7 @@ struct RainfallCardView: View {
             .font(.subheadline)
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
     }
 
     private var lastRainText: String {
@@ -58,7 +47,7 @@ struct RainfallCardView: View {
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(formatMM(value))
+            Text(value.formatMillimeters())
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundStyle(.blue)
@@ -70,9 +59,5 @@ struct RainfallCardView: View {
         .padding(.vertical, 10)
         .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.06),
                      in: RoundedRectangle(cornerRadius: 8))
-    }
-
-    private func formatMM(_ value: Double) -> String {
-        value < 10 ? String(format: "%.1f", value) : String(format: "%.0f", value)
     }
 }

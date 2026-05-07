@@ -199,7 +199,7 @@ private struct PlaceRow: View {
             Text(label)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-            Text(formatMM(value))
+            Text(value.formatMillimeters())
                 .font(.callout)
                 .fontWeight(.semibold)
                 .foregroundStyle(value > 0 ? .blue : .secondary)
@@ -207,11 +207,7 @@ private struct PlaceRow: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
         .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.05),
-                     in: RoundedRectangle(cornerRadius: 6))
-        .accessibilityLabel("\(label) rainfall: \(formatMM(value)) millimeters")
-    }
-
-    private func formatMM(_ value: Double) -> String {
-        value < 10 ? String(format: "%.1f", value) : String(format: "%.0f", value)
+                     in: RoundedRectangle(cornerRadius: .cornerSmall))
+        .accessibilityLabel("\(label) rainfall: \(value.formatMillimeters()) millimeters")
     }
 }

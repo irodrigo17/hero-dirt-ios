@@ -116,7 +116,7 @@ struct MapView: View {
                             .frame(width: 44, height: 44)
                     }
                     .tint(.primary)
-                    .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 8))
+                    .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: .cornerSmall))
                     .accessibilityLabel("Center map on your location")
                 }
                 .padding(12)

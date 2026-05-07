@@ -258,7 +258,7 @@ private struct SheetActionButton: View {
             .foregroundStyle(isPrimary ? .white : .blue)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isPrimary ? Color.blue : Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
+            .background(isPrimary ? Color.blue : Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: .cornerLarge))
         }
         .disabled(isDisabled)
     }

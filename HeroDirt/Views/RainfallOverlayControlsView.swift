@@ -39,7 +39,7 @@ struct RainfallOverlayControlsView: View {
             .frame(width: 44, height: 44)
         }
         .tint(isExpanded ? .blue : .primary)
-        .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: .cornerSmall))
         .accessibilityLabel(isExpanded ? "Close rainfall overlay controls" : "Open rainfall overlay controls")
     }
 
@@ -85,7 +85,7 @@ struct RainfallOverlayControlsView: View {
         }
         .padding(12)
         .frame(width: 260)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
     }
 }
 
