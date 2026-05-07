@@ -5,14 +5,14 @@ struct MapView: View {
     @EnvironmentObject private var placeStore: PlaceStore
 
     @State private var cameraPosition: MapCameraPosition = .automatic
-    @State private var selectedCoordinate = CLLocationCoordinate2D()
-    @State private var hasSelection = false
+    @State private var newPinCoordinate: CLLocationCoordinate2D?
     @State private var sheetPresented = true
     @State private var selectedDetent: PresentationDetent = .medium
     @State private var showingPlaceDetails = false
-    @State private var mapSelection: MapSelection<UUID>?
-    @State private var selectedPlaceID: UUID?
+    @State private var mapSelection: MapSelection<String>?
+    @State private var selectedPlace: Place?
     @State private var selectedMapItem: MKMapItem?
+    @State private var selectedSearchResult: MKMapItem?
 
     @State private var resolvedCategories: [UUID: MKPointOfInterestCategory] = [:]
 
@@ -22,7 +22,7 @@ struct MapView: View {
     @State private var overlayOpacity: Double = 0.3
     @State private var cameraChangeCount = 0
     @State private var visibleRegion: MKCoordinateRegion?
-    
+
     private let collapsedDetent = PresentationDetent.fraction(0.09)
 
     var body: some View {
@@ -30,33 +30,26 @@ struct MapView: View {
             Map(position: $cameraPosition, interactionModes: [.pan, .zoom], selection: $mapSelection) {
                 UserAnnotation()
 
-                if hasSelection {
-                    Marker("Selected", coordinate: selectedCoordinate)
-                        .tint(.blue)
+                if let coord = newPinCoordinate {
+                    Marker("New place", coordinate: coord)
+                        .tint(.blue).tag(MapSelection("new-place"))
+                }
+
+                if let searchResult = selectedSearchResult {
+                    Marker(
+                        searchResult.name ?? "",
+                        systemImage: searchResult.pointOfInterestCategory?.sfSymbol ?? "mappin",
+                        coordinate: searchResult.location.coordinate
+                    )
+                    .tint(searchResult.pointOfInterestCategory?.iconColor ?? .orange)
+                    .tag(MapSelection(searchResult.identifier?.rawValue ?? "search-result"))
                 }
 
                 ForEach(placeStore.places) { place in
-                    Annotation(place.name, coordinate: place.coordinate, anchor: .bottom) {
-                        Button {
-                            selectedCoordinate = place.coordinate
-                            selectedPlaceID = place.id
-                            selectedMapItem = nil
-                            hasSelection = false
-                            showingPlaceDetails = true
-                        } label: {
-                            let category = resolvedCategories[place.id]
-                            ZStack {
-                                Circle()
-                                    .fill(category?.iconColor ?? .orange)
-                                    .frame(width: 32, height: 32)
-                                Image(systemName: category?.sfSymbol ?? "mappin")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(.white)
-                            }
-                            .shadow(color: .black.opacity(0.2), radius: 3, y: 2)
-                        }
-                        .buttonStyle(.plain)
-                    }
+                    let category = resolvedCategories[place.id]
+                    Marker(place.name, systemImage: category?.sfSymbol ?? "mappin", coordinate: CLLocationCoordinate2D(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude))
+                    .tint(category?.iconColor ?? .orange)
+                    .tag(MapSelection(place.id.uuidString))
                 }
             }
             .mapControls {
@@ -67,17 +60,19 @@ struct MapView: View {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             })
             .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.5)
+                LongPressGesture(minimumDuration: 0.2)
                     .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
                     .onEnded { value in
                         if case .second(true, let drag) = value,
                            let location = drag?.location,
                            let coordinate = proxy.convert(location, from: .local) {
-                            selectedCoordinate = coordinate
-                            selectedPlaceID = nil
+                            newPinCoordinate = coordinate
+                            selectedPlace = nil
                             selectedMapItem = nil
-                            hasSelection = true
-                            showingPlaceDetails = true
+                            selectedSearchResult = nil
+                            withAnimation {
+                                mapSelection = MapSelection("new-place")
+                            }
                         }
                     }
             )
@@ -124,11 +119,6 @@ struct MapView: View {
             .task(id: placeStore.places.map(\.id)) {
                 await fetchResolvedCategories()
             }
-            .onChange(of: showingPlaceDetails) { _, isShowing in
-                if isShowing {
-                    Task { @MainActor in centerAboveSheet(selectedCoordinate) }
-                }
-            }
             .onChange(of: overlayVisible) { _, visible in
                 if visible {
                     gridService.refetch()
@@ -140,23 +130,22 @@ struct MapView: View {
         }) {
             SheetView(
                 onSelectPlace: { place in
-                    selectedCoordinate = place.coordinate
-                    selectedPlaceID = place.id
+                    selectedPlace = place
                     selectedMapItem = nil
-                    hasSelection = false
-                    showingPlaceDetails = true
+                    newPinCoordinate = nil
+                    selectedSearchResult = nil
+                    withAnimation(.spring(duration: 0.3)) {
+                        mapSelection = MapSelection(place.id.uuidString)
+                    }
                 },
                 onSelectSearchResult: { item in
-                    let coordinate = item.location.coordinate
-                    cameraPosition = .region(MKCoordinateRegion(
-                        center: coordinate,
-                        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
-                    ))
-                    selectedCoordinate = coordinate
-                    selectedPlaceID = nil
+                    selectedSearchResult = item
                     selectedMapItem = item
-                    hasSelection = false
-                    showingPlaceDetails = true
+                    selectedPlace = nil
+                    newPinCoordinate = nil
+                    withAnimation(.spring(duration: 0.3)) {
+                        mapSelection = MapSelection(item.identifier?.rawValue ?? "search-result")
+                    }
                 },
                 onSearchFocusChanged: { focused in
                     selectedDetent = focused ? .large : .medium
@@ -168,13 +157,21 @@ struct MapView: View {
             .presentationBackgroundInteraction(.enabled)
             .interactiveDismissDisabled(true)
             .sheet(isPresented: $showingPlaceDetails, onDismiss: {
-                mapSelection = nil
-                hasSelection = false
+                withAnimation {
+                    mapSelection = nil
+                }
+                selectedPlace = nil
+                newPinCoordinate = nil
+                selectedSearchResult = nil
+                selectedMapItem = nil
                 selectedDetent = .medium
             }) {
                 PlaceDetailsView(
-                    coordinate: selectedCoordinate,
-                    placeID: selectedPlaceID,
+                    coordinate: selectedPlace?.coordinate
+                               ?? selectedMapItem?.location.coordinate
+                               ?? newPinCoordinate
+                               ?? CLLocationCoordinate2D(),
+                    placeID: selectedPlace?.id,
                     mapItem: selectedMapItem,
                     onClose: { showingPlaceDetails = false }
                 )
@@ -203,18 +200,33 @@ struct MapView: View {
         }
     }
 
-    private func handleSelectionChange(_ newValue: MapSelection<UUID>?) {
+    private func handleSelectionChange(_ newValue: MapSelection<String>?) {
         guard let selection = newValue else { return }
 
         if let feature = selection.feature {
             Task {
                 if let item = try? await MKMapItemRequest(feature: feature).mapItem {
-                    selectedCoordinate = item.location.coordinate
-                    selectedPlaceID = nil
                     selectedMapItem = item
-                    hasSelection = false
+                    selectedPlace = nil
+                    newPinCoordinate = nil
+                    selectedSearchResult = nil
                     showingPlaceDetails = true
+                    centerAboveSheet(item.location.coordinate)
                 }
+            }
+        } else if let place = placeStore.places.first(where: { $0.id.uuidString == selection.value }) {
+            Task {
+                selectedPlace = place
+                selectedMapItem = nil
+                newPinCoordinate = nil
+                selectedSearchResult = nil
+                showingPlaceDetails = true
+                centerAboveSheet(place.coordinate)
+            }
+        } else if let item = selectedSearchResult {
+            Task {
+                showingPlaceDetails = true
+                centerAboveSheet(item.location.coordinate)
             }
         }
     }
