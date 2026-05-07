@@ -25,6 +25,9 @@ struct MapView: View {
 
     private let collapsedDetent = PresentationDetent.fraction(0.09)
 
+    @GestureState private var longPressDragLocation: CGPoint? = nil
+    @GestureState private var longPressActivated: Bool = false
+
     var body: some View {
         MapReader { proxy in
             Map(position: $cameraPosition, interactionModes: [.pan, .zoom], selection: $mapSelection) {
@@ -60,22 +63,28 @@ struct MapView: View {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             })
             .simultaneousGesture(
+                DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                    .updating($longPressDragLocation) { value, state, _ in state = value.location }
+            )
+            .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.2)
                     .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
-                    .onEnded { value in
-                        if case .second(true, let drag) = value,
-                           let location = drag?.location,
-                           let coordinate = proxy.convert(location, from: .local) {
-                            newPinCoordinate = coordinate
-                            selectedPlace = nil
-                            selectedMapItem = nil
-                            selectedSearchResult = nil
-                            withAnimation {
-                                mapSelection = MapSelection("new-place")
-                            }
-                        }
+                    .updating($longPressActivated) { value, state, _ in
+                        if case .second(true, _) = value { state = true }
                     }
             )
+            .onChange(of: longPressActivated) { _, activated in
+                guard activated,
+                      let location = longPressDragLocation,
+                      let coordinate = proxy.convert(location, from: .local) else { return }
+                newPinCoordinate = coordinate
+                selectedPlace = nil
+                selectedMapItem = nil
+                selectedSearchResult = nil
+                withAnimation {
+                    mapSelection = MapSelection("new-place")
+                }
+            }
             .onChange(of: mapSelection) { _, newValue in
                 handleSelectionChange(newValue)
             }
