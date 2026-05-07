@@ -25,7 +25,7 @@ enum DirtCondition {
     var color: Color {
         switch self {
         case .wet: return .blue
-        case .heroDirt: return Color(red: 1, green: 0.75, blue: 0.2)
+        case .heroDirt: return .green
         case .dry: return .orange
         }
     }

@@ -130,7 +130,12 @@ private struct PlaceRow: View {
                     .font(.headline)
                     .lineLimit(1)
                 Spacer()
+                Image(systemName: "chevron.forward")
+            }
+            HStack {
                 if let rainfall {
+                    dirtConditionBadge(rainfall.dirtCondition)
+                    Spacer()
                     lastRainBadge(rainfall)
                 }
             }
@@ -153,6 +158,16 @@ private struct PlaceRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func dirtConditionBadge(_ condition: DirtCondition) -> some View {
+        Label(condition.label, systemImage: condition.icon)
+            .font(.footnote)
+            .foregroundStyle(condition.color)
+            .padding(8)
+            .background(condition.color.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+            .labelIconToTitleSpacing(4)
     }
 
     @ViewBuilder
