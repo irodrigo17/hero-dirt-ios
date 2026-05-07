@@ -2,9 +2,12 @@ import Foundation
 import Combine
 import CloudKit
 import MapKit
+import os
 
 class PlaceStore: ObservableObject {
     @Published private(set) var places: [Place] = []
+
+    private static let logger = Logger(subsystem: "com.herodirt.app", category: "PlaceStore")
 
     private let fileURL: URL?
     private var externalChangeObserver: (any NSObjectProtocol)?
@@ -206,10 +209,13 @@ class PlaceStore: ObservableObject {
         }
     }
 
+    private static let proximityThresholdMeters: CLLocationDistance = 50
+
     func placeNear(latitude: Double, longitude: Double) -> Place? {
-        places.first { place in
-            abs(place.latitude - latitude) < 0.0005 &&
-            abs(place.longitude - longitude) < 0.0005
+        let target = CLLocation(latitude: latitude, longitude: longitude)
+        return places.first { place in
+            let placeLocation = CLLocation(latitude: place.latitude, longitude: place.longitude)
+            return target.distance(from: placeLocation) < Self.proximityThresholdMeters
         }
     }
 
@@ -222,7 +228,6 @@ class PlaceStore: ObservableObject {
                 try data.write(to: fileURL, options: .atomic)
             } else {
                 NSUbiquitousKeyValueStore.default.set(data, forKey: Self.kvsKey)
-                NSUbiquitousKeyValueStore.default.synchronize()
                 try? data.write(to: Self.localFileURL, options: .atomic)
             }
             iCloudAccountAvailable { [weak self] available in
@@ -231,7 +236,7 @@ class PlaceStore: ObservableObject {
                 self.deleteMissingFromCloudKit(keeping: self.places)
             }
         } catch {
-            print("PlaceStore save error: \(error)")
+            Self.logger.error("PlaceStore save error: \(error)")
         }
     }
 
@@ -242,7 +247,7 @@ class PlaceStore: ObservableObject {
                 let data = try Data(contentsOf: fileURL)
                 places = try JSONDecoder().decode([Place].self, from: data)
             } catch {
-                print("PlaceStore load error: \(error)")
+                Self.logger.error("PlaceStore load error: \(error)")
             }
         } else {
             let data: Data
@@ -260,7 +265,7 @@ class PlaceStore: ObservableObject {
                     places = decoded
                 }
             } catch {
-                print("PlaceStore load error: \(error)")
+                Self.logger.error("PlaceStore load error: \(error)")
             }
         }
     }
