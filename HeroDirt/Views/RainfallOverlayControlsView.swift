@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct RainfallOverlayControls: View {
+struct RainfallOverlayControlsView: View {
     @Binding var isVisible: Bool
     @Binding var timeframe: RainfallTimeframe
     @Binding var opacity: Double

@@ -17,7 +17,7 @@
 		AA1111110000000000000001 /* RainfallOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000001 /* RainfallOverlay.swift */; };
 		AA1111110000000000000002 /* RainfallColorScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000002 /* RainfallColorScale.swift */; };
 		AA1111110000000000000003 /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000003 /* RainfallGridService.swift */; };
-		AA1111110000000000000004 /* RainfallOverlayControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000004 /* RainfallOverlayControls.swift */; };
+		AA1111110000000000000004 /* RainfallOverlayControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222220000000000000004 /* RainfallOverlayControlsView.swift */; };
 		BB2A3BBEBC1605581F8E40ED /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F07BDA81B746CEF21AD2D9 /* PlaceDetailsView.swift */; };
 		C200A36C09D984FE4A6A074F /* SavedPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */; };
 		C7A7B3A5364CF2C0353E79C5 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F81B48B2FECDB1A26677D74 /* MapView.swift */; };
@@ -60,7 +60,7 @@
 		AA2222220000000000000001 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
 		AA2222220000000000000002 /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
 		AA2222220000000000000003 /* RainfallGridService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallGridService.swift; sourceTree = "<group>"; };
-		AA2222220000000000000004 /* RainfallOverlayControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayControls.swift; sourceTree = "<group>"; };
+		AA2222220000000000000004 /* RainfallOverlayControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayControlsView.swift; sourceTree = "<group>"; };
 		C67A5237BA565EB2FF746B50 /* PlaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStore.swift; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* PlaceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStoreTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000002 /* PlaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceTests.swift; sourceTree = "<group>"; };
@@ -167,7 +167,7 @@
 				9F81B48B2FECDB1A26677D74 /* MapView.swift */,
 				CC2222220000000000000004 /* SheetView.swift */,
 				00A9AA6050FC1D5C136700A5 /* RainfallCardView.swift */,
-				AA2222220000000000000004 /* RainfallOverlayControls.swift */,
+				AA2222220000000000000004 /* RainfallOverlayControlsView.swift */,
 				F88F75D89426ECCBA66F0422 /* SavedPlacesView.swift */,
 				CC2222220000000000000003 /* SearchResultsView.swift */,
 			);
@@ -278,7 +278,7 @@
 				78515DF55F43F5201709D0E6 /* RainfallData.swift in Sources */,
 				AA1111110000000000000003 /* RainfallGridService.swift in Sources */,
 				AA1111110000000000000001 /* RainfallOverlay.swift in Sources */,
-				AA1111110000000000000004 /* RainfallOverlayControls.swift in Sources */,
+				AA1111110000000000000004 /* RainfallOverlayControlsView.swift in Sources */,
 				C200A36C09D984FE4A6A074F /* SavedPlacesView.swift in Sources */,
 				30AB008D141C44FBCCCD9B11 /* WeatherService.swift in Sources */,
 			);

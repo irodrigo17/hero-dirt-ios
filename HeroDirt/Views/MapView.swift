@@ -96,7 +96,7 @@ struct MapView: View {
             }
             .overlay(alignment: .topTrailing) {
                 VStack(alignment: .trailing, spacing: 10) {
-                    RainfallOverlayControls(
+                    RainfallOverlayControlsView(
                         isVisible: $overlayVisible,
                         timeframe: $overlayTimeframe,
                         opacity: $overlayOpacity,
@@ -179,6 +179,7 @@ struct MapView: View {
                     onClose: { showingPlaceDetails = false }
                 )
                 .environmentObject(placeStore)
+                .presentationBackgroundInteraction(.enabled)
             }
         }
     }
