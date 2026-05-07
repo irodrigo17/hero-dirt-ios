@@ -237,6 +237,9 @@ struct MapView: View {
                 showingPlaceDetails = true
                 centerAboveSheet(item.location.coordinate)
             }
+        } else if let newPinCoordinate = newPinCoordinate {
+            showingPlaceDetails = true
+            centerAboveSheet(newPinCoordinate)
         }
     }
 
