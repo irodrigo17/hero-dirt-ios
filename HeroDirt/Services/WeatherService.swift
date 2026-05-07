@@ -2,12 +2,7 @@ import Foundation
 import WeatherKit
 import CoreLocation
 
-protocol WeatherServiceProtocol {
-    func fetchRainfall(latitude: Double, longitude: Double) async throws -> RainfallSummary
-    func fetchRainForecast(latitude: Double, longitude: Double) async throws -> RainForecast
-}
-
-enum WeatherService: WeatherServiceProtocol {
+enum WeatherService {
 
     // MARK: - API Response
 

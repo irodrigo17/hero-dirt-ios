@@ -46,11 +46,7 @@ struct PlaceDetailsView: View {
                             "Unable to load rainfall data",
                             systemImage: "exclamationmark.triangle",
                             description: Text(errorMessage)
-                        ) {
-                            Button("Retry") {
-                                Task { await loadData() }
-                            }
-                        }
+                        )
                     } else if let summary = rainfallSummary {
                         DirtConditionCardView(condition: summary.dirtCondition)
                         RainfallCardView(summary: summary)
