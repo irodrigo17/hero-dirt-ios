@@ -43,7 +43,8 @@ struct SearchResultsView: View {
                                 Text(item.name ?? "Unknown")
                                     .font(.subheadline)
                                     .foregroundStyle(.primary)
-                                if let subtitle = item.placemark.title, subtitle != item.name {
+                                let subtitle = item.addressRepresentations?.cityWithContext ?? item.pointOfInterestCategory?.displayName
+                                if let subtitle, subtitle != item.name {
                                     Text(subtitle)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
