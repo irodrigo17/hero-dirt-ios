@@ -54,6 +54,7 @@ enum WeatherService {
 
         var daily: [DailyRainfall] = []
         for (i, dateString) in decoded.daily.time.enumerated() {
+            guard i < decoded.daily.precipitationSum.count else { continue }
             guard let date = formatter.date(from: dateString) else { continue }
             let amount = decoded.daily.precipitationSum[i] ?? 0.0
             daily.append(DailyRainfall(date: date, amount: amount))

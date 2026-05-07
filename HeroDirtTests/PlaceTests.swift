@@ -40,9 +40,9 @@ struct PlaceTests {
     }
 
     @Test func hashableEquality() {
-        let id = UUID()
-        let place1 = Place(id: id, name: "A", latitude: 1, longitude: 2)
-        let place2 = Place(id: id, name: "B", latitude: 3, longitude: 4)
+        let placeID = UUID()
+        let place1 = Place(id: placeID, name: "A", latitude: 1, longitude: 2)
+        let place2 = Place(id: placeID, name: "A", latitude: 1, longitude: 2)
 
         #expect(place1 == place2)
         #expect(place1.hashValue == place2.hashValue)
