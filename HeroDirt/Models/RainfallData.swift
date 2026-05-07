@@ -39,24 +39,27 @@ enum DirtCondition {
     }
 }
 
-struct RainForecast {
+struct RainForecast: Sendable {
     let next1Day: Double
     let next2Days: Double
     let next3Days: Double
     let next7Days: Double
 }
 
-struct DailyRainfall {
+struct DailyRainfall: Sendable {
     let date: Date
-    let amount: Double // millimeters
+    let amount: Double
 }
 
-struct RainfallSummary {
+struct RainfallSummary: Sendable {
     let last1Day: Double
     let last2Days: Double
     let last3Days: Double
     let last7Days: Double
-    let daysSinceLastRain: Int? // nil = no rain in available data (~30 days)
+    let daysSinceLastRain: Int?
+
+    private static let mmPerInch = 25.4
+    private static let heroDirtBufferDays = 3.0
 
     init(last1Day: Double, last2Days: Double, last3Days: Double, last7Days: Double, daysSinceLastRain: Int?) {
         self.last1Day = last1Day
@@ -79,9 +82,9 @@ struct RainfallSummary {
 
     var dirtCondition: DirtCondition {
         let daysSince = Double(daysSinceLastRain ?? 30)
-        let requiredDays = max(1.0, last7Days / 25.4)
+        let requiredDays = max(1.0, last7Days / Self.mmPerInch)
         if daysSince < requiredDays { return .wet }
-        if daysSince <= requiredDays + 3 { return .heroDirt }
+        if daysSince <= requiredDays + Self.heroDirtBufferDays { return .heroDirt }
         return .dry
     }
 

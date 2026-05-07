@@ -2,7 +2,7 @@ import Foundation
 import MapKit
 import CoreLocation
 
-struct Place: Identifiable, Codable, Hashable {
+struct Place: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     var name: String
     var latitude: Double

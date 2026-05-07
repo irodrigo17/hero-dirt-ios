@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-struct RainfallCell: Identifiable {
+struct RainfallCell: Identifiable, Sendable {
     let id: String
     let coordinate: CLLocationCoordinate2D
     let latDelta: Double

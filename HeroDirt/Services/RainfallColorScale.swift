@@ -40,7 +40,9 @@ enum RainfallColorScale {
             return (0, 0, 0, 0)
         }
 
-        let visible = stopRGBAs.dropFirst() // skip clear stop
+        let visible = Array(stopRGBAs.dropFirst())
+        precondition(visible.count >= 2, "RainfallColorScale needs at least 2 visible stops")
+
         var lower = visible.first!
         var upper = visible.last!
 

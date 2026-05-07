@@ -99,8 +99,14 @@ struct PlaceDetailsView: View {
         }
     }
 
-    private var loadKey: String {
-        "\(coordinate.latitude),\(coordinate.longitude),\(placeID?.uuidString ?? "")"
+    private struct LoadKey: Hashable {
+        let latitude: Double
+        let longitude: Double
+        let placeID: UUID?
+    }
+
+    private var loadKey: LoadKey {
+        LoadKey(latitude: coordinate.latitude, longitude: coordinate.longitude, placeID: placeID)
     }
 
     // MARK: - Action Bar
