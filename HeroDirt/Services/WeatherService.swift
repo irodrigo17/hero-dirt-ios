@@ -2,7 +2,12 @@ import Foundation
 import WeatherKit
 import CoreLocation
 
-enum WeatherService {
+protocol WeatherServiceProtocol {
+    func fetchRainfall(latitude: Double, longitude: Double) async throws -> RainfallSummary
+    func fetchRainForecast(latitude: Double, longitude: Double) async throws -> RainForecast
+}
+
+enum WeatherService: WeatherServiceProtocol {
 
     // MARK: - API Response
 
@@ -24,12 +29,21 @@ enum WeatherService {
 
     enum WeatherError: LocalizedError {
         case invalidURL
+        case httpError(statusCode: Int)
         case invalidResponse
 
         var errorDescription: String? {
             switch self {
-            case .invalidURL: return "Could not build request URL."
-            case .invalidResponse: return "Invalid response from weather service."
+            case .invalidURL:
+                return "Could not build request URL."
+            case .httpError(let statusCode):
+                switch statusCode {
+                case 429: return "Rate limited. Please try again later."
+                case 500...599: return "Weather service is temporarily unavailable."
+                default: return "Weather service error (HTTP \(statusCode))."
+                }
+            case .invalidResponse:
+                return "Invalid response from weather service."
             }
         }
     }
@@ -53,7 +67,7 @@ enum WeatherService {
         return RainfallSummary(daily: daily)
     }
 
-    // MARK: - Fetch
+    // MARK: - Network
 
     private static let detailSession: URLSession = {
         let config = URLSessionConfiguration.default
@@ -82,8 +96,12 @@ enum WeatherService {
 
         let (data, response) = try await (session ?? detailSession).data(from: url)
 
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+        guard let http = response as? HTTPURLResponse else {
             throw WeatherError.invalidResponse
+        }
+
+        guard (200...299).contains(http.statusCode) else {
+            throw WeatherError.httpError(statusCode: http.statusCode)
         }
 
         return try parseResponse(data)
