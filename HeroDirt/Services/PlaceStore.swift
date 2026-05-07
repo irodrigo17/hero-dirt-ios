@@ -138,6 +138,7 @@ class PlaceStore: ObservableObject {
         ) { [weak self] _ in
             self?.load()
         }
+        syncFromCloudKit()
     }
 
     init(fileURL: URL) {
@@ -148,6 +149,20 @@ class PlaceStore: ObservableObject {
     deinit {
         if let observer = externalChangeObserver {
             NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    private func syncFromCloudKit() {
+        iCloudAccountAvailable { [weak self] available in
+            guard let self = self, available, self.fileURL == nil else { return }
+            self.fetchAllFromCloudKit { result in
+                DispatchQueue.main.async {
+                    if case let .success(remotePlaces) = result, !remotePlaces.isEmpty, remotePlaces != self.places {
+                        self.places = remotePlaces
+                        self.save()
+                    }
+                }
+            }
         }
     }
 
@@ -230,19 +245,6 @@ class PlaceStore: ObservableObject {
                 print("PlaceStore load error: \(error)")
             }
         } else {
-            // Kick off a non-blocking CloudKit fetch; local fallback proceeds below.
-            iCloudAccountAvailable { [weak self] available in
-                guard let self = self, available, self.fileURL == nil else { return }
-                self.fetchAllFromCloudKit { result in
-                    DispatchQueue.main.async {
-                        if case let .success(remotePlaces) = result, !remotePlaces.isEmpty, remotePlaces != self.places {
-                            self.places = remotePlaces
-                            self.save() // persist to local fallback as well
-                        }
-                    }
-                }
-            }
-
             let data: Data
             if let kvsData = NSUbiquitousKeyValueStore.default.data(forKey: Self.kvsKey) {
                 data = kvsData

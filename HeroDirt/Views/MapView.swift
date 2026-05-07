@@ -190,8 +190,11 @@ struct MapView: View {
         }
     }
 
+    @State private var selectionTask: Task<Void, Never>?
+
     // MARK: - Map Interaction
 
+    @MainActor
     private func fetchResolvedCategories() async {
         await withTaskGroup(of: (UUID, MKPointOfInterestCategory?).self) { group in
             for place in placeStore.places {
@@ -210,11 +213,13 @@ struct MapView: View {
     }
 
     private func handleSelectionChange(_ newValue: MapSelection<String>?) {
+        selectionTask?.cancel()
         guard let selection = newValue else { return }
 
-        if let feature = selection.feature {
-            Task {
+        selectionTask = Task { @MainActor in
+            if let feature = selection.feature {
                 if let item = try? await MKMapItemRequest(feature: feature).mapItem {
+                    guard !Task.isCancelled else { return }
                     selectedMapItem = item
                     selectedPlace = nil
                     newPinCoordinate = nil
@@ -222,24 +227,23 @@ struct MapView: View {
                     showingPlaceDetails = true
                     centerAboveSheet(item.location.coordinate)
                 }
-            }
-        } else if let place = placeStore.places.first(where: { $0.id.uuidString == selection.value }) {
-            Task {
+            } else if let place = placeStore.places.first(where: { $0.id.uuidString == selection.value }) {
+                guard !Task.isCancelled else { return }
                 selectedPlace = place
                 selectedMapItem = nil
                 newPinCoordinate = nil
                 selectedSearchResult = nil
                 showingPlaceDetails = true
                 centerAboveSheet(place.coordinate)
-            }
-        } else if let item = selectedSearchResult {
-            Task {
+            } else if let item = selectedSearchResult {
+                guard !Task.isCancelled else { return }
                 showingPlaceDetails = true
                 centerAboveSheet(item.location.coordinate)
+            } else if let newPinCoordinate = newPinCoordinate {
+                guard !Task.isCancelled else { return }
+                showingPlaceDetails = true
+                centerAboveSheet(newPinCoordinate)
             }
-        } else if let newPinCoordinate = newPinCoordinate {
-            showingPlaceDetails = true
-            centerAboveSheet(newPinCoordinate)
         }
     }
 

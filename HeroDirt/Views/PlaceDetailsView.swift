@@ -151,6 +151,7 @@ struct PlaceDetailsView: View {
         errorMessage = nil
 
         resolvedMapItem = await fetchMapItem(from: savedPlace?.mapItemId)
+        guard !Task.isCancelled else { return }
 
         if let saved = savedPlace {
             placeName = saved.name
@@ -177,6 +178,8 @@ struct PlaceDetailsView: View {
             }
         }
 
+        guard !Task.isCancelled else { return }
+
         async let rainfallTask = WeatherService.fetchRainfall(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
@@ -193,6 +196,7 @@ struct PlaceDetailsView: View {
             errorMessage = error.localizedDescription
         }
 
+        guard !Task.isCancelled else { return }
         isLoading = false
 
         rainForecast = try? await forecastTask
