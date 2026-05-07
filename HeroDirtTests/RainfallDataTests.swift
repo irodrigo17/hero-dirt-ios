@@ -132,4 +132,27 @@ struct RainfallDataTests {
         let dailyAbove = [DailyRainfall(date: today, amount: 0.11)]
         #expect(RainfallSummary(daily: dailyAbove).daysSinceLastRain == 0)
     }
+
+    // MARK: - Sendable conformance
+
+    @Test func summarySendable() {
+        let summary = RainfallSummary(last1Day: 1, last2Days: 2, last3Days: 3, last7Days: 7, daysSinceLastRain: 1)
+
+        func checkSendable(_: some Sendable) {}
+        checkSendable(summary)
+    }
+
+    @Test func forecastSendable() {
+        let forecast = RainForecast(next1Day: 1, next2Days: 2, next3Days: 3, next7Days: 7)
+
+        func checkSendable(_: some Sendable) {}
+        checkSendable(forecast)
+    }
+
+    @Test func dailyRainfallSendable() {
+        let daily = DailyRainfall(date: Date(), amount: 5.0)
+
+        func checkSendable(_: some Sendable) {}
+        checkSendable(daily)
+    }
 }

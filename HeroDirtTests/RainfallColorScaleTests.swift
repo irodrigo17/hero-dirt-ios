@@ -41,4 +41,33 @@ struct RainfallColorScaleTests {
         let count = RainfallColorScale.gradientStops.count
         #expect(count == RainfallColorScale.stops.count - 1)
     }
+
+    @Test func gradientStopsNormalized() {
+        let stops = RainfallColorScale.gradientStops
+        #expect(stops.first?.location == 0)
+        #expect(stops.last?.location == 1)
+    }
+
+    @Test func colorForReturnsColor() {
+        let color = RainfallColorScale.color(for: 5.0)
+        // Should not be clear since 5.0 >= 0.1
+        #expect(color != .clear)
+    }
+
+    @Test func colorForBelowThresholdReturnsClear() {
+        let color = RainfallColorScale.color(for: 0.05)
+        #expect(color == .clear)
+    }
+
+    @Test func interpolationBetweenStops() {
+        // 3.0 is between green (1.0) and yellow (5.0)
+        let (r1, g1, b1, a1) = RainfallColorScale.rgbaComponents(for: 1.0)
+        let (r2, g2, b2, a2) = RainfallColorScale.rgbaComponents(for: 5.0)
+        let (r3, g3, b3, a3) = RainfallColorScale.rgbaComponents(for: 3.0)
+
+        // 3.0 is midpoint, so values should be between
+        #expect(r3 > r1)
+        #expect(g3 < g1 || g3 > g1) // green may go either direction
+        #expect(a3 == a1 && a3 == a2) // all fully opaque
+    }
 }

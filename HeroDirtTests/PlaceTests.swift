@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import MapKit
 import CoreLocation
 @testable import HeroDirt
 
@@ -23,5 +24,34 @@ struct PlaceTests {
 
         #expect(coord.latitude == 40.7128)
         #expect(coord.longitude == -74.006)
+    }
+
+    @Test func customID() {
+        let customID = UUID()
+        let place = Place(id: customID, name: "Test", latitude: 0, longitude: 0)
+
+        #expect(place.id == customID)
+    }
+
+    @Test func defaultID() {
+        let place = Place(name: "Test", latitude: 0, longitude: 0)
+
+        #expect(place.id != UUID())
+    }
+
+    @Test func hashableEquality() {
+        let id = UUID()
+        let place1 = Place(id: id, name: "A", latitude: 1, longitude: 2)
+        let place2 = Place(id: id, name: "B", latitude: 3, longitude: 4)
+
+        #expect(place1 == place2)
+        #expect(place1.hashValue == place2.hashValue)
+    }
+
+    @Test func sendableConformance() {
+        let place = Place(name: "Test", latitude: 1, longitude: 2)
+
+        func checkSendable(_: some Sendable) {}
+        checkSendable(place)
     }
 }

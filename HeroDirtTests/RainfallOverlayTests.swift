@@ -25,6 +25,20 @@ struct RainfallOverlayTests {
         #expect(RainfallTimeframe.allCases.count == 4)
     }
 
+    @Test func timeframeLabels() {
+        #expect(RainfallTimeframe.oneDay.label == "1 Day")
+        #expect(RainfallTimeframe.twoDays.label == "2 Days")
+        #expect(RainfallTimeframe.threeDays.label == "3 Days")
+        #expect(RainfallTimeframe.sevenDays.label == "7 Days")
+    }
+
+    @Test func timeframeIDs() {
+        #expect(RainfallTimeframe.oneDay.id == "1d")
+        #expect(RainfallTimeframe.twoDays.id == "2d")
+        #expect(RainfallTimeframe.threeDays.id == "3d")
+        #expect(RainfallTimeframe.sevenDays.id == "7d")
+    }
+
     // MARK: - RainfallCell
 
     @Test func cellPolygonCorners() {
