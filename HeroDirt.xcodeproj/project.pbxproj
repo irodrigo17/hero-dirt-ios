@@ -28,12 +28,11 @@
 		C11B532A7C1451259475A046 /* MKPointOfInterestCategory+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1816173533EAECC787BF6E /* MKPointOfInterestCategory+Display.swift */; };
 		C57E9C352F8B43CE289C608D /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4D92D7FAA67BA17087181C /* RainfallGridService.swift */; };
 		CAD0245467130F02D9DC0588 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A36B08913D55F2B7F70EE4D /* RainForecastCardView.swift */; };
-		F8763DE41C5F64DCF1CF0F4A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC7A56DDBCB56417A920D98C /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0A6212CF0607C8E212CC4494 /* PlaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStore.swift; sourceTree = "<group>"; };
-		21A26BC8E82D87CB9A648454 /* HeroDirt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21A26BC8E82D87CB9A648454 /* HeroDirt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34B4E7778CAA336AADDCF385 /* DirtConditionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtConditionCardView.swift; sourceTree = "<group>"; };
 		3DD1A9567E75AD601360DCAA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		49C37481A6448709D5937CF2 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
@@ -52,7 +51,6 @@
 		B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
 		BEE2B26511DA261B886CCA74 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
-		DC7A56DDBCB56417A920D98C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		DEAF02E7DBE496C0D7E3FAC9 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		E22A23F977479A4A4C4E79B9 /* SheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetViewController.swift; sourceTree = "<group>"; };
 		EFDCB15D7909852E9F7677ED /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
@@ -67,7 +65,6 @@
 				BEE2B26511DA261B886CCA74 /* Assets.xcassets */,
 				948419789085469DD0A31178 /* HeroDirt.entitlements */,
 				FA4FDD2381347C02A1215178 /* Info.plist */,
-				DC7A56DDBCB56417A920D98C /* SceneDelegate.swift */,
 				75710BBBBC944EF6A70628BA /* Models */,
 				82AD055064B80AE78D55E8D6 /* Services */,
 				853D24C281FCC9239BB5DBDF /* Views */,
@@ -217,7 +214,6 @@
 				54BE1C102E3F2C6D9FBF995B /* RainfallOverlay.swift in Sources */,
 				BAD934D8462C843D4364AA0C /* RainfallOverlayControlsView.swift in Sources */,
 				812A834E18CCA03DB93B25D9 /* SavedPlacesViewController.swift in Sources */,
-				F8763DE41C5F64DCF1CF0F4A /* SceneDelegate.swift in Sources */,
 				7B5A10BF956F883652256F6A /* SearchResultsViewController.swift in Sources */,
 				28688B986F3D37299DE18E16 /* SharedUI.swift in Sources */,
 				3F3754A5F70EE178D645867F /* SheetViewController.swift in Sources */,
@@ -298,9 +294,9 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -320,9 +316,9 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

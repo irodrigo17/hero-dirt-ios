@@ -128,9 +128,12 @@ enum WeatherService {
             including: .daily
         )
 
-        let amounts = daily.forecast.prefix(7).map {
-            $0.precipitationAmountByType.rainfall.converted(to: .millimeters)
-                .value
+        let amounts = daily.forecast.prefix(7).map { day -> Double in
+            if #available(iOS 18, *) {
+                return day.precipitationAmountByType.rainfall.converted(to: .millimeters).value
+            } else {
+                return day.precipitationAmount.converted(to: .millimeters).value
+            }
         }
 
         func sum(_ n: Int) -> Double { amounts.prefix(n).reduce(0, +) }

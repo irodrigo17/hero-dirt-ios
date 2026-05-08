@@ -79,7 +79,11 @@ final class SheetViewController: UIViewController {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = query
         if let region = visibleRegion { request.region = region }
-        request.resultTypes = [.pointOfInterest, .physicalFeature]
+        if #available(iOS 18, *) {
+            request.resultTypes = [.pointOfInterest, .physicalFeature]
+        } else {
+            request.resultTypes = [.pointOfInterest]
+        }
         do {
             let response = try await MKLocalSearch(request: request).start()
             guard !Task.isCancelled else { return }
