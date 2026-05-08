@@ -431,7 +431,7 @@ extension MapViewController: MKMapViewDelegate {
         selectionTask?.cancel()
         selectionTask = Task { @MainActor in
             if let feature = annotation as? MKMapFeatureAnnotation {
-                guard let item = try? await MKMapItemRequest(feature: feature).mapItem else { return }
+                guard let item = try? await MKMapItemRequest(mapFeatureAnnotation: feature).mapItem else { return }
                 guard !Task.isCancelled else { return }
                 showPlaceDetails(coordinate: item.location.coordinate, placeID: nil, mapItem: item)
                 centerAboveSheet(item.location.coordinate)
