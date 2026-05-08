@@ -223,7 +223,7 @@ final class MapViewController: UIViewController {
         if let sp = sheet.sheetPresentationController {
             sp.detents = [
                 .custom(identifier: collapsedIdentifier) { context in
-                    context.maximumDetentValue * 0.09
+                    context.maximumDetentValue * 0.08
                 },
                 .medium(),
                 .large(),
