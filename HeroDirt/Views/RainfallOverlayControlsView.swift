@@ -82,6 +82,8 @@ final class RainfallOverlayControlsView: UIView {
         NSLayoutConstraint.activate([
             toggleButton.topAnchor.constraint(equalTo: topAnchor),
             toggleButton.trailingAnchor.constraint(equalTo: trailingAnchor),
+            toggleButton.bottomAnchor.constraint(equalTo: bottomAnchor),
+            toggleButton.leadingAnchor.constraint(equalTo: leadingAnchor),
             toggleButton.widthAnchor.constraint(equalToConstant: 44),
             toggleButton.heightAnchor.constraint(equalToConstant: 44),
 

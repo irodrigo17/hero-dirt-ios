@@ -67,11 +67,16 @@ final class MapViewController: UIViewController {
         setupLocationButton()
         setupGestures()
         observeStores()
-        presentBottomSheet()
     }
+
+    private var sheetPresented = false
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if !sheetPresented {
+            sheetPresented = true
+            presentBottomSheet()
+        }
         if placeStore.places.isEmpty {
             mapView.setUserTrackingMode(.follow, animated: true)
         }
