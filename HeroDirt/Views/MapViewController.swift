@@ -219,6 +219,7 @@ final class MapViewController: UIViewController {
                 .large(),
             ]
             sp.selectedDetentIdentifier = .medium
+            sp.largestUndimmedDetentIdentifier = .large
             sp.prefersScrollingExpandsWhenScrolledToEdge = false
             sp.prefersEdgeAttachedInCompactHeight = true
             sp.prefersGrabberVisible = true
