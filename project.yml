@@ -19,3 +19,15 @@ targets:
         SWIFT_VERSION: "5.9"
         DEVELOPMENT_TEAM: ""
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
+
+  HeroDirtTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: HeroDirtTests
+    dependencies:
+      - target: HeroDirt
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.herodirt.app.tests
+        SWIFT_VERSION: "5.9"
