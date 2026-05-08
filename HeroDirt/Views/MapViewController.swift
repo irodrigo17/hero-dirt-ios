@@ -45,7 +45,7 @@ final class MapViewController: UIViewController {
         didSet { refreshOverlayImage() }
     }
     private var overlayOpacity: Double = 0.3 {
-        didSet { rainfallRenderer?.overlayOpacity = overlayOpacity; mapView.setNeedsDisplay() }
+        didSet { rainfallRenderer?.overlayOpacity = overlayOpacity; rainfallRenderer?.setNeedsDisplay() }
     }
 
     private var cancellables = Set<AnyCancellable>()
@@ -223,7 +223,7 @@ final class MapViewController: UIViewController {
         if let sp = sheet.sheetPresentationController {
             sp.detents = [
                 .custom(identifier: collapsedIdentifier) { context in
-                    context.maximumDetentValue * 0.12
+                    context.maximumDetentValue * 0.09
                 },
                 .medium(),
                 .large(),

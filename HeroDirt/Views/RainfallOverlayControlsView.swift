@@ -288,9 +288,12 @@ final class RainfallOverlayControlsView: UIView {
 
 // MARK: - Legend
 
+private final class GradientView: UIView {
+    override class var layerClass: AnyClass { CAGradientLayer.self }
+    var gradientLayer: CAGradientLayer { layer as! CAGradientLayer }
+}
+
 final class RainfallLegendView: UIView {
-    private let gradientLayer = CAGradientLayer()
-    private let gradientContainer = UIView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -305,14 +308,14 @@ final class RainfallLegendView: UIView {
         mmLabel.font = UIFont.preferredFont(forTextStyle: .caption2)
         mmLabel.textColor = .secondaryLabel
 
-        gradientContainer.layer.cornerRadius = 2
-        gradientContainer.clipsToBounds = true
+        let gradientView = GradientView()
+        gradientView.layer.cornerRadius = 2
+        gradientView.clipsToBounds = true
 
         let visible = Array(RainfallColorScale.stops.dropFirst())
-        gradientLayer.colors = visible.map { $0.color.cgColor }
-        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
-        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
-        gradientContainer.layer.addSublayer(gradientLayer)
+        gradientView.gradientLayer.colors = visible.map { $0.color.cgColor }
+        gradientView.gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+        gradientView.gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
 
         let labelsRow = UIStackView()
         labelsRow.axis = .horizontal
@@ -327,7 +330,7 @@ final class RainfallLegendView: UIView {
             }
         }
 
-        let stack = UIStackView(arrangedSubviews: [mmLabel, gradientContainer, labelsRow])
+        let stack = UIStackView(arrangedSubviews: [mmLabel, gradientView, labelsRow])
         stack.axis = .vertical
         stack.spacing = 4
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -338,13 +341,8 @@ final class RainfallLegendView: UIView {
             stack.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            gradientContainer.heightAnchor.constraint(equalToConstant: 12),
+            gradientView.heightAnchor.constraint(equalToConstant: 12),
         ])
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        gradientLayer.frame = gradientContainer.bounds
     }
 
     private func makeFlexSpacer() -> UIView {
