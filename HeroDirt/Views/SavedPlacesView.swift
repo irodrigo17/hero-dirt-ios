@@ -13,13 +13,18 @@ struct SavedPlacesListView: View {
 
     var body: some View {
         content
-            .alert("Rename", isPresented: Binding(
-                get: { renamingPlace != nil },
-                set: { if !$0 { renamingPlace = nil } }
-            )) {
+            .alert(
+                "Rename",
+                isPresented: Binding(
+                    get: { renamingPlace != nil },
+                    set: { if !$0 { renamingPlace = nil } }
+                )
+            ) {
                 TextField("Name", text: $editingName)
                 Button("Save") {
-                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
+                    let trimmed = editingName.trimmingCharacters(
+                        in: .whitespaces
+                    )
                     if let place = renamingPlace, !trimmed.isEmpty {
                         placeStore.renamePlace(place, to: trimmed)
                     }
@@ -35,7 +40,9 @@ struct SavedPlacesListView: View {
             ContentUnavailableView(
                 "No saved places",
                 systemImage: "star",
-                description: Text("Long-press anywhere on the map to check rainfall, then tap the star to save it here.")
+                description: Text(
+                    "Long-press anywhere on the map to check rainfall, then tap the star to save it here."
+                )
             )
         } else {
             VStack(spacing: 0) {
@@ -72,7 +79,9 @@ struct SavedPlacesListView: View {
                 }
                 .listStyle(.plain)
                 .refreshable { await loadAllRainfall() }
-                .task(id: placeStore.places.map(\.id)) { await loadAllRainfall() }
+                .task(id: placeStore.places.map(\.id)) {
+                    await loadAllRainfall()
+                }
             }
         }
     }
@@ -85,7 +94,8 @@ struct SavedPlacesListView: View {
             loadingPlaces.insert(place.id)
         }
 
-        await withTaskGroup(of: (UUID, Result<RainfallSummary, Error>).self) { group in
+        await withTaskGroup(of: (UUID, Result<RainfallSummary, Error>).self) {
+            group in
             for place in placesToLoad {
                 group.addTask {
                     do {
@@ -166,7 +176,10 @@ private struct PlaceRow: View {
             .font(.footnote)
             .foregroundStyle(condition.color)
             .padding(8)
-            .background(condition.color.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+            .background(
+                condition.color.opacity(0.12),
+                in: RoundedRectangle(cornerRadius: 8)
+            )
             .labelIconToTitleSpacing(4)
     }
 
@@ -206,8 +219,12 @@ private struct PlaceRow: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.05),
-                     in: RoundedRectangle(cornerRadius: .cornerSmall))
-        .accessibilityLabel("\(label) rainfall: \(value.formatMillimeters()) millimeters")
+        .background(
+            value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.05),
+            in: RoundedRectangle(cornerRadius: .cornerSmall)
+        )
+        .accessibilityLabel(
+            "\(label) rainfall: \(value.formatMillimeters()) millimeters"
+        )
     }
 }

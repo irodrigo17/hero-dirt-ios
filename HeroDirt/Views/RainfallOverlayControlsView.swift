@@ -4,9 +4,9 @@ struct RainfallOverlayControlsView: View {
     @Binding var isVisible: Bool
     @Binding var timeframe: RainfallTimeframe
     @Binding var opacity: Double
-    
+
     @State private var isExpanded: Bool = false
-    
+
     let isLoading: Bool
 
     var body: some View {
@@ -15,7 +15,9 @@ struct RainfallOverlayControlsView: View {
                 if isExpanded {
                     controlPanel
                         .offset(x: -54)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                        .transition(
+                            .move(edge: .trailing).combined(with: .opacity)
+                        )
                 }
             }
     }
@@ -41,8 +43,15 @@ struct RainfallOverlayControlsView: View {
             .frame(width: 44, height: 44)
         }
         .tint(isExpanded ? .blue : .primary)
-        .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: .cornerSmall))
-        .accessibilityLabel(isExpanded ? "Close rainfall overlay controls" : "Open rainfall overlay controls")
+        .background(
+            .ultraThickMaterial,
+            in: RoundedRectangle(cornerRadius: .cornerSmall)
+        )
+        .accessibilityLabel(
+            isExpanded
+                ? "Close rainfall overlay controls"
+                : "Open rainfall overlay controls"
+        )
     }
 
     // MARK: - Control Panel
@@ -63,7 +72,7 @@ struct RainfallOverlayControlsView: View {
                 }
                 .accessibilityLabel("Close")
             }
-            
+
             Toggle("Enabled", isOn: $isVisible)
 
             Picker("Timeframe", selection: $timeframe) {
@@ -87,7 +96,10 @@ struct RainfallOverlayControlsView: View {
         }
         .padding(12)
         .frame(width: 260)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: .cornerMedium)
+        )
     }
 }
 
@@ -107,7 +119,10 @@ struct RainfallLegendView: View {
             .frame(height: 12)
             .clipShape(RoundedRectangle(cornerRadius: 2))
             HStack {
-                ForEach(Array(RainfallColorScale.stops.dropFirst().enumerated()), id: \.offset) { _, stop in
+                ForEach(
+                    Array(RainfallColorScale.stops.dropFirst().enumerated()),
+                    id: \.offset
+                ) { _, stop in
                     Text(stop.label)
                         .font(.system(size: 8))
                         .foregroundStyle(.secondary)

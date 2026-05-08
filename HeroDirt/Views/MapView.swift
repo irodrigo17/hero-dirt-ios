@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct MapView: View {
     @EnvironmentObject private var placeStore: PlaceStore
@@ -14,7 +14,8 @@ struct MapView: View {
     @State private var selectedMapItem: MKMapItem?
     @State private var selectedSearchResult: MKMapItem?
 
-    @State private var resolvedCategories: [UUID: MKPointOfInterestCategory] = [:]
+    @State private var resolvedCategories: [UUID: MKPointOfInterestCategory] =
+        [:]
 
     @StateObject private var gridService = RainfallGridService()
     @State private var overlayVisible = false
@@ -30,7 +31,11 @@ struct MapView: View {
 
     var body: some View {
         MapReader { proxy in
-            Map(position: $cameraPosition, interactionModes: [.pan, .zoom], selection: $mapSelection) {
+            Map(
+                position: $cameraPosition,
+                interactionModes: [.pan, .zoom],
+                selection: $mapSelection
+            ) {
                 UserAnnotation()
 
                 if let coord = newPinCoordinate {
@@ -41,16 +46,31 @@ struct MapView: View {
                 if let searchResult = selectedSearchResult {
                     Marker(
                         searchResult.name ?? "",
-                        systemImage: searchResult.pointOfInterestCategory?.sfSymbol ?? "mappin",
+                        systemImage: searchResult.pointOfInterestCategory?
+                            .sfSymbol ?? "mappin",
                         coordinate: searchResult.location.coordinate
                     )
-                    .tint(searchResult.pointOfInterestCategory?.iconColor ?? .orange)
-                    .tag(MapSelection(searchResult.identifier?.rawValue ?? "search-result"))
+                    .tint(
+                        searchResult.pointOfInterestCategory?.iconColor
+                            ?? .orange
+                    )
+                    .tag(
+                        MapSelection(
+                            searchResult.identifier?.rawValue ?? "search-result"
+                        )
+                    )
                 }
 
                 ForEach(placeStore.places) { place in
                     let category = resolvedCategories[place.id]
-                    Marker(place.name, systemImage: category?.sfSymbol ?? "mappin", coordinate: CLLocationCoordinate2D(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude))
+                    Marker(
+                        place.name,
+                        systemImage: category?.sfSymbol ?? "mappin",
+                        coordinate: CLLocationCoordinate2D(
+                            latitude: place.coordinate.latitude,
+                            longitude: place.coordinate.longitude
+                        )
+                    )
                     .tint(category?.iconColor ?? .orange)
                     .tag(MapSelection(place.id.uuidString))
                 }
@@ -59,24 +79,39 @@ struct MapView: View {
                 MapCompass()
                 MapScaleView()
             }
-            .simultaneousGesture(SpatialTapGesture().onEnded { _ in
-                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-            })
+            .simultaneousGesture(
+                SpatialTapGesture().onEnded { _ in
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil,
+                        from: nil,
+                        for: nil
+                    )
+                }
+            )
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                    .updating($longPressDragLocation) { value, state, _ in state = value.location }
+                    .updating($longPressDragLocation) { value, state, _ in
+                        state = value.location
+                    }
             )
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.5)
-                    .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
+                    .sequenced(
+                        before: DragGesture(
+                            minimumDistance: 0,
+                            coordinateSpace: .local
+                        )
+                    )
                     .updating($longPressActivated) { value, state, _ in
                         if case .second(true, _) = value { state = true }
                     }
             )
             .onChange(of: longPressActivated) { _, activated in
                 guard activated,
-                      let location = longPressDragLocation,
-                      let coordinate = proxy.convert(location, from: .local) else { return }
+                    let location = longPressDragLocation,
+                    let coordinate = proxy.convert(location, from: .local)
+                else { return }
                 newPinCoordinate = coordinate
                 selectedPlace = nil
                 selectedMapItem = nil
@@ -117,7 +152,10 @@ struct MapView: View {
                             .frame(width: 44, height: 44)
                     }
                     .tint(.primary)
-                    .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: .cornerSmall))
+                    .background(
+                        .ultraThickMaterial,
+                        in: RoundedRectangle(cornerRadius: .cornerSmall)
+                    )
                     .accessibilityLabel("Center map on your location")
                 }
                 .padding(12)
@@ -136,9 +174,12 @@ struct MapView: View {
                 }
             }
         }
-        .sheet(isPresented: $sheetPresented, onDismiss: {
-            Task { @MainActor in sheetPresented = true }
-        }) {
+        .sheet(
+            isPresented: $sheetPresented,
+            onDismiss: {
+                Task { @MainActor in sheetPresented = true }
+            }
+        ) {
             SheetView(
                 onSelectPlace: { place in
                     selectedPlace = place
@@ -155,7 +196,9 @@ struct MapView: View {
                     selectedPlace = nil
                     newPinCoordinate = nil
                     withAnimation(.spring(duration: 0.3)) {
-                        mapSelection = MapSelection(item.identifier?.rawValue ?? "search-result")
+                        mapSelection = MapSelection(
+                            item.identifier?.rawValue ?? "search-result"
+                        )
                     }
                 },
                 onSearchFocusChanged: { focused in
@@ -164,24 +207,30 @@ struct MapView: View {
                 visibleRegion: visibleRegion,
                 selectedDetent: selectedDetent
             )
-            .presentationDetents([collapsedDetent, .medium, .large], selection: $selectedDetent)
+            .presentationDetents(
+                [collapsedDetent, .medium, .large],
+                selection: $selectedDetent
+            )
             .presentationBackgroundInteraction(.enabled)
             .interactiveDismissDisabled(true)
-            .sheet(isPresented: $showingPlaceDetails, onDismiss: {
-                withAnimation {
-                    mapSelection = nil
+            .sheet(
+                isPresented: $showingPlaceDetails,
+                onDismiss: {
+                    withAnimation {
+                        mapSelection = nil
+                    }
+                    selectedPlace = nil
+                    newPinCoordinate = nil
+                    selectedSearchResult = nil
+                    selectedMapItem = nil
+                    selectedDetent = .medium
                 }
-                selectedPlace = nil
-                newPinCoordinate = nil
-                selectedSearchResult = nil
-                selectedMapItem = nil
-                selectedDetent = .medium
-            }) {
+            ) {
                 PlaceDetailsView(
                     coordinate: selectedPlace?.coordinate
-                               ?? selectedMapItem?.location.coordinate
-                               ?? newPinCoordinate
-                               ?? CLLocationCoordinate2D(),
+                        ?? selectedMapItem?.location.coordinate
+                        ?? newPinCoordinate
+                        ?? CLLocationCoordinate2D(),
                     placeID: selectedPlace?.id,
                     mapItem: selectedMapItem,
                     onClose: { showingPlaceDetails = false }
@@ -198,11 +247,16 @@ struct MapView: View {
 
     @MainActor
     private func fetchResolvedCategories() async {
-        await withTaskGroup(of: (UUID, MKPointOfInterestCategory?).self) { group in
+        await withTaskGroup(of: (UUID, MKPointOfInterestCategory?).self) {
+            group in
             for place in placeStore.places {
-                guard let mapItemId = place.mapItemId, resolvedCategories[place.id] == nil else { continue }
+                guard let mapItemId = place.mapItemId,
+                    resolvedCategories[place.id] == nil
+                else { continue }
                 group.addTask {
-                    let item = try? await MKMapItemRequest(mapItemIdentifier: mapItemId).mapItem
+                    let item = try? await MKMapItemRequest(
+                        mapItemIdentifier: mapItemId
+                    ).mapItem
                     return (place.id, item?.pointOfInterestCategory)
                 }
             }
@@ -220,7 +274,9 @@ struct MapView: View {
 
         selectionTask = Task { @MainActor in
             if let feature = selection.feature {
-                if let item = try? await MKMapItemRequest(feature: feature).mapItem {
+                if let item = try? await MKMapItemRequest(feature: feature)
+                    .mapItem
+                {
                     guard !Task.isCancelled else { return }
                     selectedMapItem = item
                     selectedPlace = nil
@@ -229,7 +285,9 @@ struct MapView: View {
                     showingPlaceDetails = true
                     centerAboveSheet(item.location.coordinate)
                 }
-            } else if let place = placeStore.places.first(where: { $0.id.uuidString == selection.value }) {
+            } else if let place = placeStore.places.first(where: {
+                $0.id.uuidString == selection.value
+            }) {
                 guard !Task.isCancelled else { return }
                 selectedPlace = place
                 selectedMapItem = nil
@@ -251,13 +309,17 @@ struct MapView: View {
 
     // 0.25 = half the sheet height (50% detent) expressed as a fraction of the latitude span
     private func centerAboveSheet(_ coordinate: CLLocationCoordinate2D) {
-        let span = visibleRegion?.span ?? MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+        let span =
+            visibleRegion?.span
+            ?? MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
         let newCenter = CLLocationCoordinate2D(
             latitude: coordinate.latitude - span.latitudeDelta * 0.25,
             longitude: coordinate.longitude
         )
         withAnimation(.easeInOut(duration: 0.4)) {
-            cameraPosition = .region(MKCoordinateRegion(center: newCenter, span: span))
+            cameraPosition = .region(
+                MKCoordinateRegion(center: newCenter, span: span)
+            )
         }
     }
 
@@ -269,10 +331,11 @@ struct MapView: View {
         let _ = cameraChangeCount
 
         if overlayVisible,
-           let bounds = gridService.gridBounds,
-           let image = gridService.rainfallImage(for: overlayTimeframe),
-           let tl = proxy.convert(bounds.topLeft, to: .local),
-           let br = proxy.convert(bounds.bottomRight, to: .local) {
+            let bounds = gridService.gridBounds,
+            let image = gridService.rainfallImage(for: overlayTimeframe),
+            let tl = proxy.convert(bounds.topLeft, to: .local),
+            let br = proxy.convert(bounds.bottomRight, to: .local)
+        {
             let width = br.x - tl.x
             let height = br.y - tl.y
             if width > 0, height > 0 {

@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct PlaceDetailsView: View {
     @EnvironmentObject private var placeStore: PlaceStore
@@ -20,16 +20,22 @@ struct PlaceDetailsView: View {
     @State private var resolvedMapItem: MKMapItem?
 
     private var savedPlace: Place? {
-        if let placeID, let place = placeStore.places.first(where: { $0.id == placeID }) {
+        if let placeID,
+            let place = placeStore.places.first(where: { $0.id == placeID })
+        {
             return place
         }
-        return placeStore.placeNear(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        return placeStore.placeNear(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
     }
 
     private var effectiveMapItem: MKMapItem? { mapItem ?? resolvedMapItem }
 
     private var subtitle: String? {
-        effectiveMapItem?.pointOfInterestCategory?.displayName ?? effectiveMapItem?.addressRepresentations?.cityWithContext
+        effectiveMapItem?.pointOfInterestCategory?.displayName
+            ?? effectiveMapItem?.addressRepresentations?.cityWithContext
     }
 
     var body: some View {
@@ -37,7 +43,7 @@ struct PlaceDetailsView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     actionBar
-                    
+
                     if isLoading {
                         ProgressView("Loading rainfall data...")
                             .padding(.top, 40)
@@ -79,14 +85,16 @@ struct PlaceDetailsView: View {
             .alert("Rename", isPresented: $showingRenameAlert) {
                 TextField("Name", text: $editingName)
                 Button("Save") {
-                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
+                    let trimmed = editingName.trimmingCharacters(
+                        in: .whitespaces
+                    )
                     guard !trimmed.isEmpty else { return }
                     placeName = trimmed
                     if let existing = savedPlace {
                         placeStore.renamePlace(existing, to: trimmed)
                     }
                 }
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
             }
         }
         .presentationDetents([.medium, .large])
@@ -102,7 +110,11 @@ struct PlaceDetailsView: View {
     }
 
     private var loadKey: LoadKey {
-        LoadKey(latitude: coordinate.latitude, longitude: coordinate.longitude, placeID: placeID)
+        LoadKey(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            placeID: placeID
+        )
     }
 
     // MARK: - Action Bar
@@ -136,11 +148,13 @@ struct PlaceDetailsView: View {
     }
 
     // MARK: - Data Loading
-    
-    func fetchMapItem(from identifier: MKMapItem.Identifier?) async -> MKMapItem? {
+
+    func fetchMapItem(from identifier: MKMapItem.Identifier?) async
+        -> MKMapItem?
+    {
         guard let identifier else { return nil }
         let request = MKMapItemRequest(mapItemIdentifier: identifier)
-        
+
         do {
             let mapItem = try await request.mapItem
             return mapItem
@@ -165,13 +179,18 @@ struct PlaceDetailsView: View {
         } else if let name = mapItem?.name {
             placeName = name
         } else {
-            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            let location = CLLocation(
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude
+            )
             if let request = MKReverseGeocodingRequest(location: location) {
                 do {
                     let mapItems = try await request.mapItems
                     guard !Task.isCancelled else { return }
                     if let item = mapItems.first,
-                       let cityContext = item.addressRepresentations?.cityWithContext {
+                        let cityContext = item.addressRepresentations?
+                            .cityWithContext
+                    {
                         placeName = cityContext
                     } else {
                         placeName = formatCoordinate()
@@ -233,7 +252,13 @@ struct PlaceDetailsView: View {
         if let item = effectiveMapItem {
             item.openInMaps()
         } else {
-            let item = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
+            let item = MKMapItem(
+                location: CLLocation(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                ),
+                address: nil
+            )
             item.name = placeName
             item.openInMaps()
         }
@@ -261,9 +286,11 @@ private struct SheetActionButton: View {
             .foregroundStyle(isPrimary ? .white : .blue)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .background(isPrimary ? Color.blue : Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: .cornerLarge))
+            .background(
+                isPrimary ? Color.blue : Color.blue.opacity(0.1),
+                in: RoundedRectangle(cornerRadius: .cornerLarge)
+            )
         }
         .disabled(isDisabled)
     }
 }
-

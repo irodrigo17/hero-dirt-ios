@@ -1,13 +1,16 @@
-import Foundation
-import Combine
 import CloudKit
+import Combine
+import Foundation
 import MapKit
 import os
 
 class PlaceStore: ObservableObject {
     @Published private(set) var places: [Place] = []
 
-    private static let logger = Logger(subsystem: "com.herodirt.app", category: "PlaceStore")
+    private static let logger = Logger(
+        subsystem: "com.herodirt.app",
+        category: "PlaceStore"
+    )
 
     private let fileURL: URL?
     private var externalChangeObserver: (any NSObjectProtocol)?
@@ -50,8 +53,14 @@ class PlaceStore: ObservableObject {
         if let mapItemIdString = record[CKKeys.mapItemId] as? String {
             mapItemId = MKMapItem.Identifier(rawValue: mapItemIdString)
         }
-        
-        return Place(id: uuid, name: name, latitude: latitude, longitude: longitude, mapItemId: mapItemId)
+
+        return Place(
+            id: uuid,
+            name: name,
+            latitude: latitude,
+            longitude: longitude,
+            mapItemId: mapItemId
+        )
     }
 
     private func apply(place: Place, to record: CKRecord) {
@@ -70,8 +79,13 @@ class PlaceStore: ObservableObject {
         }
     }
 
-    private func fetchAllFromCloudKit(completion: @escaping (Result<[Place], Error>) -> Void) {
-        let query = CKQuery(recordType: Self.recordType, predicate: NSPredicate(value: true))
+    private func fetchAllFromCloudKit(
+        completion: @escaping (Result<[Place], Error>) -> Void
+    ) {
+        let query = CKQuery(
+            recordType: Self.recordType,
+            predicate: NSPredicate(value: true)
+        )
         let operation = CKQueryOperation(query: query)
         var fetched: [Place] = []
         operation.recordMatchedBlock = { recordID, result in
@@ -97,11 +111,17 @@ class PlaceStore: ObservableObject {
     private func upsertAllToCloudKit(_ places: [Place]) {
         guard !places.isEmpty else { return }
         let records: [CKRecord] = places.map { place in
-            let record = CKRecord(recordType: Self.recordType, recordID: recordID(for: place))
+            let record = CKRecord(
+                recordType: Self.recordType,
+                recordID: recordID(for: place)
+            )
             apply(place: place, to: record)
             return record
         }
-        let modify = CKModifyRecordsOperation(recordsToSave: records, recordIDsToDelete: nil)
+        let modify = CKModifyRecordsOperation(
+            recordsToSave: records,
+            recordIDsToDelete: nil
+        )
         modify.savePolicy = .changedKeys
         modify.qualityOfService = .utility
         modify.modifyRecordsResultBlock = { _ in }
@@ -111,13 +131,17 @@ class PlaceStore: ObservableObject {
     private func deleteMissingFromCloudKit(keeping local: [Place]) {
         // Fetch existing, then delete those not present locally
         fetchAllFromCloudKit { result in
-            guard case let .success(remote) = result else { return }
+            guard case .success(let remote) = result else { return }
             let localIDs = Set(local.map { $0.id })
-            let toDeleteIDs = remote
+            let toDeleteIDs =
+                remote
                 .filter { !localIDs.contains($0.id) }
                 .map { CKRecord.ID(recordName: $0.id.uuidString) }
             guard !toDeleteIDs.isEmpty else { return }
-            let op = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: toDeleteIDs)
+            let op = CKModifyRecordsOperation(
+                recordsToSave: nil,
+                recordIDsToDelete: toDeleteIDs
+            )
             op.qualityOfService = .utility
             self.privateDB.add(op)
         }
@@ -157,10 +181,14 @@ class PlaceStore: ObservableObject {
 
     private func syncFromCloudKit() {
         iCloudAccountAvailable { [weak self] available in
-            guard let self = self, available, self.fileURL == nil else { return }
+            guard let self = self, available, self.fileURL == nil else {
+                return
+            }
             self.fetchAllFromCloudKit { result in
                 DispatchQueue.main.async {
-                    if case let .success(remotePlaces) = result, !remotePlaces.isEmpty, remotePlaces != self.places {
+                    if case .success(let remotePlaces) = result,
+                        !remotePlaces.isEmpty, remotePlaces != self.places
+                    {
                         self.places = remotePlaces
                         self.save()
                     }
@@ -173,18 +201,24 @@ class PlaceStore: ObservableObject {
         places.append(place)
         save()
         iCloudAccountAvailable { [weak self] available in
-            guard let self = self, available, self.fileURL == nil else { return }
+            guard let self = self, available, self.fileURL == nil else {
+                return
+            }
             self.upsertAllToCloudKit(self.places)
             self.deleteMissingFromCloudKit(keeping: self.places)
         }
     }
 
     func renamePlace(_ place: Place, to newName: String) {
-        guard let index = places.firstIndex(where: { $0.id == place.id }) else { return }
+        guard let index = places.firstIndex(where: { $0.id == place.id }) else {
+            return
+        }
         places[index].name = newName
         save()
         iCloudAccountAvailable { [weak self] available in
-            guard let self = self, available, self.fileURL == nil else { return }
+            guard let self = self, available, self.fileURL == nil else {
+                return
+            }
             self.upsertAllToCloudKit(self.places)
         }
     }
@@ -193,7 +227,9 @@ class PlaceStore: ObservableObject {
         places.removeAll { $0.id == place.id }
         save()
         iCloudAccountAvailable { [weak self] available in
-            guard let self = self, available, self.fileURL == nil else { return }
+            guard let self = self, available, self.fileURL == nil else {
+                return
+            }
             self.upsertAllToCloudKit(self.places)
             self.deleteMissingFromCloudKit(keeping: self.places)
         }
@@ -203,7 +239,9 @@ class PlaceStore: ObservableObject {
         places.remove(atOffsets: offsets)
         save()
         iCloudAccountAvailable { [weak self] available in
-            guard let self = self, available, self.fileURL == nil else { return }
+            guard let self = self, available, self.fileURL == nil else {
+                return
+            }
             self.upsertAllToCloudKit(self.places)
             self.deleteMissingFromCloudKit(keeping: self.places)
         }
@@ -214,8 +252,12 @@ class PlaceStore: ObservableObject {
     func placeNear(latitude: Double, longitude: Double) -> Place? {
         let target = CLLocation(latitude: latitude, longitude: longitude)
         return places.first { place in
-            let placeLocation = CLLocation(latitude: place.latitude, longitude: place.longitude)
-            return target.distance(from: placeLocation) < Self.proximityThresholdMeters
+            let placeLocation = CLLocation(
+                latitude: place.latitude,
+                longitude: place.longitude
+            )
+            return target.distance(from: placeLocation)
+                < Self.proximityThresholdMeters
         }
     }
 
@@ -231,7 +273,9 @@ class PlaceStore: ObservableObject {
                 try? data.write(to: Self.localFileURL, options: .atomic)
             }
             iCloudAccountAvailable { [weak self] available in
-                guard let self = self, available, self.fileURL == nil else { return }
+                guard let self = self, available, self.fileURL == nil else {
+                    return
+                }
                 self.upsertAllToCloudKit(self.places)
                 self.deleteMissingFromCloudKit(keeping: self.places)
             }
@@ -242,7 +286,9 @@ class PlaceStore: ObservableObject {
 
     private func load() {
         if let fileURL {
-            guard FileManager.default.fileExists(atPath: fileURL.path()) else { return }
+            guard FileManager.default.fileExists(atPath: fileURL.path()) else {
+                return
+            }
             do {
                 let data = try Data(contentsOf: fileURL)
                 places = try JSONDecoder().decode([Place].self, from: data)
@@ -251,10 +297,15 @@ class PlaceStore: ObservableObject {
             }
         } else {
             let data: Data
-            if let kvsData = NSUbiquitousKeyValueStore.default.data(forKey: Self.kvsKey) {
+            if let kvsData = NSUbiquitousKeyValueStore.default.data(
+                forKey: Self.kvsKey
+            ) {
                 data = kvsData
-            } else if FileManager.default.fileExists(atPath: Self.localFileURL.path()),
-                      let fileData = try? Data(contentsOf: Self.localFileURL) {
+            } else if FileManager.default.fileExists(
+                atPath: Self.localFileURL.path()
+            ),
+                let fileData = try? Data(contentsOf: Self.localFileURL)
+            {
                 data = fileData
             } else {
                 return
@@ -270,4 +321,3 @@ class PlaceStore: ObservableObject {
         }
     }
 }
-

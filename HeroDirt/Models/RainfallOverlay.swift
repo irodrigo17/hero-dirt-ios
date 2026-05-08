@@ -1,5 +1,5 @@
-import Foundation
 import CoreLocation
+import Foundation
 
 struct RainfallCell: Identifiable, Sendable {
     let id: String
@@ -14,10 +14,22 @@ struct RainfallCell: Identifiable, Sendable {
         let lat = coordinate.latitude
         let lon = coordinate.longitude
         return [
-            CLLocationCoordinate2D(latitude: lat - halfLat, longitude: lon - halfLon),
-            CLLocationCoordinate2D(latitude: lat - halfLat, longitude: lon + halfLon),
-            CLLocationCoordinate2D(latitude: lat + halfLat, longitude: lon + halfLon),
-            CLLocationCoordinate2D(latitude: lat + halfLat, longitude: lon - halfLon),
+            CLLocationCoordinate2D(
+                latitude: lat - halfLat,
+                longitude: lon - halfLon
+            ),
+            CLLocationCoordinate2D(
+                latitude: lat - halfLat,
+                longitude: lon + halfLon
+            ),
+            CLLocationCoordinate2D(
+                latitude: lat + halfLat,
+                longitude: lon + halfLon
+            ),
+            CLLocationCoordinate2D(
+                latitude: lat + halfLat,
+                longitude: lon - halfLon
+            ),
         ]
     }
 }

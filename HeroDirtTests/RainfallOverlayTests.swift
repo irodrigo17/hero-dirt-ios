@@ -1,14 +1,23 @@
-import Testing
 import CoreLocation
+import Testing
+
 @testable import HeroDirt
 
 struct RainfallOverlayTests {
 
-    private func makeSummary(last1Day: Double = 1, last2Days: Double = 2,
-                             last3Days: Double = 3, last7Days: Double = 7) -> RainfallSummary {
-        RainfallSummary(last1Day: last1Day, last2Days: last2Days,
-                        last3Days: last3Days, last7Days: last7Days,
-                        daysSinceLastRain: 0)
+    private func makeSummary(
+        last1Day: Double = 1,
+        last2Days: Double = 2,
+        last3Days: Double = 3,
+        last7Days: Double = 7
+    ) -> RainfallSummary {
+        RainfallSummary(
+            last1Day: last1Day,
+            last2Days: last2Days,
+            last3Days: last3Days,
+            last7Days: last7Days,
+            daysSinceLastRain: 0
+        )
     }
 
     // MARK: - RainfallTimeframe

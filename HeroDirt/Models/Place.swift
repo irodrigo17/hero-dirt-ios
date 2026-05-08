@@ -1,6 +1,6 @@
+import CoreLocation
 import Foundation
 import MapKit
-import CoreLocation
 
 struct Place: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
@@ -18,7 +18,13 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         return MKMapItem.Identifier(rawValue: rawValue)
     }
 
-    init(id: UUID = UUID(), name: String, latitude: Double, longitude: Double, mapItemId: MKMapItem.Identifier? = nil) {
+    init(
+        id: UUID = UUID(),
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        mapItemId: MKMapItem.Identifier? = nil
+    ) {
         self.id = id
         self.name = name
         self.latitude = latitude

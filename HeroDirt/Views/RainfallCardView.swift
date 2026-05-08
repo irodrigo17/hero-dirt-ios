@@ -28,7 +28,10 @@ struct RainfallCardView: View {
             .font(.subheadline)
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
+        .background(
+            .regularMaterial,
+            in: RoundedRectangle(cornerRadius: .cornerMedium)
+        )
     }
 
     private var lastRainText: String {
@@ -57,7 +60,9 @@ struct RainfallCardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
-        .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.06),
-                     in: RoundedRectangle(cornerRadius: 8))
+        .background(
+            value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.06),
+            in: RoundedRectangle(cornerRadius: 8)
+        )
     }
 }

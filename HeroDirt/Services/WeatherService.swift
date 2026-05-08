@@ -1,6 +1,6 @@
+import CoreLocation
 import Foundation
 import WeatherKit
-import CoreLocation
 
 enum WeatherService {
 
@@ -34,7 +34,8 @@ enum WeatherService {
             case .httpError(let statusCode):
                 switch statusCode {
                 case 429: return "Rate limited. Please try again later."
-                case 500...599: return "Weather service is temporarily unavailable."
+                case 500...599:
+                    return "Weather service is temporarily unavailable."
                 default: return "Weather service error (HTTP \(statusCode))."
                 }
             case .invalidResponse:
@@ -46,7 +47,10 @@ enum WeatherService {
     // MARK: - Parsing
 
     static func parseResponse(_ data: Data) throws -> RainfallSummary {
-        let decoded = try JSONDecoder().decode(OpenMeteoResponse.self, from: data)
+        let decoded = try JSONDecoder().decode(
+            OpenMeteoResponse.self,
+            from: data
+        )
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -76,10 +80,18 @@ enum WeatherService {
         longitude: Double,
         session: URLSession? = nil
     ) async throws -> RainfallSummary {
-        var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
+        var components = URLComponents(
+            string: "https://api.open-meteo.com/v1/forecast"
+        )!
         components.queryItems = [
-            URLQueryItem(name: "latitude", value: String(format: "%.6f", latitude)),
-            URLQueryItem(name: "longitude", value: String(format: "%.6f", longitude)),
+            URLQueryItem(
+                name: "latitude",
+                value: String(format: "%.6f", latitude)
+            ),
+            URLQueryItem(
+                name: "longitude",
+                value: String(format: "%.6f", longitude)
+            ),
             URLQueryItem(name: "daily", value: "precipitation_sum"),
             URLQueryItem(name: "past_days", value: "30"),
             URLQueryItem(name: "forecast_days", value: "1"),
@@ -90,7 +102,9 @@ enum WeatherService {
             throw WeatherError.invalidURL
         }
 
-        let (data, response) = try await (session ?? detailSession).data(from: url)
+        let (data, response) = try await (session ?? detailSession).data(
+            from: url
+        )
 
         guard let http = response as? HTTPURLResponse else {
             throw WeatherError.invalidResponse
@@ -105,12 +119,18 @@ enum WeatherService {
 
     // MARK: - WeatherKit Forecast
 
-    static func fetchRainForecast(latitude: Double, longitude: Double) async throws -> RainForecast {
+    static func fetchRainForecast(latitude: Double, longitude: Double)
+        async throws -> RainForecast
+    {
         let location = CLLocation(latitude: latitude, longitude: longitude)
-        let daily = try await WeatherKit.WeatherService.shared.weather(for: location, including: .daily)
+        let daily = try await WeatherKit.WeatherService.shared.weather(
+            for: location,
+            including: .daily
+        )
 
         let amounts = daily.forecast.prefix(7).map {
-            $0.precipitationAmountByType.rainfall.converted(to: .millimeters).value
+            $0.precipitationAmountByType.rainfall.converted(to: .millimeters)
+                .value
         }
 
         func sum(_ n: Int) -> Double { amounts.prefix(n).reduce(0, +) }

@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct SheetView: View {
     var onSelectPlace: (Place) -> Void = { _ in }
@@ -22,7 +22,11 @@ struct SheetView: View {
                 onIsSearchingChanged: onSearchFocusChanged
             )
             .navigationTitle("Saved places")
-            .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search places")
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer,
+                prompt: "Search places"
+            )
             .navigationBarTitleDisplayMode(.inline)
             .onSubmit(of: .search) {
                 searchTask?.cancel()
@@ -83,7 +87,10 @@ private struct SearchableContent: View {
                     }
                 )
             } else {
-                SavedPlacesListView(onSelectPlace: onSelectPlace, selectedDetent: selectedDetent)
+                SavedPlacesListView(
+                    onSelectPlace: onSelectPlace,
+                    selectedDetent: selectedDetent
+                )
             }
         }
         .onChange(of: isSearching) { _, newValue in

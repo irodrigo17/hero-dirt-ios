@@ -1,5 +1,6 @@
-import Testing
 import Foundation
+import Testing
+
 @testable import HeroDirt
 
 struct WeatherServiceTests {
@@ -8,33 +9,33 @@ struct WeatherServiceTests {
 
     @Test func parseValidResponse() throws {
         let json = """
-        {
-            "daily": {
-                "time": ["2025-03-01", "2025-02-28", "2025-02-27"],
-                "precipitation_sum": [5.2, 0.0, 1.3]
+            {
+                "daily": {
+                    "time": ["2025-03-01", "2025-02-28", "2025-02-27"],
+                    "precipitation_sum": [5.2, 0.0, 1.3]
+                }
             }
-        }
-        """
+            """
         let data = Data(json.utf8)
         let summary = try WeatherService.parseResponse(data)
 
         #expect(summary.last1Day == 5.2)
-        #expect(summary.last2Days == 5.2)      // 5.2 + 0.0
-        #expect(summary.last3Days == 6.5)       // 5.2 + 0.0 + 1.3
-        #expect(summary.daysSinceLastRain == 0) // rain on most recent day
+        #expect(summary.last2Days == 5.2)  // 5.2 + 0.0
+        #expect(summary.last3Days == 6.5)  // 5.2 + 0.0 + 1.3
+        #expect(summary.daysSinceLastRain == 0)  // rain on most recent day
     }
 
     // MARK: - Nil precipitation values
 
     @Test func parseNilPrecipitationTreatedAsZero() throws {
         let json = """
-        {
-            "daily": {
-                "time": ["2025-03-01", "2025-02-28"],
-                "precipitation_sum": [null, 2.0]
+            {
+                "daily": {
+                    "time": ["2025-03-01", "2025-02-28"],
+                    "precipitation_sum": [null, 2.0]
+                }
             }
-        }
-        """
+            """
         let data = Data(json.utf8)
         let summary = try WeatherService.parseResponse(data)
 
@@ -62,13 +63,13 @@ struct WeatherServiceTests {
 
     @Test func parseEmptyTimeArray() throws {
         let json = """
-        {
-            "daily": {
-                "time": [],
-                "precipitation_sum": []
+            {
+                "daily": {
+                    "time": [],
+                    "precipitation_sum": []
+                }
             }
-        }
-        """
+            """
         let data = Data(json.utf8)
         let summary = try WeatherService.parseResponse(data)
 
@@ -79,13 +80,13 @@ struct WeatherServiceTests {
 
     @Test func parseMismatchedArrayLengths() throws {
         let json = """
-        {
-            "daily": {
-                "time": ["2025-03-01", "2025-02-28"],
-                "precipitation_sum": [5.2]
+            {
+                "daily": {
+                    "time": ["2025-03-01", "2025-02-28"],
+                    "precipitation_sum": [5.2]
+                }
             }
-        }
-        """
+            """
         let data = Data(json.utf8)
         let summary = try WeatherService.parseResponse(data)
 
@@ -95,13 +96,13 @@ struct WeatherServiceTests {
 
     @Test func parseInvalidDateFormat() throws {
         let json = """
-        {
-            "daily": {
-                "time": ["invalid-date"],
-                "precipitation_sum": [5.2]
+            {
+                "daily": {
+                    "time": ["invalid-date"],
+                    "precipitation_sum": [5.2]
+                }
             }
-        }
-        """
+            """
         let data = Data(json.utf8)
         let summary = try WeatherService.parseResponse(data)
 
@@ -112,23 +113,43 @@ struct WeatherServiceTests {
     // MARK: - WeatherError descriptions
 
     @Test func invalidURLErrorDescription() {
-        #expect(WeatherService.WeatherError.invalidURL.errorDescription == "Could not build request URL.")
+        #expect(
+            WeatherService.WeatherError.invalidURL.errorDescription
+                == "Could not build request URL."
+        )
     }
 
     @Test func invalidResponseErrorDescription() {
-        #expect(WeatherService.WeatherError.invalidResponse.errorDescription == "Invalid response from weather service.")
+        #expect(
+            WeatherService.WeatherError.invalidResponse.errorDescription
+                == "Invalid response from weather service."
+        )
     }
 
     @Test func httpErrorRateLimitDescription() {
-        #expect(WeatherService.WeatherError.httpError(statusCode: 429).errorDescription == "Rate limited. Please try again later.")
+        #expect(
+            WeatherService.WeatherError.httpError(statusCode: 429)
+                .errorDescription == "Rate limited. Please try again later."
+        )
     }
 
     @Test func httpErrorServerDescription() {
-        #expect(WeatherService.WeatherError.httpError(statusCode: 500).errorDescription == "Weather service is temporarily unavailable.")
-        #expect(WeatherService.WeatherError.httpError(statusCode: 503).errorDescription == "Weather service is temporarily unavailable.")
+        #expect(
+            WeatherService.WeatherError.httpError(statusCode: 500)
+                .errorDescription
+                == "Weather service is temporarily unavailable."
+        )
+        #expect(
+            WeatherService.WeatherError.httpError(statusCode: 503)
+                .errorDescription
+                == "Weather service is temporarily unavailable."
+        )
     }
 
     @Test func httpErrorGenericDescription() {
-        #expect(WeatherService.WeatherError.httpError(statusCode: 404).errorDescription == "Weather service error (HTTP 404).")
+        #expect(
+            WeatherService.WeatherError.httpError(statusCode: 404)
+                .errorDescription == "Weather service error (HTTP 404)."
+        )
     }
 }

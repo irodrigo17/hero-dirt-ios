@@ -1,9 +1,9 @@
-import Foundation
 import Combine
-import MapKit
-import UIKit
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import Foundation
+import MapKit
+import UIKit
 
 struct RainfallGridBounds: Equatable {
     let minLat: Double
@@ -48,7 +48,7 @@ final class RainfallGridService: ObservableObject {
     }
 
     private var cache: [CacheKey: CacheEntry] = [:]
-    private let cacheTTL: TimeInterval = 15 * 60 // 15 minutes
+    private let cacheTTL: TimeInterval = 15 * 60  // 15 minutes
 
     // MARK: - Debounce
 
@@ -94,13 +94,14 @@ final class RainfallGridService: ObservableObject {
 
     func rainfallImage(for timeframe: RainfallTimeframe) -> UIImage? {
         // Return cached image if grid hasn't changed
-        if imageCacheVersion == gridVersion, let cached = imageCache[timeframe] {
+        if imageCacheVersion == gridVersion, let cached = imageCache[timeframe]
+        {
             return cached
         }
 
         guard coarseRows > 0, coarseCols > 0 else { return nil }
 
-        let scale = 8 // pixels per coarse cell
+        let scale = 8  // pixels per coarse cell
         let imgWidth = coarseCols * scale
         let imgHeight = coarseRows * scale
 
@@ -110,7 +111,9 @@ final class RainfallGridService: ObservableObject {
             for px in 0..<imgWidth {
                 // Map pixel to fractional coarse grid position
                 // Bitmap row 0 = top = north (maxLat), coarse grid row 0 = south (minLat)
-                let gridR = Double(coarseRows) - (Double(py) + 0.5) / Double(scale) - 0.5
+                let gridR =
+                    Double(coarseRows) - (Double(py) + 0.5) / Double(scale)
+                    - 0.5
                 let gridC = (Double(px) + 0.5) / Double(scale) - 0.5
 
                 let r0 = max(0, min(coarseRows - 1, Int(floor(gridR))))
@@ -129,26 +132,45 @@ final class RainfallGridService: ObservableObject {
 
                 var mm = 0.0
                 var totalWeight = 0.0
-                if let s = coarseGrid[r0][c0] { mm += timeframe.amount(from: s) * w00; totalWeight += w00 }
-                if let s = coarseGrid[r0][c1] { mm += timeframe.amount(from: s) * w01; totalWeight += w01 }
-                if let s = coarseGrid[r1][c0] { mm += timeframe.amount(from: s) * w10; totalWeight += w10 }
-                if let s = coarseGrid[r1][c1] { mm += timeframe.amount(from: s) * w11; totalWeight += w11 }
+                if let s = coarseGrid[r0][c0] {
+                    mm += timeframe.amount(from: s) * w00
+                    totalWeight += w00
+                }
+                if let s = coarseGrid[r0][c1] {
+                    mm += timeframe.amount(from: s) * w01
+                    totalWeight += w01
+                }
+                if let s = coarseGrid[r1][c0] {
+                    mm += timeframe.amount(from: s) * w10
+                    totalWeight += w10
+                }
+                if let s = coarseGrid[r1][c1] {
+                    mm += timeframe.amount(from: s) * w11
+                    totalWeight += w11
+                }
                 guard totalWeight > 0 else { continue }
                 mm /= totalWeight
                 let (r, g, b, a) = RainfallColorScale.rgbaComponents(for: mm)
 
                 let idx = (py * imgWidth + px) * 4
-                pixelData[idx]     = UInt8(min(255, r * a * 255))
+                pixelData[idx] = UInt8(min(255, r * a * 255))
                 pixelData[idx + 1] = UInt8(min(255, g * a * 255))
                 pixelData[idx + 2] = UInt8(min(255, b * a * 255))
                 pixelData[idx + 3] = UInt8(min(255, a * 255))
             }
         }
 
-        guard let rawImage = createCGImage(from: &pixelData, width: imgWidth, height: imgHeight) else { return nil }
+        guard
+            let rawImage = createCGImage(
+                from: &pixelData,
+                width: imgWidth,
+                height: imgHeight
+            )
+        else { return nil }
 
         // Apply Gaussian blur for extra smoothness
-        let blurred = applyBlur(to: rawImage, radius: 1) ?? UIImage(cgImage: rawImage)
+        let blurred =
+            applyBlur(to: rawImage, radius: 1) ?? UIImage(cgImage: rawImage)
 
         // Cache the result
         if imageCacheVersion != gridVersion {
@@ -160,9 +182,15 @@ final class RainfallGridService: ObservableObject {
         return blurred
     }
 
-    private func createCGImage(from pixelData: inout [UInt8], width: Int, height: Int) -> CGImage? {
+    private func createCGImage(
+        from pixelData: inout [UInt8],
+        width: Int,
+        height: Int
+    ) -> CGImage? {
         let data = Data(pixelData)
-        guard let provider = CGDataProvider(data: data as CFData) else { return nil }
+        guard let provider = CGDataProvider(data: data as CFData) else {
+            return nil
+        }
         return CGImage(
             width: width,
             height: height,
@@ -170,7 +198,9 @@ final class RainfallGridService: ObservableObject {
             bitsPerPixel: 32,
             bytesPerRow: width * 4,
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+            bitmapInfo: CGBitmapInfo(
+                rawValue: CGImageAlphaInfo.premultipliedLast.rawValue
+            ),
             provider: provider,
             decode: nil,
             shouldInterpolate: true,
@@ -186,7 +216,9 @@ final class RainfallGridService: ObservableObject {
         guard let output = blur.outputImage else { return nil }
         // Blur expands bounds, crop back to original
         let cropped = output.cropped(to: ciImage.extent)
-        guard let result = ciContext.createCGImage(cropped, from: cropped.extent) else { return nil }
+        guard
+            let result = ciContext.createCGImage(cropped, from: cropped.extent)
+        else { return nil }
         return UIImage(cgImage: result)
     }
 
@@ -201,10 +233,18 @@ final class RainfallGridService: ObservableObject {
         // Pad region by one cell on each side to cover area behind safe area insets
         // (search bar, tab bar) where the map is visible but the reported region is smaller
         let padding = 1.5
-        let minLat = region.center.latitude - region.span.latitudeDelta / 2 - latStep * padding
-        let minLon = region.center.longitude - region.span.longitudeDelta / 2 - lonStep * padding
-        let maxLat = region.center.latitude + region.span.latitudeDelta / 2 + latStep * padding
-        let maxLon = region.center.longitude + region.span.longitudeDelta / 2 + lonStep * padding
+        let minLat =
+            region.center.latitude - region.span.latitudeDelta / 2 - latStep
+            * padding
+        let minLon =
+            region.center.longitude - region.span.longitudeDelta / 2 - lonStep
+            * padding
+        let maxLat =
+            region.center.latitude + region.span.latitudeDelta / 2 + latStep
+            * padding
+        let maxLon =
+            region.center.longitude + region.span.longitudeDelta / 2 + lonStep
+            * padding
 
         struct GridPoint {
             let lat: Double
@@ -223,14 +263,21 @@ final class RainfallGridService: ObservableObject {
             for c in 0..<cols {
                 let lat = minLat + latStep / 2 + Double(r) * latStep
                 let lon = minLon + lonStep / 2 + Double(c) * lonStep
-                let key = CacheKey(latSlot: Int(lat * 100), lonSlot: Int(lon * 100))
-                points.append(GridPoint(lat: lat, lon: lon, row: r, col: c, key: key))
+                let key = CacheKey(
+                    latSlot: Int(lat * 100),
+                    lonSlot: Int(lon * 100)
+                )
+                points.append(
+                    GridPoint(lat: lat, lon: lon, row: r, col: c, key: key)
+                )
             }
         }
 
         // Prune expired cache entries
         let now = Date()
-        cache = cache.filter { now.timeIntervalSince($0.value.timestamp) < cacheTTL }
+        cache = cache.filter {
+            now.timeIntervalSince($0.value.timestamp) < cacheTTL
+        }
 
         // Split into cached and uncached
         let uncachedPoints = points.filter { cache[$0.key] == nil }
@@ -241,7 +288,8 @@ final class RainfallGridService: ObservableObject {
             isLoading = true
 
             let session = gridSession
-            await withTaskGroup(of: (CacheKey, RainfallSummary?).self) { group in
+            await withTaskGroup(of: (CacheKey, RainfallSummary?).self) {
+                group in
                 let maxConcurrent = 4
                 var inflight = 0
 
@@ -249,18 +297,22 @@ final class RainfallGridService: ObservableObject {
                     if inflight >= maxConcurrent {
                         if let (key, summary) = await group.next() {
                             if let summary {
-                                cache[key] = CacheEntry(summary: summary, timestamp: Date())
+                                cache[key] = CacheEntry(
+                                    summary: summary,
+                                    timestamp: Date()
+                                )
                             }
                             inflight -= 1
                         }
                     }
                     group.addTask {
                         do {
-                            let summary = try await WeatherService.fetchRainfall(
-                                latitude: point.lat,
-                                longitude: point.lon,
-                                session: session
-                            )
+                            let summary =
+                                try await WeatherService.fetchRainfall(
+                                    latitude: point.lat,
+                                    longitude: point.lon,
+                                    session: session
+                                )
                             return (point.key, summary)
                         } catch {
                             return (point.key, nil)
@@ -271,7 +323,10 @@ final class RainfallGridService: ObservableObject {
 
                 for await (key, summary) in group {
                     if let summary {
-                        cache[key] = CacheEntry(summary: summary, timestamp: Date())
+                        cache[key] = CacheEntry(
+                            summary: summary,
+                            timestamp: Date()
+                        )
                     }
                 }
             }
@@ -285,7 +340,10 @@ final class RainfallGridService: ObservableObject {
         }
 
         // Build coarse 2D grid
-        var grid = [[RainfallSummary?]](repeating: [RainfallSummary?](repeating: nil, count: cols), count: rows)
+        var grid = [[RainfallSummary?]](
+            repeating: [RainfallSummary?](repeating: nil, count: cols),
+            count: rows
+        )
         for point in points {
             if let entry = cache[point.key] {
                 grid[point.row][point.col] = entry.summary

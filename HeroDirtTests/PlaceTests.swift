@@ -1,13 +1,18 @@
-import Testing
+import CoreLocation
 import Foundation
 import MapKit
-import CoreLocation
+import Testing
+
 @testable import HeroDirt
 
 struct PlaceTests {
 
     @Test func codableRoundTrip() throws {
-        let original = Place(name: "Test Place", latitude: -34.6, longitude: -58.4)
+        let original = Place(
+            name: "Test Place",
+            latitude: -34.6,
+            longitude: -58.4
+        )
 
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode(Place.self, from: data)

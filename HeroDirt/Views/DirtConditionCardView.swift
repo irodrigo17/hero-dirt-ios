@@ -36,12 +36,17 @@ struct DirtConditionCardView: View {
 
             Divider()
 
-            Text("Based on the 1 day per inch of rainfall rule of thumb. Actual conditions vary by soil type, shade, and exposure.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            Text(
+                "Based on the 1 day per inch of rainfall rule of thumb. Actual conditions vary by soil type, shade, and exposure."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
+        .background(
+            .regularMaterial,
+            in: RoundedRectangle(cornerRadius: .cornerMedium)
+        )
     }
 }

@@ -1,5 +1,6 @@
-import Testing
 import SwiftUI
+import Testing
+
 @testable import HeroDirt
 
 struct RainfallColorScaleTests {
@@ -67,7 +68,7 @@ struct RainfallColorScaleTests {
 
         // 3.0 is midpoint, so values should be between
         #expect(r3 > r1)
-        #expect(g3 < g1 || g3 > g1) // green may go either direction
-        #expect(a3 == a1 && a3 == a2) // all fully opaque
+        #expect(g3 < g1 || g3 > g1)  // green may go either direction
+        #expect(a3 == a1 && a3 == a2)  // all fully opaque
     }
 }

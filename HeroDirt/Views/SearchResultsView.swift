@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 // MARK: - POI Category Icon
 
@@ -38,12 +38,16 @@ struct SearchResultsView: View {
                         onSelectResult(item)
                     } label: {
                         HStack(spacing: 10) {
-                            POICategoryIcon(category: item.pointOfInterestCategory)
+                            POICategoryIcon(
+                                category: item.pointOfInterestCategory
+                            )
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.name ?? "Unknown")
                                     .font(.subheadline)
                                     .foregroundStyle(.primary)
-                                let subtitle = item.addressRepresentations?.cityWithContext ?? item.pointOfInterestCategory?.displayName
+                                let subtitle =
+                                    item.addressRepresentations?.cityWithContext
+                                    ?? item.pointOfInterestCategory?.displayName
                                 if let subtitle, subtitle != item.name {
                                     Text(subtitle)
                                         .font(.caption)

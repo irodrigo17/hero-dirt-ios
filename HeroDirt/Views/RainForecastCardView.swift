@@ -15,7 +15,10 @@ struct RainForecastCardView: View {
             }
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: .cornerMedium))
+        .background(
+            .regularMaterial,
+            in: RoundedRectangle(cornerRadius: .cornerMedium)
+        )
     }
 
     private func forecastTile(_ label: String, value: Double) -> some View {
@@ -33,7 +36,9 @@ struct RainForecastCardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
-        .background(value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.06),
-                     in: RoundedRectangle(cornerRadius: 8))
+        .background(
+            value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.06),
+            in: RoundedRectangle(cornerRadius: 8)
+        )
     }
 }

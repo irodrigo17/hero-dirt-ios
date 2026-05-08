@@ -61,7 +61,13 @@ struct RainfallSummary: Sendable {
     private static let mmPerInch = 25.4
     private static let heroDirtBufferDays = 3.0
 
-    init(last1Day: Double, last2Days: Double, last3Days: Double, last7Days: Double, daysSinceLastRain: Int?) {
+    init(
+        last1Day: Double,
+        last2Days: Double,
+        last3Days: Double,
+        last7Days: Double,
+        daysSinceLastRain: Int?
+    ) {
         self.last1Day = last1Day
         self.last2Days = last2Days
         self.last3Days = last3Days
@@ -84,7 +90,9 @@ struct RainfallSummary: Sendable {
         let daysSince = Double(daysSinceLastRain ?? 30)
         let requiredDays = max(1.0, last7Days / Self.mmPerInch)
         if daysSince < requiredDays { return .wet }
-        if daysSince <= requiredDays + Self.heroDirtBufferDays { return .heroDirt }
+        if daysSince <= requiredDays + Self.heroDirtBufferDays {
+            return .heroDirt
+        }
         return .dry
     }
 
