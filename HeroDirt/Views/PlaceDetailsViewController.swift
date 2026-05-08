@@ -30,7 +30,6 @@ final class PlaceDetailsViewController: UIViewController {
     private var dirtConditionCard: DirtConditionCardView?
     private var rainfallCard: RainfallCardView?
     private var forecastCard: RainForecastCardView?
-    private let errorView = UIContentUnavailableView()
 
     // MARK: - Init
 
