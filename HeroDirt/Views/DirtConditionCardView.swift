@@ -1,52 +1,74 @@
-import SwiftUI
+import UIKit
 
-struct DirtConditionCardView: View {
-    let condition: DirtCondition
+final class DirtConditionCardView: UIView {
+    private let iconView = UIImageView()
+    private let conditionLabel = UILabel()
+    private let descriptionLabel = UILabel()
 
-    var body: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("Dirt Conditions")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Spacer()
-                Text("Estimate")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+    init(condition: DirtCondition) {
+        super.init(frame: .zero)
+        setup()
+        configure(condition: condition)
+    }
 
-            HStack(spacing: 16) {
-                Image(systemName: condition.icon)
-                    .font(.system(size: 36))
-                    .foregroundStyle(condition.color)
-                    .frame(width: 44)
+    required init?(coder: NSCoder) { fatalError() }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(condition.label)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(condition.color)
-                    Text(condition.description)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+    func configure(condition: DirtCondition) {
+        iconView.image = UIImage(systemName: condition.icon,
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 36, weight: .regular))
+        iconView.tintColor = condition.color
+        conditionLabel.text = condition.label
+        conditionLabel.textColor = condition.color
+        descriptionLabel.text = condition.description
+    }
 
-                Spacer()
-            }
+    private func setup() {
+        backgroundColor = .secondarySystemBackground
+        layer.cornerRadius = .cornerMedium
+        clipsToBounds = true
 
-            Divider()
+        let header = CardHeaderView(title: "Dirt Conditions", subtitle: "Estimate")
 
-            Text(
-                "Based on the 1 day per inch of rainfall rule of thumb. Actual conditions vary by soil type, shade, and exposure."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding()
-        .background(
-            .regularMaterial,
-            in: RoundedRectangle(cornerRadius: .cornerMedium)
-        )
+        iconView.contentMode = .scaleAspectFit
+
+        conditionLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        conditionLabel.adjustsFontSizeToFitWidth = true
+
+        descriptionLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        descriptionLabel.textColor = .secondaryLabel
+        descriptionLabel.numberOfLines = 0
+
+        let textStack = UIStackView(arrangedSubviews: [conditionLabel, descriptionLabel])
+        textStack.axis = .vertical
+        textStack.spacing = 4
+
+        let conditionRow = UIStackView(arrangedSubviews: [iconView, textStack])
+        conditionRow.axis = .horizontal
+        conditionRow.spacing = 16
+        conditionRow.alignment = .center
+
+        let divider = UIView()
+        divider.backgroundColor = .separator
+
+        let footnote = UILabel()
+        footnote.text = "Based on the 1 day per inch of rainfall rule of thumb. Actual conditions vary by soil type, shade, and exposure."
+        footnote.font = UIFont.preferredFont(forTextStyle: .caption1)
+        footnote.textColor = .secondaryLabel
+        footnote.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [header, conditionRow, divider, footnote])
+        stack.axis = .vertical
+        stack.spacing = 16
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            divider.heightAnchor.constraint(equalToConstant: 0.5),
+            iconView.widthAnchor.constraint(equalToConstant: 44),
+        ])
     }
 }
