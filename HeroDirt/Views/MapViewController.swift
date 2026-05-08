@@ -322,7 +322,7 @@ final class MapViewController: UIViewController {
             if rainfallOverlay == nil {
                 addOverlay(for: bounds)
             } else if let existing = rainfallOverlay,
-                existing.boundingMapRect != RainfallMapOverlay(bounds: bounds).boundingMapRect
+                !MKMapRectEqualToRect(existing.boundingMapRect, RainfallMapOverlay(bounds: bounds).boundingMapRect)
             {
                 mapView.removeOverlay(existing)
                 addOverlay(for: bounds)
