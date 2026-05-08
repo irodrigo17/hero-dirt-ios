@@ -401,7 +401,8 @@ final class MapViewController: UIViewController {
 extension MapViewController: MKMapViewDelegate {
 
     func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
-        guard !(annotation is MKUserLocation) else { return nil }
+        guard !(annotation is MKUserLocation),
+              !(annotation is MKMapFeatureAnnotation) else { return nil }
 
         let view = mapView.dequeueReusableAnnotationView(
             withIdentifier: Self.placeAnnotationReuseID,
