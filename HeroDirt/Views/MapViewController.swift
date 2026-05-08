@@ -22,6 +22,7 @@ final class MapViewController: UIViewController {
     // MARK: - Annotations
 
     private var placeAnnotations: [UUID: MKPointAnnotation] = [:]
+    private var hasInitiallyZoomed = false
     private var newPinAnnotation: MKPointAnnotation?
     private var searchResultAnnotation: MKPointAnnotation?
     private var selectedSearchResult: MKMapItem?
@@ -242,6 +243,7 @@ final class MapViewController: UIViewController {
         let navVC = UINavigationController(rootViewController: detailsVC)
         if let sp = navVC.sheetPresentationController {
             sp.detents = [.medium(), .large()]
+            sp.largestUndimmedDetentIdentifier = .large
             sp.prefersGrabberVisible = true
         }
         sheetVC?.present(navVC, animated: true)
@@ -271,6 +273,13 @@ final class MapViewController: UIViewController {
 
         categoryTask?.cancel()
         categoryTask = Task { await fetchCategories(for: places) }
+
+        if !hasInitiallyZoomed {
+            hasInitiallyZoomed = true
+            if !placeAnnotations.isEmpty {
+                mapView.showAnnotations(Array(placeAnnotations.values), animated: false)
+            }
+        }
     }
 
     @MainActor
