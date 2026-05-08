@@ -36,77 +36,15 @@ struct MapView: View {
                 interactionModes: [.pan, .zoom],
                 selection: $mapSelection
             ) {
-                UserAnnotation()
-
-                if let coord = newPinCoordinate {
-                    Marker("New place", coordinate: coord)
-                        .tint(.blue).tag(MapSelection("new-place"))
-                }
-
-                if let searchResult = selectedSearchResult {
-                    Marker(
-                        searchResult.name ?? "",
-                        systemImage: searchResult.pointOfInterestCategory?
-                            .sfSymbol ?? "mappin",
-                        coordinate: searchResult.location.coordinate
-                    )
-                    .tint(
-                        searchResult.pointOfInterestCategory?.iconColor
-                            ?? .orange
-                    )
-                    .tag(
-                        MapSelection(
-                            searchResult.identifier?.rawValue ?? "search-result"
-                        )
-                    )
-                }
-
-                ForEach(placeStore.places) { place in
-                    let category = resolvedCategories[place.id]
-                    Marker(
-                        place.name,
-                        systemImage: category?.sfSymbol ?? "mappin",
-                        coordinate: CLLocationCoordinate2D(
-                            latitude: place.coordinate.latitude,
-                            longitude: place.coordinate.longitude
-                        )
-                    )
-                    .tint(category?.iconColor ?? .orange)
-                    .tag(MapSelection(place.id.uuidString))
-                }
+                mapAnnotations
             }
             .mapControls {
                 MapCompass()
                 MapScaleView()
             }
-            .simultaneousGesture(
-                SpatialTapGesture().onEnded { _ in
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder),
-                        to: nil,
-                        from: nil,
-                        for: nil
-                    )
-                }
-            )
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                    .updating($longPressDragLocation) { value, state, _ in
-                        state = value.location
-                    }
-            )
-            .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.5)
-                    .sequenced(
-                        before: DragGesture(
-                            minimumDistance: 0,
-                            coordinateSpace: .local
-                        )
-                    )
-                    .updating($longPressActivated) { value, state, _ in
-                        if case .second(true, _) = value { state = true }
-                    }
-            )
+            .simultaneousGesture(tapGesture)
+            .simultaneousGesture(dragGesture)
+            .simultaneousGesture(longPressSequenceGesture)
             .onChange(of: longPressActivated) { _, activated in
                 guard activated,
                     let location = longPressDragLocation,
@@ -135,30 +73,7 @@ struct MapView: View {
                 rainfallImageOverlay(proxy: proxy)
             }
             .overlay(alignment: .topTrailing) {
-                VStack(alignment: .trailing, spacing: 10) {
-                    RainfallOverlayControlsView(
-                        isVisible: $overlayVisible,
-                        timeframe: $overlayTimeframe,
-                        opacity: $overlayOpacity,
-                        isLoading: gridService.isLoading
-                    )
-
-                    Button {
-                        cameraPosition = .userLocation(fallback: .automatic)
-                        selectedDetent = collapsedDetent
-                    } label: {
-                        Image(systemName: "location.fill")
-                            .font(.system(size: 16))
-                            .frame(width: 44, height: 44)
-                    }
-                    .tint(.primary)
-                    .background(
-                        .ultraThickMaterial,
-                        in: RoundedRectangle(cornerRadius: .cornerSmall)
-                    )
-                    .accessibilityLabel("Center map on your location")
-                }
-                .padding(12)
+                mapControlsOverlay
             }
             .onAppear {
                 if placeStore.places.isEmpty {
@@ -180,65 +95,180 @@ struct MapView: View {
                 Task { @MainActor in sheetPresented = true }
             }
         ) {
-            SheetView(
-                onSelectPlace: { place in
-                    selectedPlace = place
-                    selectedMapItem = nil
-                    newPinCoordinate = nil
-                    selectedSearchResult = nil
-                    withAnimation(.spring(duration: 0.3)) {
-                        mapSelection = MapSelection(place.id.uuidString)
-                    }
-                },
-                onSelectSearchResult: { item in
-                    selectedSearchResult = item
-                    selectedMapItem = item
-                    selectedPlace = nil
-                    newPinCoordinate = nil
-                    withAnimation(.spring(duration: 0.3)) {
-                        mapSelection = MapSelection(
-                            item.identifier?.rawValue ?? "search-result"
-                        )
-                    }
-                },
-                onSearchFocusChanged: { focused in
-                    selectedDetent = focused ? .large : .medium
-                },
-                visibleRegion: visibleRegion,
-                selectedDetent: selectedDetent
-            )
-            .presentationDetents(
-                [collapsedDetent, .medium, .large],
-                selection: $selectedDetent
-            )
-            .presentationBackgroundInteraction(.enabled)
-            .interactiveDismissDisabled(true)
-            .sheet(
-                isPresented: $showingPlaceDetails,
-                onDismiss: {
-                    withAnimation {
-                        mapSelection = nil
-                    }
-                    selectedPlace = nil
-                    newPinCoordinate = nil
-                    selectedSearchResult = nil
-                    selectedMapItem = nil
-                    selectedDetent = .medium
-                }
-            ) {
-                PlaceDetailsView(
-                    coordinate: selectedPlace?.coordinate
-                        ?? selectedMapItem?.location.coordinate
-                        ?? newPinCoordinate
-                        ?? CLLocationCoordinate2D(),
-                    placeID: selectedPlace?.id,
-                    mapItem: selectedMapItem,
-                    onClose: { showingPlaceDetails = false }
-                )
-                .environmentObject(placeStore)
-                .presentationBackgroundInteraction(.enabled)
-            }
+            mainSheet
         }
+    }
+
+    // MARK: - Map Content
+
+    @MapContentBuilder
+    private var mapAnnotations: some MapContent {
+        UserAnnotation()
+
+        if let coord = newPinCoordinate {
+            Marker("New place", coordinate: coord)
+                .tint(.blue).tag(MapSelection("new-place"))
+        }
+
+        if let searchResult = selectedSearchResult {
+            Marker(
+                searchResult.name ?? "",
+                systemImage: searchResult.pointOfInterestCategory?
+                    .sfSymbol ?? "mappin",
+                coordinate: searchResult.location.coordinate
+            )
+            .tint(
+                searchResult.pointOfInterestCategory?.iconColor ?? .orange
+            )
+            .tag(
+                MapSelection(
+                    searchResult.identifier?.rawValue ?? "search-result"
+                )
+            )
+        }
+
+        ForEach(placeStore.places) { place in
+            let category = resolvedCategories[place.id]
+            Marker(
+                place.name,
+                systemImage: category?.sfSymbol ?? "mappin",
+                coordinate: CLLocationCoordinate2D(
+                    latitude: place.coordinate.latitude,
+                    longitude: place.coordinate.longitude
+                )
+            )
+            .tint(category?.iconColor ?? .orange)
+            .tag(MapSelection(place.id.uuidString))
+        }
+    }
+
+    // MARK: - Gestures
+
+    private var tapGesture: some Gesture {
+        SpatialTapGesture().onEnded { _ in
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil,
+                from: nil,
+                for: nil
+            )
+        }
+    }
+
+    private var dragGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .local)
+            .updating($longPressDragLocation) { value, state, _ in
+                state = value.location
+            }
+    }
+
+    private var longPressSequenceGesture: some Gesture {
+        LongPressGesture(minimumDuration: 0.5)
+            .sequenced(
+                before: DragGesture(
+                    minimumDistance: 0,
+                    coordinateSpace: .local
+                )
+            )
+            .updating($longPressActivated) { value, state, _ in
+                if case .second(true, _) = value { state = true }
+            }
+    }
+
+    // MARK: - Overlays
+
+    private var mapControlsOverlay: some View {
+        VStack(alignment: .trailing, spacing: 10) {
+            RainfallOverlayControlsView(
+                isVisible: $overlayVisible,
+                timeframe: $overlayTimeframe,
+                opacity: $overlayOpacity,
+                isLoading: gridService.isLoading
+            )
+
+            Button {
+                cameraPosition = .userLocation(fallback: .automatic)
+                selectedDetent = collapsedDetent
+            } label: {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 16))
+                    .frame(width: 44, height: 44)
+            }
+            .tint(.primary)
+            .background(
+                .ultraThickMaterial,
+                in: RoundedRectangle(cornerRadius: .cornerSmall)
+            )
+            .accessibilityLabel("Center map on your location")
+        }
+        .padding(12)
+    }
+
+    // MARK: - Sheets
+
+    private var mainSheet: some View {
+        SheetView(
+            onSelectPlace: { place in
+                selectedPlace = place
+                selectedMapItem = nil
+                newPinCoordinate = nil
+                selectedSearchResult = nil
+                withAnimation(.spring(duration: 0.3)) {
+                    mapSelection = MapSelection(place.id.uuidString)
+                }
+            },
+            onSelectSearchResult: { item in
+                selectedSearchResult = item
+                selectedMapItem = item
+                selectedPlace = nil
+                newPinCoordinate = nil
+                withAnimation(.spring(duration: 0.3)) {
+                    mapSelection = MapSelection(
+                        item.identifier?.rawValue ?? "search-result"
+                    )
+                }
+            },
+            onSearchFocusChanged: { focused in
+                selectedDetent = focused ? .large : .medium
+            },
+            visibleRegion: visibleRegion,
+            selectedDetent: selectedDetent
+        )
+        .presentationDetents(
+            [collapsedDetent, .medium, .large],
+            selection: $selectedDetent
+        )
+        .presentationBackgroundInteraction(.enabled)
+        .interactiveDismissDisabled(true)
+        .sheet(
+            isPresented: $showingPlaceDetails,
+            onDismiss: {
+                withAnimation {
+                    mapSelection = nil
+                }
+                selectedPlace = nil
+                newPinCoordinate = nil
+                selectedSearchResult = nil
+                selectedMapItem = nil
+                selectedDetent = .medium
+            }
+        ) {
+            placeDetailsSheet
+        }
+    }
+
+    private var placeDetailsSheet: some View {
+        PlaceDetailsView(
+            coordinate: selectedPlace?.coordinate
+                ?? selectedMapItem?.location.coordinate
+                ?? newPinCoordinate
+                ?? CLLocationCoordinate2D(),
+            placeID: selectedPlace?.id,
+            mapItem: selectedMapItem,
+            onClose: { showingPlaceDetails = false }
+        )
+        .environmentObject(placeStore)
+        .presentationBackgroundInteraction(.enabled)
     }
 
     @State private var selectionTask: Task<Void, Never>?
