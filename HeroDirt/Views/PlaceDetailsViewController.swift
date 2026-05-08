@@ -148,14 +148,30 @@ final class PlaceDetailsViewController: UIViewController {
 
     private func showError(_ message: String) {
         removeCards()
-        var config = UIContentUnavailableConfiguration.empty()
-        config.image = UIImage(systemName: "exclamationmark.triangle")
-        config.text = "Unable to load rainfall data"
-        config.secondaryText = message
-        let errorVC = UIContentUnavailableView()
-        errorVC.configuration = config
-        errorVC.tag = 101
-        contentStack.addArrangedSubview(errorVC)
+        let icon = UIImageView(image: UIImage(systemName: "exclamationmark.triangle"))
+        icon.tintColor = .secondaryLabel
+        icon.contentMode = .scaleAspectFit
+        icon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 36, weight: .regular)
+
+        let titleLabel = UILabel()
+        titleLabel.text = "Unable to load rainfall data"
+        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.textAlignment = .center
+
+        let bodyLabel = UILabel()
+        bodyLabel.text = message
+        bodyLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        bodyLabel.textColor = .secondaryLabel
+        bodyLabel.textAlignment = .center
+        bodyLabel.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [icon, titleLabel, bodyLabel])
+        stack.axis = .vertical
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.layoutMargins = UIEdgeInsets(top: 40, left: 0, bottom: 0, right: 0)
+        stack.isLayoutMarginsRelativeArrangement = true
+        contentStack.addArrangedSubview(stack)
         actionBar.setEnabled(false)
     }
 
