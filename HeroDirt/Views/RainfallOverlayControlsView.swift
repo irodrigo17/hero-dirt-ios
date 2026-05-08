@@ -35,6 +35,19 @@ final class RainfallOverlayControlsView: UIView {
 
     private var isPanelExpanded = false
 
+    // MARK: - Hit testing
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard !isHidden, isUserInteractionEnabled, alpha > 0.01 else { return nil }
+        if let result = super.hitTest(point, with: event) { return result }
+        // The panel extends outside our bounds — forward hits to it manually.
+        for subview in subviews.reversed() {
+            let converted = subview.convert(point, from: self)
+            if let result = subview.hitTest(converted, with: event) { return result }
+        }
+        return nil
+    }
+
     // MARK: - Init
 
     override init(frame: CGRect) {
@@ -277,6 +290,7 @@ final class RainfallOverlayControlsView: UIView {
 
 final class RainfallLegendView: UIView {
     private let gradientLayer = CAGradientLayer()
+    private let gradientContainer = UIView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -291,7 +305,6 @@ final class RainfallLegendView: UIView {
         mmLabel.font = UIFont.preferredFont(forTextStyle: .caption2)
         mmLabel.textColor = .secondaryLabel
 
-        let gradientContainer = UIView()
         gradientContainer.layer.cornerRadius = 2
         gradientContainer.clipsToBounds = true
 
@@ -331,13 +344,7 @@ final class RainfallLegendView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // Update gradient layer frame after layout
-        if let gradientContainer = gradientLayer.superlayer?.delegate as? UIView {
-            gradientLayer.frame = gradientContainer.bounds
-        } else {
-            // Walk up to find the gradient container
-            gradientLayer.frame = gradientLayer.superlayer?.bounds ?? .zero
-        }
+        gradientLayer.frame = gradientContainer.bounds
     }
 
     private func makeFlexSpacer() -> UIView {

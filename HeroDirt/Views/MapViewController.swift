@@ -145,10 +145,15 @@ final class MapViewController: UIViewController {
     }
 
     private func setupLocationButton() {
-        locationButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
-        locationButton.tintColor = .label
         locationButton.accessibilityLabel = "Center map on your location"
         locationButton.addTarget(self, action: #selector(centerOnUser), for: .touchUpInside)
+
+        let iconView = UIImageView(image: UIImage(systemName: "location.fill"))
+        iconView.tintColor = .label
+        iconView.contentMode = .scaleAspectFit
+        iconView.isUserInteractionEnabled = false
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        locationButton.addSubview(iconView)
 
         let bg = UIVisualEffectView(effect: UIBlurEffect(style: .systemThickMaterial))
         bg.layer.cornerRadius = .cornerSmall
@@ -168,6 +173,10 @@ final class MapViewController: UIViewController {
             bg.bottomAnchor.constraint(equalTo: locationButton.bottomAnchor),
             bg.leadingAnchor.constraint(equalTo: locationButton.leadingAnchor),
             bg.trailingAnchor.constraint(equalTo: locationButton.trailingAnchor),
+            iconView.centerXAnchor.constraint(equalTo: locationButton.centerXAnchor),
+            iconView.centerYAnchor.constraint(equalTo: locationButton.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 20),
+            iconView.heightAnchor.constraint(equalToConstant: 20),
         ])
     }
 
@@ -214,7 +223,7 @@ final class MapViewController: UIViewController {
         if let sp = sheet.sheetPresentationController {
             sp.detents = [
                 .custom(identifier: collapsedIdentifier) { context in
-                    context.maximumDetentValue * 0.09
+                    context.maximumDetentValue * 0.12
                 },
                 .medium(),
                 .large(),
@@ -241,6 +250,7 @@ final class MapViewController: UIViewController {
             self?.clearSelection()
         }
         let navVC = UINavigationController(rootViewController: detailsVC)
+        navVC.view.backgroundColor = .clear
         if let sp = navVC.sheetPresentationController {
             sp.detents = [.medium(), .large()]
             sp.largestUndimmedDetentIdentifier = .large
@@ -393,7 +403,9 @@ final class MapViewController: UIViewController {
     // MARK: - Helpers
 
     @objc private func centerOnUser() {
-        mapView.setUserTrackingMode(.follow, animated: true)
+        let coord = mapView.userLocation.coordinate
+        guard CLLocationCoordinate2DIsValid(coord) else { return }
+        centerAboveSheet(coord)
     }
 
     @objc private func dismissKeyboard() {

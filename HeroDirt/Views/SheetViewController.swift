@@ -98,9 +98,11 @@ extension SheetViewController: UISearchResultsUpdating {
         searchTask?.cancel()
         let query = searchController.searchBar.text ?? ""
         guard !query.isEmpty else {
+            searchResultsVC.isSearching = false
             searchResultsVC.items = []
             return
         }
+        searchResultsVC.isSearching = true
         searchTask = Task {
             try? await Task.sleep(for: .milliseconds(400))
             guard !Task.isCancelled else { return }
