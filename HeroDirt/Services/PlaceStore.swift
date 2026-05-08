@@ -236,7 +236,7 @@ class PlaceStore: ObservableObject {
     }
 
     func removePlaces(at offsets: IndexSet) {
-        places.remove(atOffsets: offsets)
+        for offset in offsets.reversed() { places.remove(at: offset) }
         save()
         iCloudAccountAvailable { [weak self] available in
             guard let self = self, available, self.fileURL == nil else {
