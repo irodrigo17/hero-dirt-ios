@@ -313,7 +313,12 @@ final class RainfallLegendView: UIView {
         gradientView.clipsToBounds = true
 
         let visible = Array(RainfallColorScale.stops.dropFirst())
+        let minT = visible.first!.threshold
+        let maxT = visible.last!.threshold
         gradientView.gradientLayer.colors = visible.map { $0.color.cgColor }
+        gradientView.gradientLayer.locations = visible.map {
+            NSNumber(value: ($0.threshold - minT) / (maxT - minT))
+        }
         gradientView.gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
         gradientView.gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
 

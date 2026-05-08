@@ -2,7 +2,8 @@ import UIKit
 
 extension Double {
     func formatMillimeters() -> String {
-        self < 10 ? String(format: "%.1f", self) : String(format: "%.0f", self)
+        if self >= 100 { return "100+" }
+        return self < 10 ? String(format: "%.1f", self) : String(format: "%.0f", self)
     }
 }
 
