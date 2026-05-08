@@ -1,4 +1,4 @@
-import SwiftUI
+import UIKit
 
 extension Double {
     func formatMillimeters() -> String {
@@ -12,19 +12,34 @@ extension CGFloat {
     static let cornerLarge: CGFloat = 16
 }
 
-struct CardHeader: View {
-    let title: String
-    let subtitle: String
+final class CardHeaderView: UIView {
+    init(title: String, subtitle: String) {
+        super.init(frame: .zero)
 
-    var body: some View {
-        HStack {
-            Text(title)
-                .font(.subheadline)
-                .fontWeight(.semibold)
-            Spacer()
-            Text(subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = subtitle
+        subtitleLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+        subtitleLabel.textColor = .secondaryLabel
+
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, spacer, subtitleLabel])
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+        ])
     }
+
+    required init?(coder: NSCoder) { fatalError() }
 }

@@ -1,5 +1,5 @@
 import MapKit
-import SwiftUI
+import UIKit
 
 extension MKPointOfInterestCategory {
     var displayName: String {
@@ -44,16 +44,10 @@ extension MKPointOfInterestCategory {
         case .winery: return "Winery"
         case .zoo: return "Zoo"
         default:
-            let raw = rawValue.replacingOccurrences(
-                of: "MKPOICategory",
-                with: ""
-            )
+            let raw = rawValue.replacingOccurrences(of: "MKPOICategory", with: "")
             return raw.unicodeScalars.reduce("") { result, scalar in
                 let char = Character(scalar)
-                return result.isEmpty
-                    ? String(char)
-                    : char.isUppercase
-                        ? "\(result) \(char)" : "\(result)\(char)"
+                return result.isEmpty ? String(char) : char.isUppercase ? "\(result) \(char)" : "\(result)\(char)"
             }
         }
     }
@@ -103,33 +97,33 @@ extension MKPointOfInterestCategory {
         }
     }
 
-    var iconColor: Color {
+    var iconColor: UIColor {
         switch self {
         case .park, .nationalPark, .campground, .zoo:
-            return .green
+            return .systemGreen
         case .hiking:
-            return Color(red: 0.2, green: 0.6, blue: 0.2)
+            return UIColor(red: 0.2, green: 0.6, blue: 0.2, alpha: 1)
         case .beach, .marina:
-            return .teal
+            return .systemTeal
         case .restaurant, .foodMarket, .bakery:
-            return .orange
+            return .systemOrange
         case .cafe, .brewery, .winery:
-            return Color(red: 0.6, green: 0.3, blue: 0.1)
+            return UIColor(red: 0.6, green: 0.3, blue: 0.1, alpha: 1)
         case .nightlife, .movieTheater, .theater, .museum, .amusementPark:
-            return .purple
+            return .systemPurple
         case .hospital, .pharmacy, .fireStation:
-            return .red
+            return .systemRed
         case .hotel, .publicTransport, .parking, .store, .carRental, .evCharger,
-            .police, .postOffice, .laundry, .marina:
-            return .blue
+            .police, .postOffice, .laundry:
+            return .systemBlue
         case .school, .university, .library:
-            return Color(red: 0.5, green: 0.35, blue: 0.1)
+            return UIColor(red: 0.5, green: 0.35, blue: 0.1, alpha: 1)
         case .fitnessCenter, .stadium:
-            return Color(red: 0.9, green: 0.4, blue: 0.0)
+            return UIColor(red: 0.9, green: 0.4, blue: 0.0, alpha: 1)
         case .gasStation, .atm, .bank, .restroom:
-            return Color(.systemGray)
+            return .systemGray
         default:
-            return Color(.systemPink)
+            return .systemPink
         }
     }
 }

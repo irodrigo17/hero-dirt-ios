@@ -1,5 +1,5 @@
 import Foundation
-import SwiftUI
+import UIKit
 
 enum DirtCondition {
     case wet
@@ -22,11 +22,11 @@ enum DirtCondition {
         }
     }
 
-    var color: Color {
+    var color: UIColor {
         switch self {
-        case .wet: return .blue
-        case .heroDirt: return .green
-        case .dry: return .orange
+        case .wet: return .systemBlue
+        case .heroDirt: return .systemGreen
+        case .dry: return .systemOrange
         }
     }
 
@@ -77,12 +77,10 @@ struct RainfallSummary: Sendable {
 
     init(daily: [DailyRainfall]) {
         let sorted = daily.sorted { $0.date > $1.date }
-
         last1Day = sorted.prefix(1).reduce(0) { $0 + $1.amount }
         last2Days = sorted.prefix(2).reduce(0) { $0 + $1.amount }
         last3Days = sorted.prefix(3).reduce(0) { $0 + $1.amount }
         last7Days = sorted.prefix(7).reduce(0) { $0 + $1.amount }
-
         daysSinceLastRain = Self.computeDaysSinceRain(sorted: sorted)
     }
 
@@ -90,17 +88,13 @@ struct RainfallSummary: Sendable {
         let daysSince = Double(daysSinceLastRain ?? 30)
         let requiredDays = max(1.0, last7Days / Self.mmPerInch)
         if daysSince < requiredDays { return .wet }
-        if daysSince <= requiredDays + Self.heroDirtBufferDays {
-            return .heroDirt
-        }
+        if daysSince <= requiredDays + Self.heroDirtBufferDays { return .heroDirt }
         return .dry
     }
 
     private static func computeDaysSinceRain(sorted: [DailyRainfall]) -> Int? {
         for (index, day) in sorted.enumerated() {
-            if day.amount > 0.1 {
-                return index
-            }
+            if day.amount > 0.1 { return index }
         }
         return nil
     }
