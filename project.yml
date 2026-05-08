@@ -3,7 +3,7 @@ options:
   bundleIdPrefix: com.herodirt
   deploymentTarget:
     iOS: "26.0"
-  xcodeVersion: "15.0"
+  xcodeVersion: "26.0"
 targets:
   HeroDirt:
     type: application
