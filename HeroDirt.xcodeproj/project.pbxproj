@@ -392,6 +392,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K3CQQKBR25;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -450,6 +451,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = K3CQQKBR25;
+				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
 				LD_RUNPATH_SEARCH_PATHS = (

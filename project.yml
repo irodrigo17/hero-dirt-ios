@@ -29,6 +29,7 @@ targets:
         SWIFT_VERSION: "5.9"
         DEVELOPMENT_TEAM: K3CQQKBR25
         CODE_SIGN_IDENTITY: "iPhone Developer"
+        GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
 
   HeroDirtTests:
