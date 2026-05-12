@@ -7,6 +7,7 @@ struct CameraCommand {
     enum Action {
         case followUser
         case setRegion(MKCoordinateRegion)
+        case fitAllPlaces([Place])
     }
     let id = UUID()
     let action: Action
@@ -265,7 +266,39 @@ struct UIKitMapView: UIViewRepresentable {
                 mapView.setUserTrackingMode(.follow, animated: true)
             case .setRegion(let region):
                 mapView.setRegion(region, animated: true)
+            case .fitAllPlaces(let places):
+                fitAllPlaces(places, on: mapView)
             }
+        }
+
+        private func fitAllPlaces(_ places: [Place], on mapView: MKMapView) {
+            guard !places.isEmpty else {
+                mapView.setUserTrackingMode(.follow, animated: true)
+                return
+            }
+            var minLat = places[0].coordinate.latitude
+            var maxLat = minLat
+            var minLon = places[0].coordinate.longitude
+            var maxLon = minLon
+            for place in places {
+                minLat = min(minLat, place.coordinate.latitude)
+                maxLat = max(maxLat, place.coordinate.latitude)
+                minLon = min(minLon, place.coordinate.longitude)
+                maxLon = max(maxLon, place.coordinate.longitude)
+            }
+            let centerLat = (minLat + maxLat) / 2
+            let centerLon = (minLon + maxLon) / 2
+            let latSpan = max(maxLat - minLat, 0.005)
+            let lonSpan = max(maxLon - minLon, 0.005)
+            let regionCenter = CLLocationCoordinate2D(
+                latitude: centerLat - latSpan * 0.7,
+                longitude: centerLon
+            )
+            let region = MKCoordinateRegion(
+                center: regionCenter,
+                span: MKCoordinateSpan(latitudeDelta: latSpan * 1.6, longitudeDelta: lonSpan * 1.6)
+            )
+            mapView.setRegion(region, animated: true)
         }
 
         // MARK: - Gesture handlers

@@ -83,6 +83,8 @@ struct MapView: View {
         .onAppear {
             if placeStore.places.isEmpty {
                 cameraCommand = CameraCommand(action: .followUser)
+            } else {
+                cameraCommand = CameraCommand(action: .fitAllPlaces(placeStore.places))
             }
         }
         .task(id: placeStore.places.map(\.id)) {
