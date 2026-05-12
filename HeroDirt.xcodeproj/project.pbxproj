@@ -7,22 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		22B1C7663B931C430C8B2DC4 /* RainfallColorScaleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923B2079001426116C580872 /* RainfallColorScaleTests.swift */; };
+		254832815177A7E9FFA87D88 /* SharedUtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A1B822ED96F1D1F23BFCB1 /* SharedUtilitiesTests.swift */; };
 		28688B986F3D37299DE18E16 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDCB15D7909852E9F7677ED /* SharedUI.swift */; };
+		3520ED0386A97A3281BB3345 /* WeatherServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDEC702EB7094CF94991149 /* WeatherServiceTests.swift */; };
 		3A8D138B7705C9B694D689FA /* PlaceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6212CF0607C8E212CC4494 /* PlaceStore.swift */; };
 		487524456187BBC0A72EF3B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEE2B26511DA261B886CCA74 /* Assets.xcassets */; };
 		4C905FC9E13CE8D191F60257 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544289F591E5EE646407FF37 /* Place.swift */; };
 		54BE1C102E3F2C6D9FBF995B /* RainfallOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C37481A6448709D5937CF2 /* RainfallOverlay.swift */; };
+		58419135D0DD4D289E2CFE26 /* PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C6E0BABF8E70A0502E1DD2 /* PlaceTests.swift */; };
 		69145AFD0B0F8FBADC14C612 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86D55421595648BAF851BFD8 /* WeatherService.swift */; };
 		6E4E2A432DE4C227C4C32854 /* HeroDirtApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5122001552D0FC22B15A2A8C /* HeroDirtApp.swift */; };
 		6EC369FEE43F5D9B4250F2E4 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727845F179A9D5F61D6A5C9D /* MapView.swift */; };
 		730B3EB694755B3ED6AFA92B /* RainfallData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */; };
 		77C0B23713431AF0079597F0 /* RainfallColorScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */; };
+		78793115B3C3DF45439AEE1F /* PlaceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44692038F44E67135E0B38AB /* PlaceStoreTests.swift */; };
 		7B80A0217D52A202C10B5596 /* RainfallCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E247558C1488D91E630B618 /* RainfallCardView.swift */; };
 		84649145A445B95107CCEB3D /* DirtConditionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B4E7778CAA336AADDCF385 /* DirtConditionCardView.swift */; };
 		85E09D7443AA6433753D63A0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */; };
+		A45B7ADC2F5C4D53EF06C0C2 /* RainForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044979B915FE13B07F5D5364 /* RainForecastTests.swift */; };
 		A5CCF9654186D37B73F30543 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2059132232878F0408A056ED /* SearchResultsView.swift */; };
 		AC3C44078B85376D265FE597 /* SavedPlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE1EA891008F6C141BE6DE8 /* SavedPlacesView.swift */; };
 		AC98CE93622E346B525B36C1 /* UIKitMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC197ECBCA6D6326EBB62193 /* UIKitMapView.swift */; };
+		ACD8692B1C6957473B6509E8 /* RainfallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D9242AC6F26D6D721F1484 /* RainfallDataTests.swift */; };
 		BAD934D8462C843D4364AA0C /* RainfallOverlayControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B56B676E29A6CCE4AFF8279 /* RainfallOverlayControlsView.swift */; };
 		C11B532A7C1451259475A046 /* MKPointOfInterestCategory+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1816173533EAECC787BF6E /* MKPointOfInterestCategory+Display.swift */; };
 		C57E9C352F8B43CE289C608D /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4D92D7FAA67BA17087181C /* RainfallGridService.swift */; };
@@ -30,14 +37,28 @@
 		CCCDA61D77E6092438BB06D4 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D4DE740077D285E9A578B52 /* SheetView.swift */; };
 		D94C74B7F36C475164A3700A /* MapControlsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8457BDB6F46E17A05BFB056 /* MapControlsOverlayView.swift */; };
 		F1F29134729ED0BD0699DFEE /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D59D7D187BE00C6967B78F7 /* PlaceDetailsView.swift */; };
+		F90AC25370526C2747B4959F /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FD5C632881824C2479B0C8 /* RainfallOverlayTests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		8278B35B706205D375330D02 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 575D624C3CAF0C5FA070A97E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7DC854345D021A193EA1F009;
+			remoteInfo = HeroDirt;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		044979B915FE13B07F5D5364 /* RainForecastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastTests.swift; sourceTree = "<group>"; };
 		0A6212CF0607C8E212CC4494 /* PlaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStore.swift; sourceTree = "<group>"; };
 		2059132232878F0408A056ED /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
 		21A26BC8E82D87CB9A648454 /* HeroDirt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D4DE740077D285E9A578B52 /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
+		32C6E0BABF8E70A0502E1DD2 /* PlaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceTests.swift; sourceTree = "<group>"; };
 		34B4E7778CAA336AADDCF385 /* DirtConditionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtConditionCardView.swift; sourceTree = "<group>"; };
+		44692038F44E67135E0B38AB /* PlaceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStoreTests.swift; sourceTree = "<group>"; };
 		47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		49C37481A6448709D5937CF2 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
 		5122001552D0FC22B15A2A8C /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
@@ -49,15 +70,21 @@
 		727845F179A9D5F61D6A5C9D /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		7E247558C1488D91E630B618 /* RainfallCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallCardView.swift; sourceTree = "<group>"; };
 		86D55421595648BAF851BFD8 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		8D7CC53BF896AB144D9D3AD7 /* HeroDirtTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		923B2079001426116C580872 /* RainfallColorScaleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScaleTests.swift; sourceTree = "<group>"; };
 		948419789085469DD0A31178 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
 		AD4D92D7FAA67BA17087181C /* RainfallGridService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallGridService.swift; sourceTree = "<group>"; };
 		B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
 		BEE2B26511DA261B886CCA74 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
 		C8457BDB6F46E17A05BFB056 /* MapControlsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapControlsOverlayView.swift; sourceTree = "<group>"; };
+		D3FD5C632881824C2479B0C8 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
 		DC197ECBCA6D6326EBB62193 /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
+		E1A1B822ED96F1D1F23BFCB1 /* SharedUtilitiesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUtilitiesTests.swift; sourceTree = "<group>"; };
+		E7D9242AC6F26D6D721F1484 /* RainfallDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallDataTests.swift; sourceTree = "<group>"; };
 		EFDCB15D7909852E9F7677ED /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
 		FA4FDD2381347C02A1215178 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		FCDEC702EB7094CF94991149 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
 		FCE1EA891008F6C141BE6DE8 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -81,8 +108,24 @@
 			isa = PBXGroup;
 			children = (
 				1B684C4B18ED95ECE9046C6D /* HeroDirt */,
+				5B12376377E7B1FD5758568D /* HeroDirtTests */,
 				C788B93783384DBFC7B5F3B5 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		5B12376377E7B1FD5758568D /* HeroDirtTests */ = {
+			isa = PBXGroup;
+			children = (
+				44692038F44E67135E0B38AB /* PlaceStoreTests.swift */,
+				32C6E0BABF8E70A0502E1DD2 /* PlaceTests.swift */,
+				923B2079001426116C580872 /* RainfallColorScaleTests.swift */,
+				E7D9242AC6F26D6D721F1484 /* RainfallDataTests.swift */,
+				D3FD5C632881824C2479B0C8 /* RainfallOverlayTests.swift */,
+				044979B915FE13B07F5D5364 /* RainForecastTests.swift */,
+				E1A1B822ED96F1D1F23BFCB1 /* SharedUtilitiesTests.swift */,
+				FCDEC702EB7094CF94991149 /* WeatherServiceTests.swift */,
+			);
+			path = HeroDirtTests;
 			sourceTree = "<group>";
 		};
 		75710BBBBC944EF6A70628BA /* Models */ = {
@@ -130,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				21A26BC8E82D87CB9A648454 /* HeroDirt.app */,
+				8D7CC53BF896AB144D9D3AD7 /* HeroDirtTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -155,6 +199,24 @@
 			productReference = 21A26BC8E82D87CB9A648454 /* HeroDirt.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E8E6D57E728509BD018D5144 /* HeroDirtTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5E61C7D3E83E354DFB05F9D /* Build configuration list for PBXNativeTarget "HeroDirtTests" */;
+			buildPhases = (
+				0AEB9989438CABF4A3C2CDF5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C28D8A42DC223BECE63D3E4C /* PBXTargetDependency */,
+			);
+			name = HeroDirtTests;
+			packageProductDependencies = (
+			);
+			productName = HeroDirtTests;
+			productReference = 8D7CC53BF896AB144D9D3AD7 /* HeroDirtTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -162,10 +224,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					7DC854345D021A193EA1F009 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = K3CQQKBR25;
+					};
+					E8E6D57E728509BD018D5144 = {
+						DevelopmentTeam = K3CQQKBR25;
 					};
 				};
 			};
@@ -184,6 +249,7 @@
 			projectRoot = "";
 			targets = (
 				7DC854345D021A193EA1F009 /* HeroDirt */,
+				E8E6D57E728509BD018D5144 /* HeroDirtTests */,
 			);
 		};
 /* End PBXProject section */
@@ -200,6 +266,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0AEB9989438CABF4A3C2CDF5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78793115B3C3DF45439AEE1F /* PlaceStoreTests.swift in Sources */,
+				58419135D0DD4D289E2CFE26 /* PlaceTests.swift in Sources */,
+				A45B7ADC2F5C4D53EF06C0C2 /* RainForecastTests.swift in Sources */,
+				22B1C7663B931C430C8B2DC4 /* RainfallColorScaleTests.swift in Sources */,
+				ACD8692B1C6957473B6509E8 /* RainfallDataTests.swift in Sources */,
+				F90AC25370526C2747B4959F /* RainfallOverlayTests.swift in Sources */,
+				254832815177A7E9FFA87D88 /* SharedUtilitiesTests.swift in Sources */,
+				3520ED0386A97A3281BB3345 /* WeatherServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		71AD6FB09D9F109729B5B882 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,6 +311,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C28D8A42DC223BECE63D3E4C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7DC854345D021A193EA1F009 /* HeroDirt */;
+			targetProxy = 8278B35B706205D375330D02 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		36ADA5A9DC3A536EE95AC0EC /* Debug */ = {
@@ -299,10 +388,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
+				DEVELOPMENT_TEAM = K3CQQKBR25;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -317,14 +406,50 @@
 			};
 			name = Debug;
 		};
+		3C11B515702D76CD640A899B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = K3CQQKBR25;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HeroDirt.app/HeroDirt";
+			};
+			name = Release;
+		};
+		4B4041DA5E1D45ACFD861E3B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = K3CQQKBR25;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HeroDirt.app/HeroDirt";
+			};
+			name = Debug;
+		};
 		986598FA2990955703BBEB39 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
+				DEVELOPMENT_TEAM = K3CQQKBR25;
 				INFOPLIST_FILE = HeroDirt/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hero Dirt can use your location to center the map.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -412,6 +537,15 @@
 			buildConfigurations = (
 				36ADA5A9DC3A536EE95AC0EC /* Debug */,
 				DDE72FD47CBB92F27C6C0662 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C5E61C7D3E83E354DFB05F9D /* Build configuration list for PBXNativeTarget "HeroDirtTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B4041DA5E1D45ACFD861E3B /* Debug */,
+				3C11B515702D76CD640A899B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
