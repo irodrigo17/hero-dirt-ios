@@ -12,14 +12,6 @@ targets:
       - path: HeroDirt
     entitlements:
       path: HeroDirt/HeroDirt.entitlements
-    capabilities:
-      iCloud:
-        cloudKit: true
-        containerIdentifiers:
-          - iCloud.com.herodirt.app
-      weatherKit: true
-      pushNotifications:
-        development: true
     settings:
       base:
         INFOPLIST_FILE: HeroDirt/Info.plist

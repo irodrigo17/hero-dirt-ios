@@ -228,6 +228,17 @@
 				TargetAttributes = {
 					7DC854345D021A193EA1F009 = {
 						DevelopmentTeam = K3CQQKBR25;
+						SystemCapabilities = {
+							"com.apple.iCloud" = {
+								enabled = 1;
+							};
+							"com.apple.Push" = {
+								enabled = 1;
+							};
+							"com.apple.WeatherKit" = {
+								enabled = 1;
+							};
+						};
 					};
 					E8E6D57E728509BD018D5144 = {
 						DevelopmentTeam = K3CQQKBR25;
