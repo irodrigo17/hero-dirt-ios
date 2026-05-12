@@ -111,6 +111,7 @@ struct MapView: View {
                 newPinCoordinate = nil
                 selectedSearchResult = nil
                 selectedTag = place.id.uuidString
+                showingPlaceDetails = true
                 centerAboveSheet(place.coordinate)
             },
             onSelectSearchResult: { item in
@@ -119,6 +120,7 @@ struct MapView: View {
                 selectedPlace = nil
                 newPinCoordinate = nil
                 selectedTag = item.identifier?.rawValue ?? "search-result"
+                showingPlaceDetails = true
                 centerAboveSheet(item.location.coordinate)
             },
             onSearchFocusChanged: { focused in
