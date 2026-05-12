@@ -336,8 +336,13 @@ struct UIKitMapView: UIViewRepresentable {
             } else if let ann = annotation as? SearchResultAnnotation {
                 callbacks.onAnnotationSelected(ann.tag)
             } else if let feature = annotation as? MKMapFeatureAnnotation {
-                let placemark = MKPlacemark(coordinate: feature.coordinate)
-                let mapItem = MKMapItem(placemark: placemark)
+                let mapItem = MKMapItem(
+                    location: CLLocation(
+                        latitude: feature.coordinate.latitude,
+                        longitude: feature.coordinate.longitude
+                    ),
+                    address: nil
+                )
                 mapItem.name = feature.title
                 callbacks.onFeatureTapped(mapItem)
             }

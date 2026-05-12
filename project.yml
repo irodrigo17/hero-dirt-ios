@@ -12,6 +12,14 @@ targets:
       - path: HeroDirt
     entitlements:
       path: HeroDirt/HeroDirt.entitlements
+      properties:
+        aps-environment: development
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.herodirt.app
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)$(CFBundleIdentifier)
+        com.apple.developer.weatherkit: true
     settings:
       base:
         INFOPLIST_FILE: HeroDirt/Info.plist
