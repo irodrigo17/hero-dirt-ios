@@ -111,6 +111,7 @@ struct UIKitMapView: UIViewRepresentable {
         mapView.showsUserLocation = true
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
+        mapView.selectableMapFeatures = [.pointsOfInterest]
         mapView.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: "place")
         mapView.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: "new-pin")
         mapView.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: "search-result")
