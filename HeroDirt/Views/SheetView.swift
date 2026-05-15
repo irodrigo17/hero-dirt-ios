@@ -8,10 +8,17 @@ struct SheetView: View {
     var visibleRegion: MKCoordinateRegion? = nil
     var selectedDetent: PresentationDetent
 
+    @Binding var overlayVisible: Bool
+    @Binding var overlayTimeframe: RainfallTimeframe
+    @Binding var overlayOpacity: Double
+    let isOverlayLoading: Bool
+    var onCenterLocation: () -> Void = {}
+
     @State private var searchText = ""
     @State private var searchResults: [MKMapItem] = []
     @State private var searchTask: Task<Void, Never>?
     @State private var showingAbout = false
+    @State private var showingOverlayControls = false
 
     var body: some View {
         NavigationStack {
@@ -37,9 +44,37 @@ struct SheetView: View {
                         Image(systemName: "info.circle")
                     }
                 }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        showingOverlayControls = true
+                    } label: {
+                        ZStack {
+                            if isOverlayLoading {
+                                ProgressView().controlSize(.small)
+                            }
+                            Image(systemName: overlayVisible ? "cloud.rain.fill" : "cloud.rain")
+                                .opacity(isOverlayLoading ? 0 : 1)
+                        }
+                    }
+                    .tint(overlayVisible ? .blue : nil)
+                    .accessibilityLabel("Rainfall overlay settings")
+
+                    Button(action: onCenterLocation) {
+                        Image(systemName: "location.fill")
+                    }
+                    .accessibilityLabel("Center map on your location")
+                }
             }
             .sheet(isPresented: $showingAbout) {
                 AboutView()
+            }
+            .sheet(isPresented: $showingOverlayControls) {
+                RainfallOverlaySheet(
+                    isVisible: $overlayVisible,
+                    timeframe: $overlayTimeframe,
+                    opacity: $overlayOpacity
+                )
+                .presentationDetents([.fraction(0.7)])
             }
             .onSubmit(of: .search) {
                 searchTask?.cancel()

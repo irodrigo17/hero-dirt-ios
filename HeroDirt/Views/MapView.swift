@@ -68,18 +68,6 @@ struct MapView: View {
             }
         )
         .ignoresSafeArea()
-        .overlay(alignment: .topTrailing) {
-            MapControlsOverlayView(
-                overlayVisible: $overlayVisible,
-                overlayTimeframe: $overlayTimeframe,
-                overlayOpacity: $overlayOpacity,
-                isLoading: gridService.isLoading,
-                onCenterLocation: {
-                    cameraCommand = CameraCommand(action: .followUser)
-                    selectedDetent = collapsedDetent
-                }
-            )
-        }
         .onAppear {
             if placeStore.places.isEmpty {
                 cameraCommand = CameraCommand(action: .followUser)
@@ -129,7 +117,15 @@ struct MapView: View {
                 selectedDetent = focused ? .large : .medium
             },
             visibleRegion: visibleRegion,
-            selectedDetent: selectedDetent
+            selectedDetent: selectedDetent,
+            overlayVisible: $overlayVisible,
+            overlayTimeframe: $overlayTimeframe,
+            overlayOpacity: $overlayOpacity,
+            isOverlayLoading: gridService.isLoading,
+            onCenterLocation: {
+                cameraCommand = CameraCommand(action: .followUser)
+                selectedDetent = collapsedDetent
+            }
         )
         .presentationDetents(
             [collapsedDetent, .medium, .large],
