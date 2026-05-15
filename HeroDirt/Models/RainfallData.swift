@@ -49,12 +49,25 @@ enum DirtCondition {
     }
 }
 
+// MARK: - DirtConditionResult
+
+struct DirtConditionResult: Sendable {
+    let condition: DirtCondition
+    let moistureIndex: Double?   // 0–1, nil when legacy algorithm was used
+    let recentET0: Double?       // mm/day average (last 7 days), nil when no ET0 data
+    let soil: SoilData?          // resolved soil (loam if estimated), nil when legacy
+}
+
+// MARK: - Forecast
+
 struct RainForecast: Sendable {
     let next1Day: Double
     let next2Days: Double
     let next3Days: Double
     let next7Days: Double
 }
+
+// MARK: - Daily Data
 
 struct DailyWeatherData: Sendable {
     let date: Date
@@ -69,6 +82,8 @@ struct DailyWeatherData: Sendable {
 }
 
 typealias DailyRainfall = DailyWeatherData
+
+// MARK: - RainfallSummary
 
 struct RainfallSummary: Sendable {
     let last1Day: Double
@@ -111,9 +126,19 @@ struct RainfallSummary: Sendable {
 
     // MARK: - Dirt Condition
 
-    func dirtCondition(soil: SoilData? = nil) -> DirtCondition {
-        guard dailyHistory.contains(where: { $0.et0 > 0 }) else {
-            return legacyDirtCondition
+    func dirtConditionResult(soil: SoilData? = nil) -> DirtConditionResult {
+        let recentValues = dailyHistory.prefix(7).compactMap { $0.et0 > 0 ? $0.et0 : nil }
+        let recentET0 = recentValues.isEmpty
+            ? nil
+            : recentValues.reduce(0, +) / Double(recentValues.count)
+
+        guard let recentET0 else {
+            return DirtConditionResult(
+                condition: legacyDirtCondition,
+                moistureIndex: nil,
+                recentET0: nil,
+                soil: nil
+            )
         }
 
         let resolvedSoil = soil ?? .loam
@@ -126,13 +151,25 @@ struct RainfallSummary: Sendable {
         }
 
         let index = moisture / resolvedSoil.fieldCapacity
+        let condition: DirtCondition
         switch index {
-        case let x where x > 0.80: return .veryWet
-        case let x where x > 0.60: return .wet
-        case let x where x >= 0.25: return .heroDirt
-        case let x where x >= 0.10: return .dry
-        default: return .veryDry
+        case let x where x > 0.80: condition = .veryWet
+        case let x where x > 0.60: condition = .wet
+        case let x where x >= 0.25: condition = .heroDirt
+        case let x where x >= 0.10: condition = .dry
+        default: condition = .veryDry
         }
+
+        return DirtConditionResult(
+            condition: condition,
+            moistureIndex: index,
+            recentET0: recentET0,
+            soil: resolvedSoil
+        )
+    }
+
+    func dirtCondition(soil: SoilData? = nil) -> DirtCondition {
+        dirtConditionResult(soil: soil).condition
     }
 
     private var legacyDirtCondition: DirtCondition {

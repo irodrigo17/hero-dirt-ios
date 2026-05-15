@@ -55,7 +55,7 @@ struct PlaceDetailsView: View {
                             description: Text(errorMessage)
                         )
                     } else if let summary = rainfallSummary {
-                        DirtConditionCardView(condition: summary.dirtCondition(soil: soilData))
+                        DirtConditionCardView(result: summary.dirtConditionResult(soil: soilData))
                         RainfallCardView(summary: summary)
                         if let forecast = rainForecast {
                             RainForecastCardView(forecast: forecast)
