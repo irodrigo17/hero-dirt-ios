@@ -37,7 +37,7 @@ struct DirtConditionCardView: View {
             Divider()
 
             Text(
-                "Based on the 1 day per inch of rainfall rule of thumb. Actual conditions vary by soil type, shade, and exposure."
+                "Based on a soil moisture balance model using rainfall and evapotranspiration data. Actual conditions vary by shade, aspect, and trail surface."
             )
             .font(.caption)
             .foregroundStyle(.secondary)

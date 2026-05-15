@@ -6,6 +6,7 @@ struct SavedPlacesListView: View {
     var selectedDetent: PresentationDetent
 
     @State private var rainfallData: [UUID: RainfallSummary] = [:]
+    @State private var soilData: [UUID: SoilData] = [:]
     @State private var loadingPlaces: Set<UUID> = []
     @State private var errors: [UUID: String] = [:]
     @State private var renamingPlace: Place?
@@ -54,6 +55,7 @@ struct SavedPlacesListView: View {
                             PlaceRow(
                                 place: place,
                                 rainfall: rainfallData[place.id],
+                                soil: soilData[place.id],
                                 isLoading: loadingPlaces.contains(place.id),
                                 error: errors[place.id],
                                 onRename: {
@@ -94,16 +96,22 @@ struct SavedPlacesListView: View {
             loadingPlaces.insert(place.id)
         }
 
-        await withTaskGroup(of: (UUID, Result<RainfallSummary, Error>).self) {
+        await withTaskGroup(of: (UUID, Result<(RainfallSummary, SoilData), Error>).self) {
             group in
             for place in placesToLoad {
                 group.addTask {
+                    async let summaryTask = WeatherService.fetchRainfall(
+                        latitude: place.latitude,
+                        longitude: place.longitude
+                    )
+                    async let soilTask = SoilService.fetchSoilData(
+                        latitude: place.latitude,
+                        longitude: place.longitude
+                    )
                     do {
-                        let summary = try await WeatherService.fetchRainfall(
-                            latitude: place.latitude,
-                            longitude: place.longitude
-                        )
-                        return (place.id, .success(summary))
+                        let summary = try await summaryTask
+                        let soil = await soilTask
+                        return (place.id, .success((summary, soil)))
                     } catch {
                         return (place.id, .failure(error))
                     }
@@ -113,8 +121,9 @@ struct SavedPlacesListView: View {
             for await (id, result) in group {
                 loadingPlaces.remove(id)
                 switch result {
-                case .success(let summary):
+                case .success(let (summary, soil)):
                     rainfallData[id] = summary
+                    soilData[id] = soil
                     errors[id] = nil
                 case .failure(let error):
                     errors[id] = error.localizedDescription
@@ -129,6 +138,7 @@ struct SavedPlacesListView: View {
 private struct PlaceRow: View {
     let place: Place
     let rainfall: RainfallSummary?
+    let soil: SoilData?
     let isLoading: Bool
     let error: String?
     var onRename: () -> Void
@@ -144,7 +154,7 @@ private struct PlaceRow: View {
             }
             HStack {
                 if let rainfall {
-                    dirtConditionBadge(rainfall.dirtCondition)
+                    dirtConditionBadge(rainfall.dirtCondition(soil: soil))
                     Spacer()
                     lastRainBadge(rainfall)
                 }

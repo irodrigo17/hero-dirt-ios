@@ -13,6 +13,7 @@ struct PlaceDetailsView: View {
     @State private var placeName = "Loading..."
     @State private var rainfallSummary: RainfallSummary?
     @State private var rainForecast: RainForecast?
+    @State private var soilData: SoilData?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showingRenameAlert = false
@@ -54,7 +55,7 @@ struct PlaceDetailsView: View {
                             description: Text(errorMessage)
                         )
                     } else if let summary = rainfallSummary {
-                        DirtConditionCardView(condition: summary.dirtCondition)
+                        DirtConditionCardView(condition: summary.dirtCondition(soil: soilData))
                         RainfallCardView(summary: summary)
                         if let forecast = rainForecast {
                             RainForecastCardView(forecast: forecast)
@@ -167,6 +168,7 @@ struct PlaceDetailsView: View {
         placeName = "Loading..."
         rainfallSummary = nil
         rainForecast = nil
+        soilData = nil
         resolvedMapItem = nil
         isLoading = true
         errorMessage = nil
@@ -214,6 +216,10 @@ struct PlaceDetailsView: View {
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
+        async let soilTask = SoilService.fetchSoilData(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
 
         do {
             rainfallSummary = try await rainfallTask
@@ -225,6 +231,7 @@ struct PlaceDetailsView: View {
         guard !Task.isCancelled else { return }
         isLoading = false
 
+        soilData = await soilTask
         rainForecast = try? await forecastTask
     }
 

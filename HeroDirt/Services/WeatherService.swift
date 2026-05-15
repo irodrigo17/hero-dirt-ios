@@ -12,10 +12,12 @@ enum WeatherService {
         struct DailyData: Codable {
             let time: [String]
             let precipitationSum: [Double?]
+            let et0FaoEvapotranspiration: [Double?]?
 
             enum CodingKeys: String, CodingKey {
                 case time
                 case precipitationSum = "precipitation_sum"
+                case et0FaoEvapotranspiration = "et0_fao_evapotranspiration"
             }
         }
     }
@@ -56,12 +58,15 @@ enum WeatherService {
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "en_US_POSIX")
 
-        var daily: [DailyRainfall] = []
+        var daily: [DailyWeatherData] = []
         for (i, dateString) in decoded.daily.time.enumerated() {
             guard i < decoded.daily.precipitationSum.count else { continue }
             guard let date = formatter.date(from: dateString) else { continue }
             let amount = decoded.daily.precipitationSum[i] ?? 0.0
-            daily.append(DailyRainfall(date: date, amount: amount))
+            let et0 = decoded.daily.et0FaoEvapotranspiration.flatMap { arr in
+                i < arr.count ? arr[i] : nil
+            } ?? 0.0
+            daily.append(DailyWeatherData(date: date, amount: amount, et0: et0))
         }
 
         return RainfallSummary(daily: daily)
@@ -92,7 +97,7 @@ enum WeatherService {
                 name: "longitude",
                 value: String(format: "%.6f", longitude)
             ),
-            URLQueryItem(name: "daily", value: "precipitation_sum"),
+            URLQueryItem(name: "daily", value: "precipitation_sum,et0_fao_evapotranspiration"),
             URLQueryItem(name: "past_days", value: "30"),
             URLQueryItem(name: "forecast_days", value: "1"),
             URLQueryItem(name: "timezone", value: "auto"),
@@ -141,5 +146,11 @@ enum WeatherService {
             next3Days: sum(3),
             next7Days: sum(7)
         )
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

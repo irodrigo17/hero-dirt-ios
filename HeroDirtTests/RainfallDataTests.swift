@@ -154,7 +154,7 @@ struct RainfallDataTests {
             last7Days: 25,
             daysSinceLastRain: 0
         )
-        #expect(summary.dirtCondition == .wet)
+        #expect(summary.dirtCondition() == .wet)
     }
 
     @Test func dirtConditionHeroDirtAfterModerateRain() {
@@ -166,7 +166,7 @@ struct RainfallDataTests {
             last7Days: 25,
             daysSinceLastRain: 2
         )
-        #expect(summary.dirtCondition == .heroDirt)
+        #expect(summary.dirtCondition() == .heroDirt)
     }
 
     @Test func dirtConditionDryAfterModerateRain() {
@@ -178,7 +178,7 @@ struct RainfallDataTests {
             last7Days: 25,
             daysSinceLastRain: 6
         )
-        #expect(summary.dirtCondition == .dry)
+        #expect(summary.dirtCondition() == .dry)
     }
 
     @Test func dirtConditionHeroDirtAfterHeavyRain() {
@@ -190,7 +190,7 @@ struct RainfallDataTests {
             last7Days: 100,
             daysSinceLastRain: 5
         )
-        #expect(summary.dirtCondition == .heroDirt)
+        #expect(summary.dirtCondition() == .heroDirt)
     }
 
     @Test func dirtConditionDryNoRecentRain() {
@@ -202,7 +202,7 @@ struct RainfallDataTests {
             last7Days: 0,
             daysSinceLastRain: nil
         )
-        #expect(summary.dirtCondition == .dry)
+        #expect(summary.dirtCondition() == .dry)
     }
 
     @Test func dirtConditionWetHeavyRainStillDrying() {
@@ -214,7 +214,7 @@ struct RainfallDataTests {
             last7Days: 100,
             daysSinceLastRain: 2
         )
-        #expect(summary.dirtCondition == .wet)
+        #expect(summary.dirtCondition() == .wet)
     }
 
     // MARK: - Threshold boundary
