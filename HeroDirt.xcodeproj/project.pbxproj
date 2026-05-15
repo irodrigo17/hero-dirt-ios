@@ -61,6 +61,7 @@
 		44692038F44E67135E0B38AB /* PlaceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStoreTests.swift; sourceTree = "<group>"; };
 		47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		49C37481A6448709D5937CF2 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
+		4CE69D4F15C36249D58D44EC /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		5122001552D0FC22B15A2A8C /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
 		544289F591E5EE646407FF37 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
 		5A36B08913D55F2B7F70EE4D /* RainForecastCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastCardView.swift; sourceTree = "<group>"; };
@@ -93,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				BEE2B26511DA261B886CCA74 /* Assets.xcassets */,
+				4CE69D4F15C36249D58D44EC /* Base.xcconfig */,
 				47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */,
 				948419789085469DD0A31178 /* HeroDirt.entitlements */,
 				5122001552D0FC22B15A2A8C /* HeroDirtApp.swift */,
@@ -412,6 +414,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = K3CQQKBR25;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -430,6 +433,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = K3CQQKBR25;
+				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
