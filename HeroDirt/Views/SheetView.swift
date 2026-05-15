@@ -11,6 +11,7 @@ struct SheetView: View {
     @State private var searchText = ""
     @State private var searchResults: [MKMapItem] = []
     @State private var searchTask: Task<Void, Never>?
+    @State private var showingAbout = false
 
     var body: some View {
         NavigationStack {
@@ -28,6 +29,18 @@ struct SheetView: View {
                 prompt: "Search places"
             )
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showingAbout = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAbout) {
+                AboutView()
+            }
             .onSubmit(of: .search) {
                 searchTask?.cancel()
                 guard !searchText.isEmpty else { return }

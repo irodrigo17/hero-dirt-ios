@@ -17,6 +17,7 @@
 		54BE1C102E3F2C6D9FBF995B /* RainfallOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C37481A6448709D5937CF2 /* RainfallOverlay.swift */; };
 		58419135D0DD4D289E2CFE26 /* PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C6E0BABF8E70A0502E1DD2 /* PlaceTests.swift */; };
 		69145AFD0B0F8FBADC14C612 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86D55421595648BAF851BFD8 /* WeatherService.swift */; };
+		6B13905283B321B3540924B8 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D3E5B9A3AECAD3BF81D6F9 /* AboutView.swift */; };
 		6E4E2A432DE4C227C4C32854 /* HeroDirtApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5122001552D0FC22B15A2A8C /* HeroDirtApp.swift */; };
 		6EC369FEE43F5D9B4250F2E4 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727845F179A9D5F61D6A5C9D /* MapView.swift */; };
 		730B3EB694755B3ED6AFA92B /* RainfallData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */; };
@@ -74,6 +75,7 @@
 		8D7CC53BF896AB144D9D3AD7 /* HeroDirtTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		923B2079001426116C580872 /* RainfallColorScaleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScaleTests.swift; sourceTree = "<group>"; };
 		948419789085469DD0A31178 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
+		A8D3E5B9A3AECAD3BF81D6F9 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		AD4D92D7FAA67BA17087181C /* RainfallGridService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallGridService.swift; sourceTree = "<group>"; };
 		B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
 		BEE2B26511DA261B886CCA74 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 		853D24C281FCC9239BB5DBDF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				A8D3E5B9A3AECAD3BF81D6F9 /* AboutView.swift */,
 				34B4E7778CAA336AADDCF385 /* DirtConditionCardView.swift */,
 				C8457BDB6F46E17A05BFB056 /* MapControlsOverlayView.swift */,
 				727845F179A9D5F61D6A5C9D /* MapView.swift */,
@@ -287,6 +290,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B13905283B321B3540924B8 /* AboutView.swift in Sources */,
 				85E09D7443AA6433753D63A0 /* ContentView.swift in Sources */,
 				84649145A445B95107CCEB3D /* DirtConditionCardView.swift in Sources */,
 				6E4E2A432DE4C227C4C32854 /* HeroDirtApp.swift in Sources */,
