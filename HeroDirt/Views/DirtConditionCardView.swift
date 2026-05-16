@@ -2,6 +2,8 @@ import SwiftUI
 
 struct DirtConditionCardView: View {
     let result: DirtConditionResult
+    var onCustomize: (() -> Void)? = nil
+    var isOverridden: Bool = false
     @State private var showDetails = false
 
     var body: some View {
@@ -94,13 +96,25 @@ struct DirtConditionCardView: View {
                     valueColor: result.condition.color
                 )
                 detailTile(
-                    label: soil.isEstimated ? "Soil (est.)" : "Soil type",
+                    label: isOverridden ? "Soil (custom)" : (soil.isEstimated ? "Soil (est.)" : "Soil type"),
                     value: soil.textureLabel
                 )
                 detailTile(
                     label: "Drying rate",
                     value: String(format: "%.1f mm/d", et0)
                 )
+            }
+            if let onCustomize {
+                Button(action: onCustomize) {
+                    Label(
+                        isOverridden ? "Edit soil override" : "Customize soil",
+                        systemImage: isOverridden ? "pencil.circle.fill" : "slider.horizontal.3"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
     }

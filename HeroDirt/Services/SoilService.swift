@@ -1,20 +1,94 @@
 import Foundation
 
+// MARK: - SoilOverride
+
+struct SoilOverride: Codable, Hashable, Sendable {
+
+    var textureClass: TextureClass
+    var exposure: Exposure
+
+    enum TextureClass: String, Codable, CaseIterable, Hashable {
+        case sand = "Sand"
+        case sandyLoam = "Sandy Loam"
+        case loam = "Loam"
+        case clayLoam = "Clay Loam"
+        case clay = "Clay"
+
+        var sandFraction: Double {
+            switch self {
+            case .sand: return 0.90
+            case .sandyLoam: return 0.65
+            case .loam: return 0.40
+            case .clayLoam: return 0.25
+            case .clay: return 0.10
+            }
+        }
+
+        var clayFraction: Double {
+            switch self {
+            case .sand: return 0.05
+            case .sandyLoam: return 0.10
+            case .loam: return 0.20
+            case .clayLoam: return 0.35
+            case .clay: return 0.55
+            }
+        }
+    }
+
+    enum Exposure: String, Codable, CaseIterable, Hashable {
+        case sunny = "Sunny"
+        case partial = "Partial"
+        case shaded = "Shaded"
+
+        var dryingMultiplier: Double {
+            switch self {
+            case .sunny: return 1.3
+            case .partial: return 1.0
+            case .shaded: return 0.65
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .sunny: return "sun.max"
+            case .partial: return "cloud.sun"
+            case .shaded: return "tree"
+            }
+        }
+    }
+
+    var asSoilData: SoilData {
+        SoilData(
+            sandFraction: textureClass.sandFraction,
+            clayFraction: textureClass.clayFraction,
+            isEstimated: false,
+            dryingRateMultiplier: exposure.dryingMultiplier
+        )
+    }
+}
+
 // MARK: - SoilData
 
 struct SoilData: Sendable {
-    let sandFraction: Double   // 0.0–1.0
-    let clayFraction: Double   // 0.0–1.0
-    let isEstimated: Bool      // true when using default values, not measured from API
+    let sandFraction: Double           // 0.0–1.0
+    let clayFraction: Double           // 0.0–1.0
+    let isEstimated: Bool              // true when using loam fallback, not from API
+    let dryingRateMultiplier: Double   // 1.0 = reference; <1 slower (shade), >1 faster (sun)
 
-    init(sandFraction: Double, clayFraction: Double, isEstimated: Bool = false) {
+    init(
+        sandFraction: Double,
+        clayFraction: Double,
+        isEstimated: Bool = false,
+        dryingRateMultiplier: Double = 1.0
+    ) {
         self.sandFraction = sandFraction
         self.clayFraction = clayFraction
         self.isEstimated = isEstimated
+        self.dryingRateMultiplier = dryingRateMultiplier
     }
 
     var fieldCapacity: Double { 20.0 + 25.0 * (1.0 - sandFraction) }
-    var dryingRate: Double { 0.6 + 0.9 * sandFraction }
+    var dryingRate: Double { (0.6 + 0.9 * sandFraction) * dryingRateMultiplier }
 
     // Simplified USDA texture triangle classification
     var textureLabel: String {
@@ -74,6 +148,17 @@ enum SoilService {
         struct Values: Codable {
             let mean: Double?
         }
+    }
+
+    // MARK: - Resolve
+
+    static func resolveOrFetch(
+        override: SoilOverride?,
+        latitude: Double,
+        longitude: Double
+    ) async -> SoilData {
+        if let override { return override.asSoilData }
+        return await fetchSoilData(latitude: latitude, longitude: longitude)
     }
 
     // MARK: - Fetch

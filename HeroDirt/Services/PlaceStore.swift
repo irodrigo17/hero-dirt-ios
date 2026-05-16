@@ -25,6 +25,7 @@ class PlaceStore: ObservableObject {
         static let latitude = "latitude"
         static let longitude = "longitude"
         static let mapItemId = "mapItemId"
+        static let soilOverride = "soilOverride"
         static let createdAt = "createdAt"
         static let updatedAt = "updatedAt"
     }
@@ -53,13 +54,18 @@ class PlaceStore: ObservableObject {
         if let mapItemIdString = record[CKKeys.mapItemId] as? String {
             mapItemId = MKMapItem.Identifier(rawValue: mapItemIdString)
         }
+        var soilOverride: SoilOverride? = nil
+        if let overrideData = record[CKKeys.soilOverride] as? Data {
+            soilOverride = try? JSONDecoder().decode(SoilOverride.self, from: overrideData)
+        }
 
         return Place(
             id: uuid,
             name: name,
             latitude: latitude,
             longitude: longitude,
-            mapItemId: mapItemId
+            mapItemId: mapItemId,
+            soilOverride: soilOverride
         )
     }
 
@@ -72,6 +78,13 @@ class PlaceStore: ObservableObject {
             record[CKKeys.mapItemId] = mapId.rawValue as CKRecordValue
         } else {
             record[CKKeys.mapItemId] = nil
+        }
+        if let override = place.soilOverride,
+            let data = try? JSONEncoder().encode(override)
+        {
+            record[CKKeys.soilOverride] = data as CKRecordValue
+        } else {
+            record[CKKeys.soilOverride] = nil
         }
         record[CKKeys.updatedAt] = Date() as CKRecordValue
         if record[CKKeys.createdAt] == nil {
@@ -244,6 +257,16 @@ class PlaceStore: ObservableObject {
             }
             self.upsertAllToCloudKit(self.places)
             self.deleteMissingFromCloudKit(keeping: self.places)
+        }
+    }
+
+    func updateSoilOverride(_ override: SoilOverride?, for place: Place) {
+        guard let index = places.firstIndex(where: { $0.id == place.id }) else { return }
+        places[index].soilOverride = override
+        save()
+        iCloudAccountAvailable { [weak self] available in
+            guard let self = self, available, self.fileURL == nil else { return }
+            self.upsertAllToCloudKit(self.places)
         }
     }
 

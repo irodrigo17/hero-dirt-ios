@@ -8,6 +8,7 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
     var latitude: Double
     var longitude: Double
     var mapItemIdString: String?
+    var soilOverride: SoilOverride?
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -23,12 +24,14 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         name: String,
         latitude: Double,
         longitude: Double,
-        mapItemId: MKMapItem.Identifier? = nil
+        mapItemId: MKMapItem.Identifier? = nil,
+        soilOverride: SoilOverride? = nil
     ) {
         self.id = id
         self.name = name
         self.latitude = latitude
         self.longitude = longitude
         self.mapItemIdString = mapItemId?.rawValue
+        self.soilOverride = soilOverride
     }
 }

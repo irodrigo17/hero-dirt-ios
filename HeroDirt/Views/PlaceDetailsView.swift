@@ -17,6 +17,7 @@ struct PlaceDetailsView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showingRenameAlert = false
+    @State private var showSoilOverrideSheet = false
     @State private var editingName = ""
     @State private var resolvedMapItem: MKMapItem?
 
@@ -55,7 +56,11 @@ struct PlaceDetailsView: View {
                             description: Text(errorMessage)
                         )
                     } else if let summary = rainfallSummary {
-                        DirtConditionCardView(result: summary.dirtConditionResult(soil: soilData))
+                        DirtConditionCardView(
+                        result: summary.dirtConditionResult(soil: soilData),
+                        onCustomize: savedPlace != nil ? { showSoilOverrideSheet = true } : nil,
+                        isOverridden: savedPlace?.soilOverride != nil
+                    )
                         RainfallCardView(summary: summary)
                         if let forecast = rainForecast {
                             RainForecastCardView(forecast: forecast)
@@ -101,6 +106,15 @@ struct PlaceDetailsView: View {
         .presentationDetents([.medium, .large])
         .task(id: loadKey) {
             await loadData()
+        }
+        .sheet(isPresented: $showSoilOverrideSheet) {
+            if let place = savedPlace {
+                SoilOverrideSheet(currentOverride: place.soilOverride) { newOverride in
+                    placeStore.updateSoilOverride(newOverride, for: place)
+                    applySoilOverride(newOverride)
+                    showSoilOverrideSheet = false
+                }
+            }
         }
     }
 
@@ -216,7 +230,8 @@ struct PlaceDetailsView: View {
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
-        async let soilTask = SoilService.fetchSoilData(
+        async let soilTask = SoilService.resolveOrFetch(
+            override: savedPlace?.soilOverride,
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
@@ -233,6 +248,19 @@ struct PlaceDetailsView: View {
 
         soilData = await soilTask
         rainForecast = try? await forecastTask
+    }
+
+    private func applySoilOverride(_ override: SoilOverride?) {
+        if let override {
+            soilData = override.asSoilData
+        } else {
+            Task {
+                soilData = await SoilService.fetchSoilData(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                )
+            }
+        }
     }
 
     private func formatCoordinate() -> String {
