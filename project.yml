@@ -30,7 +30,9 @@ targets:
         DEVELOPMENT_TEAM: K3CQQKBR25
         CODE_SIGN_IDENTITY: "iPhone Developer"
         GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
 
   HeroDirtTests:
     type: bundle.unit-test
