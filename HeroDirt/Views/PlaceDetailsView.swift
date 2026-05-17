@@ -57,10 +57,11 @@ struct PlaceDetailsView: View {
                         )
                     } else if let summary = rainfallSummary {
                         DirtConditionCardView(
-                        result: summary.dirtConditionResult(soil: soilData),
-                        onCustomize: savedPlace != nil ? { showSoilOverrideSheet = true } : nil,
-                        isOverridden: savedPlace?.soilOverride != nil
-                    )
+                            result: summary.dirtConditionResult(soil: soilData),
+                            onCustomize: savedPlace != nil
+                                ? { showSoilOverrideSheet = true } : nil,
+                            isOverridden: savedPlace?.soilOverride != nil
+                        )
                         RainfallCardView(summary: summary)
                         if let forecast = rainForecast {
                             RainForecastCardView(forecast: forecast)
@@ -68,6 +69,9 @@ struct PlaceDetailsView: View {
                     }
                 }
                 .padding()
+            }
+            .refreshable {
+                await refreshData()
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle(
@@ -246,6 +250,40 @@ struct PlaceDetailsView: View {
         guard !Task.isCancelled else { return }
         isLoading = false
 
+        soilData = await soilTask
+        rainForecast = try? await forecastTask
+    }
+
+    private func refreshData() async {
+        let key = WeatherCache.key(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+        await WeatherService.cache.invalidate(key: key)
+
+        async let rainfallTask = WeatherService.fetchRainfall(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+        async let forecastTask = WeatherService.fetchRainForecast(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+        async let soilTask = SoilService.resolveOrFetch(
+            override: savedPlace?.soilOverride,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+
+        do {
+            rainfallSummary = try await rainfallTask
+            errorMessage = nil
+        } catch {
+            guard !Task.isCancelled else { return }
+            errorMessage = error.localizedDescription
+        }
+
+        guard !Task.isCancelled else { return }
         soilData = await soilTask
         rainForecast = try? await forecastTask
     }

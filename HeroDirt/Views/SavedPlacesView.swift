@@ -80,7 +80,19 @@ struct SavedPlacesListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .refreshable { await loadAllRainfall() }
+                .refreshable {
+                    rainfallData = [:]
+                    soilData = [:]
+                    errors = [:]
+                    for place in placeStore.places {
+                        let key = WeatherCache.key(
+                            latitude: place.latitude,
+                            longitude: place.longitude
+                        )
+                        await WeatherService.cache.invalidate(key: key)
+                    }
+                    await loadAllRainfall()
+                }
                 .task(id: placeStore.places.map(\.id)) {
                     await loadAllRainfall()
                 }

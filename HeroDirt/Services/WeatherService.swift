@@ -119,6 +119,13 @@ actor WeatherCache {
         }
     }
 
+    // MARK: - Invalidation
+
+    func invalidate(key: String) {
+        rainfall.removeValue(forKey: key)
+        forecast.removeValue(forKey: key)
+    }
+
     // MARK: - Test support
 
     func _resetForTesting() {
