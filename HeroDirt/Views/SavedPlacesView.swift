@@ -55,7 +55,7 @@ struct SavedPlacesListView: View {
                             PlaceRow(
                                 place: place,
                                 rainfall: rainfallData[place.id],
-                                soil: soilData[place.id],
+                                fetchedSoil: soilData[place.id],
                                 isLoading: loadingPlaces.contains(place.id),
                                 error: errors[place.id],
                                 onRename: {
@@ -151,10 +151,14 @@ struct SavedPlacesListView: View {
 private struct PlaceRow: View {
     let place: Place
     let rainfall: RainfallSummary?
-    let soil: SoilData?
+    let fetchedSoil: SoilData?
     let isLoading: Bool
     let error: String?
     var onRename: () -> Void
+
+    private var effectiveSoil: SoilData? {
+        place.soilOverride?.asSoilData ?? fetchedSoil
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -167,7 +171,7 @@ private struct PlaceRow: View {
             }
             HStack {
                 if let rainfall {
-                    dirtConditionBadge(rainfall.dirtCondition(soil: soil))
+                    dirtConditionBadge(rainfall.dirtCondition(soil: effectiveSoil))
                     Spacer()
                     lastRainBadge(rainfall)
                 }
