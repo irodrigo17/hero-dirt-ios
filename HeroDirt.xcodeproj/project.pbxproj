@@ -11,6 +11,7 @@
 		254832815177A7E9FFA87D88 /* SharedUtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A1B822ED96F1D1F23BFCB1 /* SharedUtilitiesTests.swift */; };
 		28688B986F3D37299DE18E16 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFDCB15D7909852E9F7677ED /* SharedUI.swift */; };
 		3520ED0386A97A3281BB3345 /* WeatherServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDEC702EB7094CF94991149 /* WeatherServiceTests.swift */; };
+		374F078B45EE8E2B13B5FA33 /* WeatherCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF0510DEDBDFBA08E773566 /* WeatherCacheTests.swift */; };
 		3A8D138B7705C9B694D689FA /* PlaceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6212CF0607C8E212CC4494 /* PlaceStore.swift */; };
 		487524456187BBC0A72EF3B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEE2B26511DA261B886CCA74 /* Assets.xcassets */; };
 		4C905FC9E13CE8D191F60257 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544289F591E5EE646407FF37 /* Place.swift */; };
@@ -68,6 +69,7 @@
 		47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		49C37481A6448709D5937CF2 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
 		4CE69D4F15C36249D58D44EC /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		4EF0510DEDBDFBA08E773566 /* WeatherCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCacheTests.swift; sourceTree = "<group>"; };
 		5122001552D0FC22B15A2A8C /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
 		544289F591E5EE646407FF37 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
 		5A36B08913D55F2B7F70EE4D /* RainForecastCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastCardView.swift; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				044979B915FE13B07F5D5364 /* RainForecastTests.swift */,
 				E1A1B822ED96F1D1F23BFCB1 /* SharedUtilitiesTests.swift */,
 				0E9EBBB307063E84473F464D /* SoilServiceTests.swift */,
+				4EF0510DEDBDFBA08E773566 /* WeatherCacheTests.swift */,
 				FCDEC702EB7094CF94991149 /* WeatherServiceTests.swift */,
 			);
 			path = HeroDirtTests;
@@ -292,6 +295,7 @@
 				F90AC25370526C2747B4959F /* RainfallOverlayTests.swift in Sources */,
 				254832815177A7E9FFA87D88 /* SharedUtilitiesTests.swift in Sources */,
 				B46BF0C959A8CDF4AE4354F1 /* SoilServiceTests.swift in Sources */,
+				374F078B45EE8E2B13B5FA33 /* WeatherCacheTests.swift in Sources */,
 				3520ED0386A97A3281BB3345 /* WeatherServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

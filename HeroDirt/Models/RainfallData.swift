@@ -60,7 +60,7 @@ struct DirtConditionResult: Sendable {
 
 // MARK: - Forecast
 
-struct RainForecast: Sendable {
+struct RainForecast: Codable, Sendable {
     let next1Day: Double
     let next2Days: Double
     let next3Days: Double
@@ -69,7 +69,7 @@ struct RainForecast: Sendable {
 
 // MARK: - Daily Data
 
-struct DailyWeatherData: Sendable {
+struct DailyWeatherData: Codable, Sendable {
     let date: Date
     let amount: Double   // precipitation in mm
     let et0: Double      // FAO Penman-Monteith reference ET in mm/day

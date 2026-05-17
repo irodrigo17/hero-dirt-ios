@@ -2,7 +2,141 @@ import CoreLocation
 import Foundation
 import WeatherKit
 
+// MARK: - WeatherCache
+
+actor WeatherCache {
+
+    // MARK: - Entry
+
+    struct Entry<T: Codable>: Codable {
+        let value: T
+        let timestamp: Date
+    }
+
+    // MARK: - State
+
+    var rainfall: [String: Entry<[DailyWeatherData]>] = [:]
+    var forecast: [String: Entry<RainForecast>] = [:]
+    private var isLoaded = false
+    private var persistTask: Task<Void, Never>?
+
+    // MARK: - TTL
+
+    static let rainfallTTL: TimeInterval = 3600
+    static let forecastTTL: TimeInterval = 3600
+
+    // MARK: - Disk URLs
+
+    private static var cachesDir: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+    }
+    static var rainfallURL: URL {
+        cachesDir.appending(path: "hero_dirt_rainfall.json")
+    }
+    static var forecastURL: URL {
+        cachesDir.appending(path: "hero_dirt_forecast.json")
+    }
+
+    // MARK: - Key
+
+    static func key(latitude: Double, longitude: Double) -> String {
+        "\(Int(latitude * 100))_\(Int(longitude * 100))"
+    }
+
+    // MARK: - Disk load (lazy, once per instance)
+
+    private func loadIfNeeded() {
+        guard !isLoaded else { return }
+        isLoaded = true
+        let now = Date()
+        if let data = try? Data(contentsOf: Self.rainfallURL),
+            let entries = try? JSONDecoder().decode(
+                [String: Entry<[DailyWeatherData]>].self, from: data)
+        {
+            rainfall = entries.filter {
+                now.timeIntervalSince($0.value.timestamp) < Self.rainfallTTL
+            }
+        }
+        if let data = try? Data(contentsOf: Self.forecastURL),
+            let entries = try? JSONDecoder().decode(
+                [String: Entry<RainForecast>].self, from: data)
+        {
+            forecast = entries.filter {
+                now.timeIntervalSince($0.value.timestamp) < Self.forecastTTL
+            }
+        }
+    }
+
+    // MARK: - Rainfall
+
+    func getRainfall(_ key: String) -> [DailyWeatherData]? {
+        loadIfNeeded()
+        guard let entry = rainfall[key],
+            Date().timeIntervalSince(entry.timestamp) < Self.rainfallTTL
+        else { return nil }
+        return entry.value
+    }
+
+    func setRainfall(_ key: String, _ daily: [DailyWeatherData]) {
+        loadIfNeeded()
+        rainfall[key] = Entry(value: daily, timestamp: Date())
+        schedulePersist()
+    }
+
+    // MARK: - Forecast
+
+    func getForecast(_ key: String) -> RainForecast? {
+        loadIfNeeded()
+        guard let entry = forecast[key],
+            Date().timeIntervalSince(entry.timestamp) < Self.forecastTTL
+        else { return nil }
+        return entry.value
+    }
+
+    func setForecast(_ key: String, _ value: RainForecast) {
+        loadIfNeeded()
+        forecast[key] = Entry(value: value, timestamp: Date())
+        schedulePersist()
+    }
+
+    // MARK: - Persist (debounced, background)
+
+    private func schedulePersist() {
+        persistTask?.cancel()
+        let r = rainfall
+        let f = forecast
+        let rainfallURL = Self.rainfallURL
+        let forecastURL = Self.forecastURL
+        persistTask = Task.detached(priority: .background) {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            if let data = try? JSONEncoder().encode(r) {
+                try? data.write(to: rainfallURL, options: .atomic)
+            }
+            if let data = try? JSONEncoder().encode(f) {
+                try? data.write(to: forecastURL, options: .atomic)
+            }
+        }
+    }
+
+    // MARK: - Test support
+
+    func _resetForTesting() {
+        rainfall = [:]
+        forecast = [:]
+        isLoaded = false
+        persistTask?.cancel()
+        persistTask = nil
+        try? FileManager.default.removeItem(at: Self.rainfallURL)
+        try? FileManager.default.removeItem(at: Self.forecastURL)
+    }
+}
+
+// MARK: - WeatherService
+
 enum WeatherService {
+
+    static let cache = WeatherCache()
 
     // MARK: - API Response
 
@@ -85,6 +219,11 @@ enum WeatherService {
         longitude: Double,
         session: URLSession? = nil
     ) async throws -> RainfallSummary {
+        let key = WeatherCache.key(latitude: latitude, longitude: longitude)
+        if let cached = await cache.getRainfall(key) {
+            return RainfallSummary(daily: cached)
+        }
+
         var components = URLComponents(
             string: "https://api.open-meteo.com/v1/forecast"
         )!
@@ -119,7 +258,9 @@ enum WeatherService {
             throw WeatherError.httpError(statusCode: http.statusCode)
         }
 
-        return try parseResponse(data)
+        let summary = try parseResponse(data)
+        await cache.setRainfall(key, summary.dailyHistory)
+        return summary
     }
 
     // MARK: - WeatherKit Forecast
@@ -127,6 +268,9 @@ enum WeatherService {
     static func fetchRainForecast(latitude: Double, longitude: Double)
         async throws -> RainForecast
     {
+        let key = WeatherCache.key(latitude: latitude, longitude: longitude)
+        if let cached = await cache.getForecast(key) { return cached }
+
         let location = CLLocation(latitude: latitude, longitude: longitude)
         let daily = try await WeatherKit.WeatherService.shared.weather(
             for: location,
@@ -140,12 +284,14 @@ enum WeatherService {
 
         func sum(_ n: Int) -> Double { amounts.prefix(n).reduce(0, +) }
 
-        return RainForecast(
+        let result = RainForecast(
             next1Day: sum(1),
             next2Days: sum(2),
             next3Days: sum(3),
             next7Days: sum(7)
         )
+        await cache.setForecast(key, result)
+        return result
     }
 }
 
