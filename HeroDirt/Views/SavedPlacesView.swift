@@ -42,7 +42,7 @@ struct SavedPlacesListView: View {
                 "No saved places",
                 systemImage: "star",
                 description: Text(
-                    "Long-press anywhere on the map to check rainfall, then tap the star to save it here."
+                    "Search for a place by name, tap a pin on the map, or long-press to drop a new pin — then tap the star to save it here."
                 )
             )
         } else {
