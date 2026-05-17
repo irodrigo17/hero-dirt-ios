@@ -170,10 +170,10 @@ private struct PlaceRow: View {
                     .foregroundStyle(.red)
             } else if let rainfall {
                 HStack(spacing: 8) {
-                    compactTile("1d", value: rainfall.last1Day)
-                    compactTile("2d", value: rainfall.last2Days)
-                    compactTile("3d", value: rainfall.last3Days)
-                    compactTile("7d", value: rainfall.last7Days)
+                    compactTile("1 day", value: rainfall.last1Day)
+                    compactTile("2 days", value: rainfall.last2Days)
+                    compactTile("3 days", value: rainfall.last3Days)
+                    compactTile("7 days", value: rainfall.last7Days)
                 }
             }
         }
@@ -202,16 +202,16 @@ private struct PlaceRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             case 1:
-                Label("1d ago", systemImage: "cloud.rain")
+                Label("1 day ago", systemImage: "cloud.rain")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             default:
-                Label("\(days)d ago", systemImage: "cloud.rain")
+                Label("\(days) days ago", systemImage: "cloud.rain")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         } else {
-            Label("30d+", systemImage: "sun.max")
+            Label("30+ days", systemImage: "sun.max")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
