@@ -63,6 +63,7 @@ struct SavedPlacesListView: View {
                                     renamingPlace = place
                                 }
                             )
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .swipeActions(edge: .leading) {
