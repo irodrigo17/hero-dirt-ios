@@ -105,6 +105,7 @@ struct UIKitMapView: UIViewRepresentable {
     var onAnnotationSelected: (String) -> Void = { _ in }
     var onFeatureTapped: (MKMapItem) -> Void = { _ in }
     var onTap: () -> Void = {}
+    var onUserLocationAvailable: (CLLocationCoordinate2D) -> Void = { _ in }
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -138,7 +139,7 @@ struct UIKitMapView: UIViewRepresentable {
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let c = context.coordinator
-        c.callbacks = (onRegionChanged, onLongPress, onAnnotationSelected, onFeatureTapped, onTap)
+        c.callbacks = (onRegionChanged, onLongPress, onAnnotationSelected, onFeatureTapped, onTap, onUserLocationAvailable)
         c.resolvedCategories = resolvedCategories
 
         c.updateAnnotations(on: mapView, view: self)
@@ -168,10 +169,12 @@ struct UIKitMapView: UIViewRepresentable {
             onLongPress: (CLLocationCoordinate2D) -> Void,
             onAnnotationSelected: (String) -> Void,
             onFeatureTapped: (MKMapItem) -> Void,
-            onTap: () -> Void
+            onTap: () -> Void,
+            onUserLocationAvailable: (CLLocationCoordinate2D) -> Void
         )
 
-        var callbacks: Callbacks = ({ _ in }, { _ in }, { _ in }, { _ in }, {})
+        var callbacks: Callbacks = ({ _ in }, { _ in }, { _ in }, { _ in }, {}, { _ in })
+        private var didFireInitialUserLocation = false
         var resolvedCategories: [UUID: MKPointOfInterestCategory] = [:]
         var lastCommandID: UUID?
 
@@ -380,6 +383,15 @@ struct UIKitMapView: UIViewRepresentable {
                 mapItem.name = feature.title
                 callbacks.onFeatureTapped(mapItem)
             }
+        }
+
+        func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+            guard !didFireInitialUserLocation,
+                  let location = userLocation.location,
+                  location.horizontalAccuracy >= 0
+            else { return }
+            didFireInitialUserLocation = true
+            callbacks.onUserLocationAvailable(location.coordinate)
         }
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {

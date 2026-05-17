@@ -65,13 +65,17 @@ struct MapView: View {
                     #selector(UIResponder.resignFirstResponder),
                     to: nil, from: nil, for: nil
                 )
+            },
+            onUserLocationAvailable: { coordinate in
+                guard placeStore.places.isEmpty else { return }
+                centerAboveSheet(
+                    coordinate,
+                )
             }
         )
         .ignoresSafeArea()
         .onAppear {
-            if placeStore.places.isEmpty {
-                cameraCommand = CameraCommand(action: .followUser)
-            } else {
+            if !placeStore.places.isEmpty {
                 cameraCommand = CameraCommand(action: .fitAllPlaces(placeStore.places))
             }
         }
@@ -184,10 +188,9 @@ struct MapView: View {
     }
 
     private func centerAboveSheet(_ coordinate: CLLocationCoordinate2D) {
-        let span = visibleRegion?.span
-            ?? MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+        let span = visibleRegion?.span ?? MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
         let newCenter = CLLocationCoordinate2D(
-            latitude: coordinate.latitude - span.latitudeDelta * 0.25,
+            latitude: coordinate.latitude - span.latitudeDelta * 0.3,
             longitude: coordinate.longitude
         )
         cameraCommand = CameraCommand(
