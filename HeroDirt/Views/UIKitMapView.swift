@@ -31,7 +31,7 @@ private final class PlaceAnnotation: NSObject, MKAnnotation {
 
 private final class NewPinAnnotation: NSObject, MKAnnotation {
     @objc dynamic var coordinate: CLLocationCoordinate2D
-    var title: String? = "New place"
+    @objc dynamic var title: String? = "New place"
 
     init(coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate
@@ -90,6 +90,7 @@ struct UIKitMapView: UIViewRepresentable {
     let places: [Place]
     let resolvedCategories: [UUID: MKPointOfInterestCategory]
     let newPinCoordinate: CLLocationCoordinate2D?
+    let newPinTitle: String?
     let selectedSearchResult: MKMapItem?
     let selectedTag: String?
 
@@ -209,11 +210,16 @@ struct UIKitMapView: UIViewRepresentable {
             if existingIDs == desiredIDs {
                 // Update new-pin coordinate if it moved
                 if let existingPin = existing.first(where: { $0 is NewPinAnnotation }) as? NewPinAnnotation,
-                   let coord = view.newPinCoordinate,
-                   existingPin.coordinate.latitude != coord.latitude
-                       || existingPin.coordinate.longitude != coord.longitude
+                   let coord = view.newPinCoordinate
                 {
-                    existingPin.coordinate = coord
+                    if existingPin.coordinate.latitude != coord.latitude
+                        || existingPin.coordinate.longitude != coord.longitude
+                    {
+                        existingPin.coordinate = coord
+                    }
+                    if let title = view.newPinTitle, existingPin.title != title {
+                        existingPin.title = title
+                    }
                 }
                 // Update title and marker appearance if changed
                 for annotation in existing {

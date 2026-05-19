@@ -7,6 +7,7 @@ struct MapView: View {
     @State private var cameraCommand: CameraCommand?
     @State private var selectedTag: String?
     @State private var newPinCoordinate: CLLocationCoordinate2D?
+    @State private var newPinName: String?
     @State private var sheetPresented = true
     @State private var selectedDetent: PresentationDetent = .medium
     @State private var showingPlaceDetails = false
@@ -29,6 +30,7 @@ struct MapView: View {
             places: placeStore.places,
             resolvedCategories: resolvedCategories,
             newPinCoordinate: newPinCoordinate,
+            newPinTitle: newPinName,
             selectedSearchResult: selectedSearchResult,
             selectedTag: selectedTag,
             overlayVisible: overlayVisible,
@@ -49,6 +51,7 @@ struct MapView: View {
             },
             onLongPress: { coordinate in
                 newPinCoordinate = coordinate
+                newPinName = nil
                 selectedPlace = nil
                 selectedMapItem = nil
                 selectedSearchResult = nil
@@ -157,6 +160,7 @@ struct MapView: View {
                 selectedTag = nil
                 selectedPlace = nil
                 newPinCoordinate = nil
+                newPinName = nil
                 selectedSearchResult = nil
                 selectedMapItem = nil
                 selectedDetent = .medium
@@ -174,7 +178,8 @@ struct MapView: View {
                 ?? CLLocationCoordinate2D(),
             placeID: selectedPlace?.id,
             mapItem: selectedMapItem,
-            onClose: { showingPlaceDetails = false }
+            onClose: { showingPlaceDetails = false },
+            onNameResolved: newPinCoordinate != nil ? { name in newPinName = name } : nil
         )
         .environmentObject(placeStore)
         .presentationBackgroundInteraction(.enabled)

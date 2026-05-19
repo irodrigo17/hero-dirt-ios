@@ -9,6 +9,7 @@ struct PlaceDetailsView: View {
     var placeID: UUID? = nil
     var mapItem: MKMapItem? = nil
     var onClose: (() -> Void)? = nil
+    var onNameResolved: ((String) -> Void)? = nil
 
     @State private var placeName = "Loading..."
     @State private var rainfallSummary: RainfallSummary?
@@ -224,6 +225,7 @@ struct PlaceDetailsView: View {
             }
         }
 
+        onNameResolved?(placeName)
         guard !Task.isCancelled else { return }
         await fetchWeatherAndSoil()
         isLoading = false
