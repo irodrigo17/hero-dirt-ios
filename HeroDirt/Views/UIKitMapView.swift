@@ -305,8 +305,9 @@ struct UIKitMapView: UIViewRepresentable {
             }
             let centerLat = (minLat + maxLat) / 2
             let centerLon = (minLon + maxLon) / 2
-            let latSpan = max(maxLat - minLat, 0.005)
-            let lonSpan = max(maxLon - minLon, 0.005)
+            let minSpan = 0.2
+            let latSpan = max(maxLat - minLat, minSpan)
+            let lonSpan = max(maxLon - minLon, minSpan)
             let regionCenter = CLLocationCoordinate2D(
                 latitude: centerLat - latSpan * 0.7,
                 longitude: centerLon
