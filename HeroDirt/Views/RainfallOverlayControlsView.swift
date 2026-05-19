@@ -163,59 +163,6 @@ struct RainfallOverlaySheet: View {
     }
 }
 
-// MARK: - Standalone Panel
-
-struct RainfallControlPanelView: View {
-    @Binding var isVisible: Bool
-    @Binding var timeframe: RainfallTimeframe
-    @Binding var opacity: Double
-    var onClose: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Rainfall overlay")
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Button(action: onClose) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                        .frame(minWidth: 44, minHeight: 44)
-                }
-                .accessibilityLabel("Close")
-            }
-
-            Toggle("Enabled", isOn: $isVisible)
-
-            Picker("Timeframe", selection: $timeframe) {
-                ForEach(RainfallTimeframe.allCases) { tf in
-                    Text(tf.rawValue).tag(tf)
-                }
-            }
-            .pickerStyle(.segmented)
-
-            HStack {
-                Image(systemName: "circle.dotted")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-                Slider(value: $opacity, in: 0.1...0.9, step: 0.1)
-                Image(systemName: "circle.fill")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-            }
-
-            RainfallLegendView()
-        }
-        .padding(12)
-        .frame(width: 260)
-        .background(
-            .ultraThinMaterial,
-            in: RoundedRectangle(cornerRadius: .cornerMedium)
-        )
-    }
-}
-
 // MARK: - Legend
 
 struct RainfallLegendView: View {

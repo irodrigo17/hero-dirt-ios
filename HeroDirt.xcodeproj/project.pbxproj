@@ -39,7 +39,6 @@
 		C57E9C352F8B43CE289C608D /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4D92D7FAA67BA17087181C /* RainfallGridService.swift */; };
 		CAD0245467130F02D9DC0588 /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A36B08913D55F2B7F70EE4D /* RainForecastCardView.swift */; };
 		CCCDA61D77E6092438BB06D4 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D4DE740077D285E9A578B52 /* SheetView.swift */; };
-		D94C74B7F36C475164A3700A /* MapControlsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8457BDB6F46E17A05BFB056 /* MapControlsOverlayView.swift */; };
 		EFF7D4F1494082B927E7C3D6 /* SoilService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A742A14C6A8B8F08A953E9 /* SoilService.swift */; };
 		F1F29134729ED0BD0699DFEE /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D59D7D187BE00C6967B78F7 /* PlaceDetailsView.swift */; };
 		F90AC25370526C2747B4959F /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FD5C632881824C2479B0C8 /* RainfallOverlayTests.swift */; };
@@ -88,7 +87,6 @@
 		B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
 		BEE2B26511DA261B886CCA74 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
-		C8457BDB6F46E17A05BFB056 /* MapControlsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapControlsOverlayView.swift; sourceTree = "<group>"; };
 		D3FD5C632881824C2479B0C8 /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
 		DC197ECBCA6D6326EBB62193 /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
 		E1A1B822ED96F1D1F23BFCB1 /* SharedUtilitiesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUtilitiesTests.swift; sourceTree = "<group>"; };
@@ -169,7 +167,6 @@
 			children = (
 				A8D3E5B9A3AECAD3BF81D6F9 /* AboutView.swift */,
 				34B4E7778CAA336AADDCF385 /* DirtConditionCardView.swift */,
-				C8457BDB6F46E17A05BFB056 /* MapControlsOverlayView.swift */,
 				727845F179A9D5F61D6A5C9D /* MapView.swift */,
 				6B1816173533EAECC787BF6E /* MKPointOfInterestCategory+Display.swift */,
 				6D59D7D187BE00C6967B78F7 /* PlaceDetailsView.swift */,
@@ -309,7 +306,6 @@
 				84649145A445B95107CCEB3D /* DirtConditionCardView.swift in Sources */,
 				6E4E2A432DE4C227C4C32854 /* HeroDirtApp.swift in Sources */,
 				C11B532A7C1451259475A046 /* MKPointOfInterestCategory+Display.swift in Sources */,
-				D94C74B7F36C475164A3700A /* MapControlsOverlayView.swift in Sources */,
 				6EC369FEE43F5D9B4250F2E4 /* MapView.swift in Sources */,
 				4C905FC9E13CE8D191F60257 /* Place.swift in Sources */,
 				F1F29134729ED0BD0699DFEE /* PlaceDetailsView.swift in Sources */,
