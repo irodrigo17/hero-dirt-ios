@@ -76,6 +76,7 @@ struct SheetView: View {
                     isLoading: isOverlayLoading
                 )
                 .presentationDetents([.fraction(0.7)])
+                .presentationBackgroundInteraction(.enabled)
             }
             .onSubmit(of: .search) {
                 searchTask?.cancel()
