@@ -83,7 +83,16 @@ struct MapView: View {
             await fetchResolvedCategories()
         }
         .onChange(of: overlayVisible) { _, visible in
-            if visible { gridService.refetch() }
+            if visible {
+                gridService.timeframe = overlayTimeframe
+                gridService.refetch()
+            }
+        }
+        .onChange(of: overlayTimeframe) { _, timeframe in
+            if overlayVisible {
+                gridService.timeframe = timeframe
+                gridService.refetch()
+            }
         }
         .sheet(
             isPresented: $sheetPresented,

@@ -51,6 +51,15 @@ enum RainfallTimeframe: String, CaseIterable, Identifiable {
         }
     }
 
+    var pastDays: Int {
+        switch self {
+        case .oneDay: return 1
+        case .twoDays: return 2
+        case .threeDays: return 3
+        case .sevenDays: return 7
+        }
+    }
+
     func amount(from summary: RainfallSummary) -> Double {
         switch self {
         case .oneDay: return summary.last1Day

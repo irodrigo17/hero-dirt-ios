@@ -221,6 +221,69 @@ enum WeatherService {
         return URLSession(configuration: config)
     }()
 
+    static func fetchRainfallBatch(
+        points: [(lat: Double, lon: Double)],
+        pastDays: Int,
+        session: URLSession
+    ) async throws -> [RainfallSummary?] {
+        guard !points.isEmpty else { return [] }
+
+        let chunkSize = 100
+        var results = [RainfallSummary?](repeating: nil, count: points.count)
+
+        for chunkStart in stride(from: 0, to: points.count, by: chunkSize) {
+            let chunk = Array(points[chunkStart..<min(chunkStart + chunkSize, points.count)])
+
+            var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
+            components.queryItems = [
+                URLQueryItem(name: "latitude", value: chunk.map { String(format: "%.6f", $0.lat) }.joined(separator: ",")),
+                URLQueryItem(name: "longitude", value: chunk.map { String(format: "%.6f", $0.lon) }.joined(separator: ",")),
+                URLQueryItem(name: "daily", value: "precipitation_sum"),
+                URLQueryItem(name: "past_days", value: "\(pastDays)"),
+                URLQueryItem(name: "forecast_days", value: "1"),
+                URLQueryItem(name: "timezone", value: "auto"),
+            ]
+
+            guard let url = components.url else { continue }
+
+            let (data, response) = try await session.data(from: url)
+            guard let http = response as? HTTPURLResponse,
+                  (200...299).contains(http.statusCode)
+            else { continue }
+
+            let responses: [OpenMeteoResponse]
+            if chunk.count == 1 {
+                // Single-location response is a plain object, not an array
+                responses = (try? [JSONDecoder().decode(OpenMeteoResponse.self, from: data)]) ?? []
+            } else {
+                responses = (try? JSONDecoder().decode([OpenMeteoResponse].self, from: data)) ?? []
+            }
+
+            for (i, resp) in responses.enumerated() {
+                let globalIndex = chunkStart + i
+                guard globalIndex < points.count else { break }
+                results[globalIndex] = try? parseResponse(data: resp)
+            }
+        }
+
+        return results
+    }
+
+    private static func parseResponse(data resp: OpenMeteoResponse) throws -> RainfallSummary {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        var daily: [DailyWeatherData] = []
+        for (i, dateString) in resp.daily.time.enumerated() {
+            guard i < resp.daily.precipitationSum.count else { continue }
+            guard let date = formatter.date(from: dateString) else { continue }
+            let amount = resp.daily.precipitationSum[i] ?? 0.0
+            daily.append(DailyWeatherData(date: date, amount: amount))
+        }
+        return RainfallSummary(daily: daily)
+    }
+
     static func fetchRainfall(
         latitude: Double,
         longitude: Double,

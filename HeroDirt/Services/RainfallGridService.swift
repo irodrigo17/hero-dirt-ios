@@ -37,9 +37,12 @@ final class RainfallGridService: ObservableObject {
 
     // MARK: - Cache
 
+    var timeframe: RainfallTimeframe = .threeDays
+
     private struct CacheKey: Hashable {
         let latSlot: Int
         let lonSlot: Int
+        let pastDays: Int
     }
 
     private struct CacheEntry {
@@ -48,7 +51,7 @@ final class RainfallGridService: ObservableObject {
     }
 
     private var cache: [CacheKey: CacheEntry] = [:]
-    private let cacheTTL: TimeInterval = 15 * 60  // 15 minutes
+    private let cacheTTL: TimeInterval = 60 * 60  // 1 hour
 
     // MARK: - Debounce
 
@@ -59,7 +62,6 @@ final class RainfallGridService: ObservableObject {
 
     private let gridSession: URLSession = {
         let config = URLSessionConfiguration.default
-        config.httpMaximumConnectionsPerHost = 4
         config.timeoutIntervalForRequest = 15
         return URLSession(configuration: config)
     }()
@@ -77,8 +79,8 @@ final class RainfallGridService: ObservableObject {
         updateTask?.cancel()
         updateTask = Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(500))
-            guard !Task.isCancelled else { return }
-            await self?.fetchGrid(for: region)
+            guard !Task.isCancelled, let self else { return }
+            await self.fetchGrid(for: region, pastDays: self.timeframe.pastDays)
         }
     }
 
@@ -86,7 +88,8 @@ final class RainfallGridService: ObservableObject {
         guard let region = lastRegion else { return }
         updateTask?.cancel()
         updateTask = Task { [weak self] in
-            await self?.fetchGrid(for: region)
+            guard let self else { return }
+            await self.fetchGrid(for: region, pastDays: self.timeframe.pastDays)
         }
     }
 
@@ -225,7 +228,7 @@ final class RainfallGridService: ObservableObject {
     // MARK: - Grid fetching
 
     @MainActor
-    private func fetchGrid(for region: MKCoordinateRegion) async {
+    private func fetchGrid(for region: MKCoordinateRegion, pastDays: Int) async {
         let maxCells = 12
         let latStep = max(0.1, region.span.latitudeDelta / Double(maxCells))
         let lonStep = max(0.1, region.span.longitudeDelta / Double(maxCells))
@@ -265,7 +268,8 @@ final class RainfallGridService: ObservableObject {
                 let lon = minLon + lonStep / 2 + Double(c) * lonStep
                 let key = CacheKey(
                     latSlot: Int(lat * 100),
-                    lonSlot: Int(lon * 100)
+                    lonSlot: Int(lon * 100),
+                    pastDays: pastDays
                 )
                 points.append(
                     GridPoint(lat: lat, lon: lon, row: r, col: c, key: key)
@@ -287,46 +291,16 @@ final class RainfallGridService: ObservableObject {
         if !uncachedPoints.isEmpty {
             isLoading = true
 
-            let session = gridSession
-            await withTaskGroup(of: (CacheKey, RainfallSummary?).self) {
-                group in
-                let maxConcurrent = 4
-                var inflight = 0
-
-                for point in uncachedPoints {
-                    if inflight >= maxConcurrent {
-                        if let (key, summary) = await group.next() {
-                            if let summary {
-                                cache[key] = CacheEntry(
-                                    summary: summary,
-                                    timestamp: Date()
-                                )
-                            }
-                            inflight -= 1
-                        }
-                    }
-                    group.addTask {
-                        do {
-                            let summary =
-                                try await WeatherService.fetchRainfall(
-                                    latitude: point.lat,
-                                    longitude: point.lon,
-                                    session: session
-                                )
-                            return (point.key, summary)
-                        } catch {
-                            return (point.key, nil)
-                        }
-                    }
-                    inflight += 1
-                }
-
-                for await (key, summary) in group {
-                    if let summary {
-                        cache[key] = CacheEntry(
-                            summary: summary,
-                            timestamp: Date()
-                        )
+            let batchPoints = uncachedPoints.map { (lat: $0.lat, lon: $0.lon) }
+            if let summaries = try? await WeatherService.fetchRainfallBatch(
+                points: batchPoints,
+                pastDays: pastDays,
+                session: gridSession
+            ) {
+                let now = Date()
+                for (i, point) in uncachedPoints.enumerated() {
+                    if let summary = summaries[i] {
+                        cache[point.key] = CacheEntry(summary: summary, timestamp: now)
                     }
                 }
             }
