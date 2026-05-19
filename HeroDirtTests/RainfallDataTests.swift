@@ -10,7 +10,7 @@ struct RainfallDataTests {
     @Test func summaryPrefixSums() {
         let today = Date()
         let daily = (0..<7).map { i in
-            DailyRainfall(
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -i,
@@ -41,7 +41,7 @@ struct RainfallDataTests {
         let today = Date()
         // Deliberately out of order
         let daily = [
-            DailyRainfall(
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -2,
@@ -49,7 +49,7 @@ struct RainfallDataTests {
                 )!,
                 amount: 10
             ),
-            DailyRainfall(
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: 0,
@@ -57,7 +57,7 @@ struct RainfallDataTests {
                 )!,
                 amount: 1
             ),
-            DailyRainfall(
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -1,
@@ -79,8 +79,8 @@ struct RainfallDataTests {
     @Test func daysSinceRainToday() {
         let today = Date()
         let daily = [
-            DailyRainfall(date: today, amount: 5.0),
-            DailyRainfall(
+            DailyWeatherData(date: today, amount: 5.0),
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -1,
@@ -96,8 +96,8 @@ struct RainfallDataTests {
     @Test func daysSinceRainThreeDaysAgo() {
         let today = Date()
         let daily = [
-            DailyRainfall(date: today, amount: 0.0),
-            DailyRainfall(
+            DailyWeatherData(date: today, amount: 0.0),
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -1,
@@ -105,7 +105,7 @@ struct RainfallDataTests {
                 )!,
                 amount: 0.0
             ),
-            DailyRainfall(
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -2,
@@ -113,7 +113,7 @@ struct RainfallDataTests {
                 )!,
                 amount: 0.0
             ),
-            DailyRainfall(
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -3,
@@ -129,8 +129,8 @@ struct RainfallDataTests {
     @Test func daysSinceRainNone() {
         let today = Date()
         let daily = [
-            DailyRainfall(date: today, amount: 0.0),
-            DailyRainfall(
+            DailyWeatherData(date: today, amount: 0.0),
+            DailyWeatherData(
                 date: Calendar.current.date(
                     byAdding: .day,
                     value: -1,
@@ -222,11 +222,11 @@ struct RainfallDataTests {
     @Test func thresholdBoundary() {
         let today = Date()
         // 0.1mm is NOT considered rain (threshold is > 0.1)
-        let dailyAt01 = [DailyRainfall(date: today, amount: 0.1)]
+        let dailyAt01 = [DailyWeatherData(date: today, amount: 0.1)]
         #expect(RainfallSummary(daily: dailyAt01).daysSinceLastRain == nil)
 
         // 0.11mm IS considered rain
-        let dailyAbove = [DailyRainfall(date: today, amount: 0.11)]
+        let dailyAbove = [DailyWeatherData(date: today, amount: 0.11)]
         #expect(RainfallSummary(daily: dailyAbove).daysSinceLastRain == 0)
     }
 
@@ -257,8 +257,8 @@ struct RainfallDataTests {
         checkSendable(forecast)
     }
 
-    @Test func dailyRainfallSendable() {
-        let daily = DailyRainfall(date: Date(), amount: 5.0)
+    @Test func dailyWeatherDataSendable() {
+        let daily = DailyWeatherData(date: Date(), amount: 5.0)
 
         func checkSendable(_: some Sendable) {}
         checkSendable(daily)

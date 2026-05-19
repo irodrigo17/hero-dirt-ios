@@ -1,4 +1,3 @@
-import CoreLocation
 import Testing
 
 @testable import HeroDirt
@@ -48,31 +47,4 @@ struct RainfallOverlayTests {
         #expect(RainfallTimeframe.sevenDays.id == "7d")
     }
 
-    // MARK: - RainfallCell
-
-    @Test func cellPolygonCorners() {
-        let cell = RainfallCell(
-            id: "test",
-            coordinate: CLLocationCoordinate2D(latitude: 10.0, longitude: 20.0),
-            latDelta: 2.0,
-            lonDelta: 4.0,
-            summary: makeSummary()
-        )
-
-        let poly = cell.polygon
-        #expect(poly.count == 4)
-
-        // Bottom-left
-        #expect(poly[0].latitude == 9.0)
-        #expect(poly[0].longitude == 18.0)
-        // Bottom-right
-        #expect(poly[1].latitude == 9.0)
-        #expect(poly[1].longitude == 22.0)
-        // Top-right
-        #expect(poly[2].latitude == 11.0)
-        #expect(poly[2].longitude == 22.0)
-        // Top-left
-        #expect(poly[3].latitude == 11.0)
-        #expect(poly[3].longitude == 18.0)
-    }
 }

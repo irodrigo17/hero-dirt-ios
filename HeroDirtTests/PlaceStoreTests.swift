@@ -3,6 +3,7 @@ import Testing
 
 @testable import HeroDirt
 
+@MainActor
 struct PlaceStoreTests {
 
     private func makeTempURL() -> URL {

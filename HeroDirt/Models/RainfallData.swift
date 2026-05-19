@@ -81,8 +81,6 @@ struct DailyWeatherData: Codable, Sendable {
     }
 }
 
-typealias DailyRainfall = DailyWeatherData
-
 // MARK: - RainfallSummary
 
 struct RainfallSummary: Sendable {

@@ -168,7 +168,7 @@ struct PlaceDetailsView: View {
 
     // MARK: - Data Loading
 
-    func fetchMapItem(from identifier: MKMapItem.Identifier?) async
+    private func fetchMapItem(from identifier: MKMapItem.Identifier?) async
         -> MKMapItem?
     {
         guard let identifier else { return nil }
@@ -225,33 +225,8 @@ struct PlaceDetailsView: View {
         }
 
         guard !Task.isCancelled else { return }
-
-        async let rainfallTask = WeatherService.fetchRainfall(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-        async let forecastTask = WeatherService.fetchRainForecast(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-        async let soilTask = SoilService.resolveOrFetch(
-            override: savedPlace?.soilOverride,
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-
-        do {
-            rainfallSummary = try await rainfallTask
-        } catch {
-            guard !Task.isCancelled else { return }
-            errorMessage = error.localizedDescription
-        }
-
-        guard !Task.isCancelled else { return }
+        await fetchWeatherAndSoil()
         isLoading = false
-
-        soilData = await soilTask
-        rainForecast = try? await forecastTask
     }
 
     private func refreshData() async {
@@ -260,7 +235,10 @@ struct PlaceDetailsView: View {
             longitude: coordinate.longitude
         )
         await WeatherService.cache.invalidate(key: key)
+        await fetchWeatherAndSoil()
+    }
 
+    private func fetchWeatherAndSoil() async {
         async let rainfallTask = WeatherService.fetchRainfall(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude

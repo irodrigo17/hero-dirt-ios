@@ -1,38 +1,4 @@
-import CoreLocation
 import Foundation
-
-struct RainfallCell: Identifiable, Sendable {
-    let id: String
-    let coordinate: CLLocationCoordinate2D
-    let latDelta: Double
-    let lonDelta: Double
-    let summary: RainfallSummary
-
-    var polygon: [CLLocationCoordinate2D] {
-        let halfLat = latDelta / 2
-        let halfLon = lonDelta / 2
-        let lat = coordinate.latitude
-        let lon = coordinate.longitude
-        return [
-            CLLocationCoordinate2D(
-                latitude: lat - halfLat,
-                longitude: lon - halfLon
-            ),
-            CLLocationCoordinate2D(
-                latitude: lat - halfLat,
-                longitude: lon + halfLon
-            ),
-            CLLocationCoordinate2D(
-                latitude: lat + halfLat,
-                longitude: lon + halfLon
-            ),
-            CLLocationCoordinate2D(
-                latitude: lat + halfLat,
-                longitude: lon - halfLon
-            ),
-        ]
-    }
-}
 
 enum RainfallTimeframe: String, CaseIterable, Identifiable {
     case oneDay = "1d"

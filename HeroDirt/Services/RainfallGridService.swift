@@ -19,6 +19,7 @@ struct RainfallGridBounds: Equatable {
     }
 }
 
+@MainActor
 final class RainfallGridService: ObservableObject {
 
     // MARK: - Public state
@@ -232,7 +233,6 @@ final class RainfallGridService: ObservableObject {
 
     // MARK: - Grid fetching
 
-    @MainActor
     private func fetchGrid(for region: MKCoordinateRegion, pastDays: Int) async {
         let maxCells = 12
         let latStep = max(0.1, region.span.latitudeDelta / Double(maxCells))

@@ -47,11 +47,11 @@ struct RainForecastTests {
     }
 }
 
-struct DailyRainfallTests {
+struct DailyWeatherDataTests {
 
-    @Test func dailyRainfallInit() {
+    @Test func dailyWeatherDataInit() {
         let date = Date()
-        let daily = DailyRainfall(date: date, amount: 5.5)
+        let daily = DailyWeatherData(date: date, amount: 5.5)
 
         #expect(daily.date == date)
         #expect(daily.amount == 5.5)
@@ -59,7 +59,7 @@ struct DailyRainfallTests {
 
     @Test func zeroAmount() {
         let date = Date()
-        let daily = DailyRainfall(date: date, amount: 0)
+        let daily = DailyWeatherData(date: date, amount: 0)
 
         #expect(daily.amount == 0)
     }

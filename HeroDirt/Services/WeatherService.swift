@@ -176,20 +176,23 @@ enum WeatherService {
 
     // MARK: - Parsing
 
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+
     static func parseResponse(_ data: Data) throws -> RainfallSummary {
         let decoded = try JSONDecoder().decode(
             OpenMeteoResponse.self,
             from: data
         )
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
         var daily: [DailyWeatherData] = []
         for (i, dateString) in decoded.daily.time.enumerated() {
             guard i < decoded.daily.precipitationSum.count else { continue }
-            guard let date = formatter.date(from: dateString) else { continue }
+            guard let date = Self.dateFormatter.date(from: dateString) else { continue }
             let amount = decoded.daily.precipitationSum[i] ?? 0.0
             let et0 = decoded.daily.et0FaoEvapotranspiration.flatMap { arr in
                 i < arr.count ? arr[i] : nil
@@ -239,11 +242,12 @@ enum WeatherService {
             else { continue }
 
             let responses: [OpenMeteoResponse]
-            if chunk.count == 1 {
-                // Single-location response is a plain object, not an array
-                responses = (try? [JSONDecoder().decode(OpenMeteoResponse.self, from: data)]) ?? []
+            if let array = try? JSONDecoder().decode([OpenMeteoResponse].self, from: data) {
+                responses = array
+            } else if let single = try? JSONDecoder().decode(OpenMeteoResponse.self, from: data) {
+                responses = [single]
             } else {
-                responses = (try? JSONDecoder().decode([OpenMeteoResponse].self, from: data)) ?? []
+                continue
             }
 
             for (i, resp) in responses.enumerated() {
@@ -257,14 +261,10 @@ enum WeatherService {
     }
 
     private static func parseResponse(data resp: OpenMeteoResponse) throws -> RainfallSummary {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
         var daily: [DailyWeatherData] = []
         for (i, dateString) in resp.daily.time.enumerated() {
             guard i < resp.daily.precipitationSum.count else { continue }
-            guard let date = formatter.date(from: dateString) else { continue }
+            guard let date = Self.dateFormatter.date(from: dateString) else { continue }
             let amount = resp.daily.precipitationSum[i] ?? 0.0
             daily.append(DailyWeatherData(date: date, amount: amount))
         }
