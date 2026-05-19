@@ -19,7 +19,7 @@ private final class PlaceAnnotation: NSObject, MKAnnotation {
     let placeID: UUID
     let tag: String
     @objc dynamic var coordinate: CLLocationCoordinate2D
-    var title: String?
+    @objc dynamic var title: String?
 
     init(place: Place) {
         self.placeID = place.id
@@ -215,14 +215,19 @@ struct UIKitMapView: UIViewRepresentable {
                 {
                     existingPin.coordinate = coord
                 }
-                // Update marker appearance if categories changed
+                // Update title and marker appearance if changed
                 for annotation in existing {
-                    guard let ann = annotation as? PlaceAnnotation,
-                          let view = mapView.view(for: ann) as? MKMarkerAnnotationView
-                    else { continue }
-                    let category = resolvedCategories[ann.placeID]
-                    view.markerTintColor = UIColor(category?.iconColor ?? .orange)
-                    view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
+                    guard let ann = annotation as? PlaceAnnotation else { continue }
+                    if let place = view.places.first(where: { $0.id == ann.placeID }),
+                       ann.title != place.name
+                    {
+                        ann.title = place.name
+                    }
+                    if let annView = mapView.view(for: ann) as? MKMarkerAnnotationView {
+                        let category = resolvedCategories[ann.placeID]
+                        annView.markerTintColor = UIColor(category?.iconColor ?? .orange)
+                        annView.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
+                    }
                 }
                 return
             }
