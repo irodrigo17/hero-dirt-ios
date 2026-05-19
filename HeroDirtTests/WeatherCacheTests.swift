@@ -3,24 +3,24 @@ import Testing
 
 @testable import HeroDirt
 
+@Suite(.serialized)
 struct WeatherCacheTests {
 
-    // Each test gets a fresh cache instance with disk files cleared.
-    private func makeCache() async -> WeatherCache {
-        let c = WeatherCache()
-        await c._resetForTesting()
-        return c
+    private func makeTempDir() -> URL {
+        let dir = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try! FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
     }
 
     // MARK: - Rainfall cache
 
     @Test func rainfallCacheMissReturnsNil() async {
-        let cache = await makeCache()
+        let cache = WeatherCache(directory: makeTempDir())
         #expect(await cache.getRainfall("0_0") == nil)
     }
 
     @Test func rainfallCacheHitReturnsValue() async {
-        let cache = await makeCache()
+        let cache = WeatherCache(directory: makeTempDir())
         let daily = [DailyWeatherData(date: Date(), amount: 12.5, et0: 3.0)]
         await cache.setRainfall("10_20", daily)
         let result = await cache.getRainfall("10_20")
@@ -30,42 +30,36 @@ struct WeatherCacheTests {
     }
 
     @Test func rainfallDifferentKeysMiss() async {
-        let cache = await makeCache()
+        let cache = WeatherCache(directory: makeTempDir())
         let daily = [DailyWeatherData(date: Date(), amount: 5.0, et0: 1.0)]
         await cache.setRainfall("10_20", daily)
         #expect(await cache.getRainfall("10_21") == nil)
     }
 
     @Test func rainfallExpiredEntryReturnsNil() async {
-        let cache = await makeCache()
-        // Manually inject an expired entry (timestamp 2 hours ago)
+        let dir = makeTempDir()
+        let key = "10_20"
         let old = WeatherCache.Entry(
             value: [DailyWeatherData(date: Date(), amount: 5.0, et0: 1.0)],
             timestamp: Date(timeIntervalSinceNow: -WeatherCache.rainfallTTL - 1)
         )
-        await MainActor.run { }  // yield so the actor processes
-        // Write directly into the actor's dict
-        let key = "10_20"
-        // Set a value then overwrite timestamp via re-encoding trick is complex;
-        // instead test via disk: write an expired entry to disk, load a new instance.
         let expired: [String: WeatherCache.Entry<[DailyWeatherData]>] = [key: old]
         if let data = try? JSONEncoder().encode(expired) {
-            try? data.write(to: WeatherCache.rainfallURL, options: .atomic)
+            try? data.write(to: dir.appending(path: "hero_dirt_rainfall.json"), options: .atomic)
         }
-        // New cache instance should prune the expired entry on load
-        let cache2 = WeatherCache()  // don't reset — we want it to load from disk
-        #expect(await cache2.getRainfall(key) == nil)
+        let cache = WeatherCache(directory: dir)
+        #expect(await cache.getRainfall(key) == nil)
     }
 
     // MARK: - Forecast cache
 
     @Test func forecastCacheMissReturnsNil() async {
-        let cache = await makeCache()
+        let cache = WeatherCache(directory: makeTempDir())
         #expect(await cache.getForecast("0_0") == nil)
     }
 
     @Test func forecastCacheHitReturnsValue() async {
-        let cache = await makeCache()
+        let cache = WeatherCache(directory: makeTempDir())
         let fc = RainForecast(next1Day: 2.5, next2Days: 5.0, next3Days: 7.5, next7Days: 20.0)
         await cache.setForecast("10_20", fc)
         let result = await cache.getForecast("10_20")
@@ -108,21 +102,18 @@ struct WeatherCacheTests {
 
     // MARK: - Disk persistence
 
-    @Test func rainfallPersistedToDiskAndLoadedByNewInstance() async throws {
-        let cache = await makeCache()
+    @Test func rainfallPersistedToDiskAndLoadedByNewInstance() async {
+        let dir = makeTempDir()
+        let cache = WeatherCache(directory: dir)
         let daily = [DailyWeatherData(date: Date(), amount: 8.0, et0: 2.5)]
         await cache.setRainfall("42_17", daily)
 
-        // Wait for the debounced write (1 second + margin)
-        try await Task.sleep(for: .milliseconds(1200))
+        let task = await cache.persistTask
+        await task?.value
 
-        // New instance should load from disk
-        let cache2 = WeatherCache()
+        let cache2 = WeatherCache(directory: dir)
         let result = await cache2.getRainfall("42_17")
         #expect(result?.count == 1)
         #expect(result?.first?.amount == 8.0)
-
-        // Clean up
-        await cache2._resetForTesting()
     }
 }

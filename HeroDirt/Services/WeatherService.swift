@@ -13,29 +13,27 @@ actor WeatherCache {
         let timestamp: Date
     }
 
+    // MARK: - Storage
+
+    let rainfallURL: URL
+    let forecastURL: URL
+
+    init(directory: URL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]) {
+        rainfallURL = directory.appending(path: "hero_dirt_rainfall.json")
+        forecastURL = directory.appending(path: "hero_dirt_forecast.json")
+    }
+
     // MARK: - State
 
     var rainfall: [String: Entry<[DailyWeatherData]>] = [:]
     var forecast: [String: Entry<RainForecast>] = [:]
     private var isLoaded = false
-    private var persistTask: Task<Void, Never>?
+    var persistTask: Task<Void, Never>?
 
     // MARK: - TTL
 
     static let rainfallTTL: TimeInterval = 3600
     static let forecastTTL: TimeInterval = 3600
-
-    // MARK: - Disk URLs
-
-    private static var cachesDir: URL {
-        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-    }
-    static var rainfallURL: URL {
-        cachesDir.appending(path: "hero_dirt_rainfall.json")
-    }
-    static var forecastURL: URL {
-        cachesDir.appending(path: "hero_dirt_forecast.json")
-    }
 
     // MARK: - Key
 
@@ -49,7 +47,7 @@ actor WeatherCache {
         guard !isLoaded else { return }
         isLoaded = true
         let now = Date()
-        if let data = try? Data(contentsOf: Self.rainfallURL),
+        if let data = try? Data(contentsOf: rainfallURL),
             let entries = try? JSONDecoder().decode(
                 [String: Entry<[DailyWeatherData]>].self, from: data)
         {
@@ -57,7 +55,7 @@ actor WeatherCache {
                 now.timeIntervalSince($0.value.timestamp) < Self.rainfallTTL
             }
         }
-        if let data = try? Data(contentsOf: Self.forecastURL),
+        if let data = try? Data(contentsOf: forecastURL),
             let entries = try? JSONDecoder().decode(
                 [String: Entry<RainForecast>].self, from: data)
         {
@@ -105,16 +103,16 @@ actor WeatherCache {
         persistTask?.cancel()
         let r = rainfall
         let f = forecast
-        let rainfallURL = Self.rainfallURL
-        let forecastURL = Self.forecastURL
+        let rURL = rainfallURL
+        let fURL = forecastURL
         persistTask = Task.detached(priority: .background) {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
             if let data = try? JSONEncoder().encode(r) {
-                try? data.write(to: rainfallURL, options: .atomic)
+                try? data.write(to: rURL, options: .atomic)
             }
             if let data = try? JSONEncoder().encode(f) {
-                try? data.write(to: forecastURL, options: .atomic)
+                try? data.write(to: fURL, options: .atomic)
             }
         }
     }
@@ -126,17 +124,6 @@ actor WeatherCache {
         forecast.removeValue(forKey: key)
     }
 
-    // MARK: - Test support
-
-    func _resetForTesting() {
-        rainfall = [:]
-        forecast = [:]
-        isLoaded = false
-        persistTask?.cancel()
-        persistTask = nil
-        try? FileManager.default.removeItem(at: Self.rainfallURL)
-        try? FileManager.default.removeItem(at: Self.forecastURL)
-    }
 }
 
 // MARK: - WeatherService
