@@ -72,7 +72,8 @@ struct SheetView: View {
                 RainfallOverlaySheet(
                     isVisible: $overlayVisible,
                     timeframe: $overlayTimeframe,
-                    opacity: $overlayOpacity
+                    opacity: $overlayOpacity,
+                    isLoading: isOverlayLoading
                 )
                 .presentationDetents([.fraction(0.7)])
             }

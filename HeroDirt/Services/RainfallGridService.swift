@@ -84,6 +84,11 @@ final class RainfallGridService: ObservableObject {
         }
     }
 
+    func cancelUpdate() {
+        updateTask?.cancel()
+        updateTask = nil
+    }
+
     func refetch() {
         guard let region = lastRegion else { return }
         updateTask?.cancel()

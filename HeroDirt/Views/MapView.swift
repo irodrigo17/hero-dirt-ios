@@ -42,6 +42,11 @@ struct MapView: View {
                     gridService.updateRegion(region)
                 }
             },
+            onRegionWillChange: {
+                if overlayVisible {
+                    gridService.cancelUpdate()
+                }
+            },
             onLongPress: { coordinate in
                 newPinCoordinate = coordinate
                 selectedPlace = nil
@@ -83,9 +88,9 @@ struct MapView: View {
             await fetchResolvedCategories()
         }
         .onChange(of: overlayVisible) { _, visible in
-            if visible {
+            if visible, let region = visibleRegion {
                 gridService.timeframe = overlayTimeframe
-                gridService.refetch()
+                gridService.updateRegion(region)
             }
         }
         .onChange(of: overlayTimeframe) { _, timeframe in

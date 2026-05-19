@@ -109,6 +109,7 @@ struct RainfallOverlaySheet: View {
     @Binding var isVisible: Bool
     @Binding var timeframe: RainfallTimeframe
     @Binding var opacity: Double
+    var isLoading: Bool = false
 
     @Environment(\.dismiss) private var dismiss
 
@@ -149,6 +150,11 @@ struct RainfallOverlaySheet: View {
             .navigationTitle("Rainfall Overlay")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if isLoading {
+                        ProgressView()
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
