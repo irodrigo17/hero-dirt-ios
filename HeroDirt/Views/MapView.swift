@@ -179,7 +179,11 @@ struct MapView: View {
             placeID: selectedPlace?.id,
             mapItem: selectedMapItem,
             onClose: { showingPlaceDetails = false },
-            onNameResolved: newPinCoordinate != nil ? { name in newPinName = name } : nil
+            onNameResolved: newPinCoordinate != nil ? { name in newPinName = name } : nil,
+            onSaved: newPinCoordinate != nil ? {
+                newPinCoordinate = nil
+                newPinName = nil
+            } : nil
         )
         .environmentObject(placeStore)
         .presentationBackgroundInteraction(.enabled)
