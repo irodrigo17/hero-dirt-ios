@@ -5,7 +5,7 @@ import SwiftUI
 
 struct CameraCommand {
     enum Action {
-        case followUser
+        case centerOnUser
         case setRegion(MKCoordinateRegion)
         case fitAllPlaces([Place])
     }
@@ -265,8 +265,14 @@ struct UIKitMapView: UIViewRepresentable {
 
         func execute(command: CameraCommand, on mapView: MKMapView) {
             switch command.action {
-            case .followUser:
-                mapView.setUserTrackingMode(.follow, animated: true)
+            case .centerOnUser:
+                if let coordinate = mapView.userLocation.location?.coordinate {
+                    let region = MKCoordinateRegion(
+                        center: coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
+                    )
+                    mapView.setRegion(region, animated: true)
+                }
             case .setRegion(let region):
                 mapView.setRegion(region, animated: true)
             case .fitAllPlaces(let places):
@@ -276,7 +282,13 @@ struct UIKitMapView: UIViewRepresentable {
 
         private func fitAllPlaces(_ places: [Place], on mapView: MKMapView) {
             guard !places.isEmpty else {
-                mapView.setUserTrackingMode(.follow, animated: true)
+                if let coordinate = mapView.userLocation.location?.coordinate {
+                    let region = MKCoordinateRegion(
+                        center: coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
+                    )
+                    mapView.setRegion(region, animated: true)
+                }
                 return
             }
             var minLat = places[0].coordinate.latitude

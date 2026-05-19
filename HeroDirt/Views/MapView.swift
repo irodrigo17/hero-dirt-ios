@@ -127,7 +127,7 @@ struct MapView: View {
             overlayOpacity: $overlayOpacity,
             isOverlayLoading: gridService.isLoading,
             onCenterLocation: {
-                cameraCommand = CameraCommand(action: .followUser)
+                cameraCommand = CameraCommand(action: .centerOnUser)
                 selectedDetent = collapsedDetent
             }
         )
