@@ -199,6 +199,7 @@ struct MapView: View {
             selectedMapItem = nil
             newPinCoordinate = nil
             selectedSearchResult = nil
+            selectedTag = tag
             showingPlaceDetails = true
             centerAboveSheet(place.coordinate)
         } else if let item = selectedSearchResult,
