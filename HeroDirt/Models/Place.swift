@@ -14,6 +14,8 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 
+    @MainActor var mapItem: MKMapItem? { MapItemCache.shared.items[id] }
+
     var mapItemId: MKMapItem.Identifier? {
         guard let rawValue = mapItemIdString else { return nil }
         return MKMapItem.Identifier(rawValue: rawValue)

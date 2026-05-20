@@ -3,6 +3,7 @@ import SwiftUI
 
 struct PlaceDetailsView: View {
     @EnvironmentObject private var placeStore: PlaceStore
+    @EnvironmentObject private var mapItemCache: MapItemCache
     @Environment(\.dismiss) private var dismiss
 
     let coordinate: CLLocationCoordinate2D
@@ -21,8 +22,6 @@ struct PlaceDetailsView: View {
     @State private var showingRenameAlert = false
     @State private var showSoilOverrideSheet = false
     @State private var editingName = ""
-    @State private var resolvedMapItem: MKMapItem?
-
     private var savedPlace: Place? {
         if let placeID,
             let place = placeStore.places.first(where: { $0.id == placeID })
@@ -35,7 +34,7 @@ struct PlaceDetailsView: View {
         )
     }
 
-    private var effectiveMapItem: MKMapItem? { mapItem ?? resolvedMapItem }
+    private var effectiveMapItem: MKMapItem? { mapItem ?? savedPlace?.mapItem }
 
     private var subtitle: String? {
         effectiveMapItem?.pointOfInterestCategory?.displayName
@@ -170,30 +169,15 @@ struct PlaceDetailsView: View {
 
     // MARK: - Data Loading
 
-    private func fetchMapItem(from identifier: MKMapItem.Identifier?) async
-        -> MKMapItem?
-    {
-        guard let identifier else { return nil }
-        let request = MKMapItemRequest(mapItemIdentifier: identifier)
-
-        do {
-            let mapItem = try await request.mapItem
-            return mapItem
-        } catch {
-            return nil
-        }
-    }
-
     private func loadData() async {
         placeName = "Loading..."
         rainfallSummary = nil
         rainForecast = nil
         soilData = nil
-        resolvedMapItem = nil
         isLoading = true
         errorMessage = nil
 
-        resolvedMapItem = await fetchMapItem(from: savedPlace?.mapItemId)
+        if let saved = savedPlace { await mapItemCache.fetch(for: saved) }
         guard !Task.isCancelled else { return }
 
         if let saved = savedPlace {

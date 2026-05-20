@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MapView: View {
     @EnvironmentObject private var placeStore: PlaceStore
+    @EnvironmentObject private var mapItemCache: MapItemCache
 
     @State private var cameraCommand: CameraCommand?
     @State private var selectedTag: String?
@@ -15,8 +16,6 @@ struct MapView: View {
     @State private var selectedMapItem: MKMapItem?
     @State private var selectedSearchResult: MKMapItem?
 
-    @State private var resolvedCategories: [UUID: MKPointOfInterestCategory] = [:]
-
     @StateObject private var gridService = RainfallGridService()
     @State private var overlayVisible = false
     @State private var overlayTimeframe: RainfallTimeframe = .threeDays
@@ -28,7 +27,6 @@ struct MapView: View {
     var body: some View {
         UIKitMapView(
             places: placeStore.places,
-            resolvedCategories: resolvedCategories,
             newPinCoordinate: newPinCoordinate,
             newPinTitle: newPinName,
             selectedSearchResult: selectedSearchResult,
@@ -88,7 +86,7 @@ struct MapView: View {
             }
         }
         .task(id: placeStore.places.map(\.id)) {
-            await fetchResolvedCategories()
+            mapItemCache.prefetch(places: placeStore.places)
         }
         .onChange(of: overlayVisible) { _, visible in
             if visible, let region = visibleRegion {
@@ -186,6 +184,7 @@ struct MapView: View {
             } : nil
         )
         .environmentObject(placeStore)
+        .environmentObject(mapItemCache)
         .presentationBackgroundInteraction(.enabled)
     }
 
@@ -221,23 +220,4 @@ struct MapView: View {
         )
     }
 
-    @MainActor
-    private func fetchResolvedCategories() async {
-        await withTaskGroup(of: (UUID, MKPointOfInterestCategory?).self) { group in
-            for place in placeStore.places {
-                guard let mapItemId = place.mapItemId,
-                      resolvedCategories[place.id] == nil
-                else { continue }
-                group.addTask {
-                    let item = try? await MKMapItemRequest(
-                        mapItemIdentifier: mapItemId
-                    ).mapItem
-                    return (place.id, item?.pointOfInterestCategory)
-                }
-            }
-            for await (id, category) in group {
-                if let category { resolvedCategories[id] = category }
-            }
-        }
-    }
 }
