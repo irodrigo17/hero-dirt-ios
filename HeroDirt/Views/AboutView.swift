@@ -14,6 +14,16 @@ struct AboutView: View {
                 } header: {
                     Text("About")
                 }
+                
+                Section {
+                    Link(destination: URL(string: "https://github.com/irodrigo17/hero-dirt-ios/issues")!) {
+                        Label("Report a Bug or Request a Feature", systemImage: "exclamationmark.bubble")
+                    }
+                } header: {
+                    Text("Feedback")
+                } footer: {
+                    Text("Feedback and feature requests are tracked as GitHub Issues.")
+                }
 
                 Section {
                     Link(destination: URL(string: "https://github.com/irodrigo17/hero-dirt-ios")!) {
@@ -22,25 +32,7 @@ struct AboutView: View {
                 } footer: {
                     Text("Source code is freely available on GitHub.")
                 }
-
-                Section("Data Sources") {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Label("Open-Meteo", systemImage: "cloud.rain")
-                        Text("Free weather API providing historical and forecasted rainfall data. No account or API key required.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 2)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Label("Apple WeatherKit", systemImage: "cloud.sun")
-                        Text("Apple's weather service providing 7-day precipitation forecasts.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 2)
-                }
-
+                
                 Section("Your Data") {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -62,14 +54,22 @@ struct AboutView: View {
                     .padding(.vertical, 2)
                 }
 
-                Section {
-                    Link(destination: URL(string: "https://github.com/irodrigo17/hero-dirt-ios/issues")!) {
-                        Label("Report a Bug or Request a Feature", systemImage: "exclamationmark.bubble")
+                Section("Data Sources") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("Open-Meteo", systemImage: "cloud.rain")
+                        Text("Free weather API providing historical and forecasted rainfall data. No account or API key required.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-                } header: {
-                    Text("Feedback")
-                } footer: {
-                    Text("Feedback and feature requests are tracked as GitHub Issues.")
+                    .padding(.vertical, 2)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("Apple WeatherKit", systemImage: "cloud.sun")
+                        Text("Apple's weather service providing 7-day precipitation forecasts.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 2)
                 }
             }
             .navigationTitle("About")
