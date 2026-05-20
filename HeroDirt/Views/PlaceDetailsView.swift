@@ -11,7 +11,7 @@ struct PlaceDetailsView: View {
     var mapItem: MKMapItem? = nil
     var onClose: (() -> Void)? = nil
     var onNameResolved: ((String) -> Void)? = nil
-    var onSaved: (() -> Void)? = nil
+    var onSaved: ((Place) -> Void)? = nil
 
     @State private var placeName = "Loading..."
     @State private var rainfallSummary: RainfallSummary?
@@ -274,15 +274,14 @@ struct PlaceDetailsView: View {
         if let existing = savedPlace {
             placeStore.removePlace(existing)
         } else {
-            placeStore.addPlace(
-                Place(
-                    name: placeName,
-                    latitude: coordinate.latitude,
-                    longitude: coordinate.longitude,
-                    mapItemId: mapItem?.identifier
-                )
+            let newPlace = Place(
+                name: placeName,
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+                mapItemId: mapItem?.identifier
             )
-            onSaved?()
+            placeStore.addPlace(newPlace)
+            onSaved?(newPlace)
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }

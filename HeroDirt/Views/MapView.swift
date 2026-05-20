@@ -178,9 +178,11 @@ struct MapView: View {
             mapItem: selectedMapItem,
             onClose: { showingPlaceDetails = false },
             onNameResolved: newPinCoordinate != nil ? { name in newPinName = name } : nil,
-            onSaved: newPinCoordinate != nil ? {
+            onSaved: newPinCoordinate != nil ? { place in
+                selectedPlace = place
                 newPinCoordinate = nil
                 newPinName = nil
+                selectedAnnotation = .place(place)
             } : nil
         )
         .environmentObject(placeStore)
