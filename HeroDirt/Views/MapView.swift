@@ -6,7 +6,7 @@ struct MapView: View {
     @EnvironmentObject private var mapItemCache: MapItemCache
 
     @State private var cameraCommand: CameraCommand?
-    @State private var selectedTag: String?
+    @State private var selectedAnnotation: AnnotationSelection?
     @State private var newPinCoordinate: CLLocationCoordinate2D?
     @State private var newPinName: String?
     @State private var sheetPresented = true
@@ -30,7 +30,7 @@ struct MapView: View {
             newPinCoordinate: newPinCoordinate,
             newPinTitle: newPinName,
             selectedSearchResult: selectedSearchResult,
-            selectedTag: selectedTag,
+            selectedAnnotation: selectedAnnotation,
             overlayVisible: overlayVisible,
             overlayImage: gridService.rainfallImage(for: overlayTimeframe),
             overlayBounds: gridService.gridBounds,
@@ -53,11 +53,11 @@ struct MapView: View {
                 selectedPlace = nil
                 selectedMapItem = nil
                 selectedSearchResult = nil
-                selectedTag = "new-place"
+                selectedAnnotation = .newPin
                 showingPlaceDetails = true
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             },
-            onAnnotationSelected: handleAnnotationSelected,
+            onAnnotationSelected: { handleAnnotationSelected($0) },
             onFeatureTapped: { item in
                 selectedMapItem = item
                 selectedPlace = nil
@@ -119,7 +119,7 @@ struct MapView: View {
                 selectedMapItem = nil
                 newPinCoordinate = nil
                 selectedSearchResult = nil
-                selectedTag = place.id.uuidString
+                selectedAnnotation = .place(place)
                 showingPlaceDetails = true
                 centerAboveSheet(place.coordinate)
             },
@@ -128,7 +128,7 @@ struct MapView: View {
                 selectedMapItem = item
                 selectedPlace = nil
                 newPinCoordinate = nil
-                selectedTag = item.identifier?.rawValue ?? "search-result"
+                selectedAnnotation = .searchResult(item)
                 showingPlaceDetails = true
                 centerAboveSheet(item.location.coordinate)
             },
@@ -155,7 +155,7 @@ struct MapView: View {
         .sheet(
             isPresented: $showingPlaceDetails,
             onDismiss: {
-                selectedTag = nil
+                selectedAnnotation = nil
                 selectedPlace = nil
                 newPinCoordinate = nil
                 newPinName = nil
@@ -190,21 +190,20 @@ struct MapView: View {
 
     // MARK: - Map Interaction
 
-    private func handleAnnotationSelected(_ tag: String) {
-        if tag == "new-place" {
-            showingPlaceDetails = true
-            if let coord = newPinCoordinate { centerAboveSheet(coord) }
-        } else if let place = placeStore.places.first(where: { $0.id.uuidString == tag }) {
+    private func handleAnnotationSelected(_ selection: AnnotationSelection) {
+        switch selection {
+        case .place(let place):
             selectedPlace = place
             selectedMapItem = nil
             newPinCoordinate = nil
             selectedSearchResult = nil
-            selectedTag = tag
+            selectedAnnotation = .place(place)
             showingPlaceDetails = true
             centerAboveSheet(place.coordinate)
-        } else if let item = selectedSearchResult,
-                  item.identifier?.rawValue == tag || tag == "search-result"
-        {
+        case .newPin:
+            showingPlaceDetails = true
+            if let coord = newPinCoordinate { centerAboveSheet(coord) }
+        case .searchResult(let item):
             showingPlaceDetails = true
             centerAboveSheet(item.location.coordinate)
         }

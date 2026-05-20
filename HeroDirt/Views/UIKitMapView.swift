@@ -13,17 +13,23 @@ struct CameraCommand {
     let action: Action
 }
 
+// MARK: - Annotation Selection
+
+enum AnnotationSelection {
+    case place(Place)
+    case newPin
+    case searchResult(MKMapItem)
+}
+
 // MARK: - Annotations
 
 private final class PlaceAnnotation: NSObject, MKAnnotation {
-    let placeID: UUID
-    let tag: String
+    var place: Place
     @objc dynamic var coordinate: CLLocationCoordinate2D
     @objc dynamic var title: String?
 
     init(place: Place) {
-        self.placeID = place.id
-        self.tag = place.id.uuidString
+        self.place = place
         self.coordinate = place.coordinate
         self.title = place.name
     }
@@ -40,13 +46,11 @@ private final class NewPinAnnotation: NSObject, MKAnnotation {
 
 private final class SearchResultAnnotation: NSObject, MKAnnotation {
     let mapItem: MKMapItem
-    let tag: String
     @objc dynamic var coordinate: CLLocationCoordinate2D
     var title: String?
 
     init(mapItem: MKMapItem) {
         self.mapItem = mapItem
-        self.tag = mapItem.identifier?.rawValue ?? "search-result"
         self.coordinate = mapItem.location.coordinate
         self.title = mapItem.name
     }
@@ -91,7 +95,7 @@ struct UIKitMapView: UIViewRepresentable {
     let newPinCoordinate: CLLocationCoordinate2D?
     let newPinTitle: String?
     let selectedSearchResult: MKMapItem?
-    let selectedTag: String?
+    let selectedAnnotation: AnnotationSelection?
 
     let overlayVisible: Bool
     let overlayImage: UIImage?
@@ -103,7 +107,7 @@ struct UIKitMapView: UIViewRepresentable {
     var onRegionChanged: (MKCoordinateRegion) -> Void = { _ in }
     var onRegionWillChange: () -> Void = {}
     var onLongPress: (CLLocationCoordinate2D) -> Void = { _ in }
-    var onAnnotationSelected: (String) -> Void = { _ in }
+    var onAnnotationSelected: (AnnotationSelection) -> Void = { _ in }
     var onFeatureTapped: (MKMapItem) -> Void = { _ in }
     var onTap: () -> Void = {}
     var onUserLocationAvailable: (CLLocationCoordinate2D) -> Void = { _ in }
@@ -142,7 +146,7 @@ struct UIKitMapView: UIViewRepresentable {
         let c = context.coordinator
         c.callbacks = (onRegionChanged, onRegionWillChange, onLongPress, onAnnotationSelected, onFeatureTapped, onTap, onUserLocationAvailable)
         c.updateAnnotations(on: mapView, view: self)
-        c.updateSelection(on: mapView, selectedTag: selectedTag)
+        c.updateSelection(on: mapView, selectedAnnotation: selectedAnnotation)
         c.updateRainfallOverlay(
             image: overlayVisible ? overlayImage : nil,
             bounds: overlayBounds,
@@ -167,7 +171,7 @@ struct UIKitMapView: UIViewRepresentable {
             onRegionChanged: (MKCoordinateRegion) -> Void,
             onRegionWillChange: () -> Void,
             onLongPress: (CLLocationCoordinate2D) -> Void,
-            onAnnotationSelected: (String) -> Void,
+            onAnnotationSelected: (AnnotationSelection) -> Void,
             onFeatureTapped: (MKMapItem) -> Void,
             onTap: () -> Void,
             onUserLocationAvailable: (CLLocationCoordinate2D) -> Void
@@ -220,13 +224,14 @@ struct UIKitMapView: UIViewRepresentable {
                 // Update title and marker appearance if changed
                 for annotation in existing {
                     guard let ann = annotation as? PlaceAnnotation else { continue }
-                    if let place = view.places.first(where: { $0.id == ann.placeID }),
-                       ann.title != place.name
+                    if let place = view.places.first(where: { $0.id == ann.place.id }),
+                       ann.place.name != place.name
                     {
+                        ann.place = place
                         ann.title = place.name
                     }
                     if let annView = mapView.view(for: ann) as? MKMarkerAnnotationView {
-                        let category = MapItemCache.shared.items[ann.placeID]?.pointOfInterestCategory
+                        let category = ann.place.mapItem?.pointOfInterestCategory
                         annView.markerTintColor = UIColor(category?.iconColor ?? .orange)
                         annView.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
                     }
@@ -239,23 +244,35 @@ struct UIKitMapView: UIViewRepresentable {
         }
 
         private func annotationID(_ annotation: MKAnnotation) -> String? {
-            if let a = annotation as? PlaceAnnotation { return a.tag }
+            if let a = annotation as? PlaceAnnotation { return a.place.id.uuidString }
             if annotation is NewPinAnnotation { return "new-place" }
-            if let a = annotation as? SearchResultAnnotation { return a.tag }
+            if let a = annotation as? SearchResultAnnotation {
+                return a.mapItem.identifier?.rawValue ?? "search-result"
+            }
             return nil
         }
 
-        func updateSelection(on mapView: MKMapView, selectedTag: String?) {
-            guard let tag = selectedTag else {
+        func updateSelection(on mapView: MKMapView, selectedAnnotation: AnnotationSelection?) {
+            guard let selection = selectedAnnotation else {
                 mapView.selectedAnnotations
                     .filter { !($0 is MKUserLocation) && !($0 is MKMapFeatureAnnotation) }
                     .forEach { mapView.deselectAnnotation($0, animated: true) }
                 return
             }
-            if let current = mapView.selectedAnnotations.first,
-               annotationID(current) == tag { return }
-            if let target = mapView.annotations.first(where: { annotationID($0) == tag }) {
+            if let current = mapView.selectedAnnotations.first, matches(current, selection) { return }
+            if let target = mapView.annotations.first(where: { matches($0, selection) }) {
                 mapView.selectAnnotation(target, animated: true)
+            }
+        }
+
+        private func matches(_ annotation: MKAnnotation, _ selection: AnnotationSelection) -> Bool {
+            switch selection {
+            case .place(let place):
+                return (annotation as? PlaceAnnotation)?.place.id == place.id
+            case .newPin:
+                return annotation is NewPinAnnotation
+            case .searchResult(let item):
+                return (annotation as? SearchResultAnnotation)?.mapItem.identifier == item.identifier
             }
         }
 
@@ -356,7 +373,7 @@ struct UIKitMapView: UIViewRepresentable {
                 let view = mapView.dequeueReusableAnnotationView(
                     withIdentifier: "place", for: ann
                 ) as! MKMarkerAnnotationView
-                let category = MapItemCache.shared.items[ann.placeID]?.pointOfInterestCategory
+                let category = ann.place.mapItem?.pointOfInterestCategory
                 view.markerTintColor = UIColor(category?.iconColor ?? .orange)
                 view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
                 view.canShowCallout = false
@@ -389,11 +406,11 @@ struct UIKitMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
             if let ann = annotation as? PlaceAnnotation {
-                callbacks.onAnnotationSelected(ann.tag)
+                callbacks.onAnnotationSelected(.place(ann.place))
             } else if annotation is NewPinAnnotation {
-                callbacks.onAnnotationSelected("new-place")
+                callbacks.onAnnotationSelected(.newPin)
             } else if let ann = annotation as? SearchResultAnnotation {
-                callbacks.onAnnotationSelected(ann.tag)
+                callbacks.onAnnotationSelected(.searchResult(ann.mapItem))
             } else if let feature = annotation as? MKMapFeatureAnnotation {
                 let mapItem = MKMapItem(
                     location: CLLocation(
