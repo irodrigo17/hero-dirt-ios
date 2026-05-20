@@ -1,15 +1,30 @@
-name: HeroDirt
+name: Hero.Dirt
 options:
   bundleIdPrefix: com.herodirt
   deploymentTarget:
     iOS: "26.0"
   xcodeVersion: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: K3CQQKBR25
+    CODE_SIGN_IDENTITY: "iPhone Developer"
 targets:
   HeroDirt:
     type: application
     platform: iOS
     sources:
       - path: HeroDirt
+    info:
+      path: HeroDirt/Info.plist
+      properties:
+        ITSAppUsesNonExemptEncryption: false
+        NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UILaunchScreen:
+          BackgroundColor: LaunchBackground
+          ImageName: LaunchImage
     entitlements:
       path: HeroDirt/HeroDirt.entitlements
       properties:
@@ -22,17 +37,10 @@ targets:
         com.apple.developer.weatherkit: true
     settings:
       base:
-        INFOPLIST_FILE: HeroDirt/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.herodirt.app
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "1"
-        SWIFT_VERSION: "5.9"
-        DEVELOPMENT_TEAM: K3CQQKBR25
-        CODE_SIGN_IDENTITY: "iPhone Developer"
-        GENERATE_INFOPLIST_FILE: YES
         TARGETED_DEVICE_FAMILY: "1"
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
 
   HeroDirtTests:
     type: bundle.unit-test
@@ -44,6 +52,4 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.herodirt.app.tests
-        SWIFT_VERSION: "5.9"
-        DEVELOPMENT_TEAM: K3CQQKBR25
         GENERATE_INFOPLIST_FILE: YES

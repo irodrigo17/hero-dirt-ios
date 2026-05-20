@@ -1,0 +1,590 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		09DED7A4B65728DCDCB55F25 /* HeroDirtApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8621EF13FF77D5032DD1F02B /* HeroDirtApp.swift */; };
+		1EF84CEA65A0F0D2954EF08A /* CardHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B7529216A0A7AA0B347BAC /* CardHeader.swift */; };
+		2000F05EA0C074EEA1A528BA /* MKPointOfInterestCategory+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = B29B68718243B090FD689424 /* MKPointOfInterestCategory+Display.swift */; };
+		244541F101C9F46551BAB9A3 /* PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDB27F1D2EC8AB36884752E /* PlaceTests.swift */; };
+		2A3A09462BEB7E0AC1C917AE /* RainfallLegendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAFF130037B3BC9282D4E65C /* RainfallLegendView.swift */; };
+		3F643586883C98B82FDA6745 /* RainfallOverlaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DA86C9D29E5D4C17E7A3AE /* RainfallOverlaySheet.swift */; };
+		402C534E06C33FC4E94923E6 /* SoilServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9856EFA623F9D24D38BDF38E /* SoilServiceTests.swift */; };
+		403C282E808C9014CC7AC33D /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565CC57CFF1DB9AD8A7D4FFD /* RainfallOverlayTests.swift */; };
+		46F2D11204F997935FD184F6 /* SavedPlacesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DB2363E554843332552538 /* SavedPlacesListView.swift */; };
+		4B83DAA2081B2183032FC15E /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA1C1B61597941FE64DDD68 /* SharedUI.swift */; };
+		4DA8A37E2BFFD6F393233154 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300314E67304AF76F06DDEAC /* Place.swift */; };
+		5A0BC7AF3161DC4F99DD74C6 /* RainForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA8E7E72BF47DB7D5856BEC5 /* RainForecastTests.swift */; };
+		616C2FF2B398ADD334730D7E /* RainfallColorScaleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFEEC963BADB40987E872E33 /* RainfallColorScaleTests.swift */; };
+		6A1E33140ABAC65137472C14 /* PlaceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D46A2453CB9D7C2396A870D /* PlaceStoreTests.swift */; };
+		6DF41E46E26FD0737C4A42D0 /* SharedUtilitiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555343949240EC5882599D2 /* SharedUtilitiesTests.swift */; };
+		78A41AAD7F41F9C026FA202C /* RainfallGridService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B885AB98C896F810A06ACC9 /* RainfallGridService.swift */; };
+		7DFF295EF102581F92F9E7CC /* PlaceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33430E98E5D4E2092450CD70 /* PlaceStore.swift */; };
+		82426FEFA26AD1EF4589190E /* SoilOverrideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F48522B33C2F81E44E05DA /* SoilOverrideSheet.swift */; };
+		83DA807EC990439DB1B0973F /* RainForecastCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961661F0181586585C163891 /* RainForecastCardView.swift */; };
+		868B1165C78C5156DC4F278E /* DirtConditionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14766FF618A12BCA6CB7EF35 /* DirtConditionCardView.swift */; };
+		8A69AE10909AB625C2A42D73 /* UIKitMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA711FAA9C73494197B849B /* UIKitMapView.swift */; };
+		908AC82B7B93E1ECFF421F50 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9625513D63CDADC35E23C201 /* ContentView.swift */; };
+		934B5927A3ACC308DAC5502E /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F534295453A49773AECC86 /* PlaceDetailsView.swift */; };
+		9417DF32B9848284D2F4C71D /* WeatherServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793B1CECAA28CC13C89EAE1C /* WeatherServiceTests.swift */; };
+		99EDD491691889402C5CF702 /* MapItemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80334A8D0278D52DA6F52DBD /* MapItemCache.swift */; };
+		9CE8A9F826F92AD6A1E6E600 /* SoilService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B876682F4F64F2632825553F /* SoilService.swift */; };
+		9F0E6B6BF72DC198A67869BE /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DB3F248DA64CFB07E49D62 /* MapView.swift */; };
+		ABECA32C7B5294CBA1FE370F /* RainfallCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB45287A540FC170EDDC3E40 /* RainfallCardView.swift */; };
+		B02891E4BF4042EADD9B5F3F /* RainfallData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D539D05B699B0CEA6A7DE7FB /* RainfallData.swift */; };
+		B8A577EF7FDD56039E145DE7 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0F624C39C9AF95E04347CD /* WeatherService.swift */; };
+		C3412CE700A88711F71DCAAE /* RainfallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68B7F1086966D4A65FC5E50 /* RainfallDataTests.swift */; };
+		C852FB499CE717D2B50E5543 /* POICategoryIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E124553B7C822887D173AF /* POICategoryIcon.swift */; };
+		C88180180E422B5ED6B2BDA3 /* WeatherCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD7D01D8EB5F9FD7D1B6C4C /* WeatherCacheTests.swift */; };
+		DA9A08D7DD4696527D66D876 /* SoilModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30E231AF73A77CB55A0D923E /* SoilModels.swift */; };
+		DE22C77864B383676E3652EE /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B47E135B9BEF828AF7A25BA /* AboutView.swift */; };
+		E4BABC2DCEFABE4AC8E3CFFB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A89B9D62FB4C58132ACBB2D6 /* Assets.xcassets */; };
+		F0FF341568A3BA18276E86E1 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD642933A242A9FB2C24A42 /* SearchResultsView.swift */; };
+		F49362CAE95D36551C067222 /* RainfallColorScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DBAB3CD0F6E799C9607960 /* RainfallColorScale.swift */; };
+		F625B46B48B53292A8992868 /* RainfallOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 768DECCC75A5E96692D50D5E /* RainfallOverlay.swift */; };
+		F749F3C3CA793099012982E5 /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36466A0B1B3AD9DA4BD4D968 /* SheetView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		45B47DFF872584EDBC69D461 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DDD59E8C87D55F021C8EF903 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F145AC9C3FD996926BA62C58;
+			remoteInfo = HeroDirt;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0804FE69C3333D4DBAE32E67 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		0AC4456292E8130536371192 /* HeroDirt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CA1C1B61597941FE64DDD68 /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
+		14766FF618A12BCA6CB7EF35 /* DirtConditionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtConditionCardView.swift; sourceTree = "<group>"; };
+		22F534295453A49773AECC86 /* PlaceDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsView.swift; sourceTree = "<group>"; };
+		300314E67304AF76F06DDEAC /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+		30E231AF73A77CB55A0D923E /* SoilModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilModels.swift; sourceTree = "<group>"; };
+		31B7529216A0A7AA0B347BAC /* CardHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardHeader.swift; sourceTree = "<group>"; };
+		33430E98E5D4E2092450CD70 /* PlaceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStore.swift; sourceTree = "<group>"; };
+		36466A0B1B3AD9DA4BD4D968 /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
+		3D46A2453CB9D7C2396A870D /* PlaceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStoreTests.swift; sourceTree = "<group>"; };
+		44DB3F248DA64CFB07E49D62 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		4CD642933A242A9FB2C24A42 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
+		565CC57CFF1DB9AD8A7D4FFD /* RainfallOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlayTests.swift; sourceTree = "<group>"; };
+		59C32295EAB5EEFDB7AA90EB /* HeroDirtTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HeroDirtTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0F624C39C9AF95E04347CD /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		60DBAB3CD0F6E799C9607960 /* RainfallColorScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScale.swift; sourceTree = "<group>"; };
+		6CD7D01D8EB5F9FD7D1B6C4C /* WeatherCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherCacheTests.swift; sourceTree = "<group>"; };
+		7555343949240EC5882599D2 /* SharedUtilitiesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUtilitiesTests.swift; sourceTree = "<group>"; };
+		768DECCC75A5E96692D50D5E /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
+		793B1CECAA28CC13C89EAE1C /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
+		7B47E135B9BEF828AF7A25BA /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		80334A8D0278D52DA6F52DBD /* MapItemCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapItemCache.swift; sourceTree = "<group>"; };
+		8621EF13FF77D5032DD1F02B /* HeroDirtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDirtApp.swift; sourceTree = "<group>"; };
+		8DDB27F1D2EC8AB36884752E /* PlaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceTests.swift; sourceTree = "<group>"; };
+		961661F0181586585C163891 /* RainForecastCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastCardView.swift; sourceTree = "<group>"; };
+		9625513D63CDADC35E23C201 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9856EFA623F9D24D38BDF38E /* SoilServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilServiceTests.swift; sourceTree = "<group>"; };
+		9B885AB98C896F810A06ACC9 /* RainfallGridService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallGridService.swift; sourceTree = "<group>"; };
+		A4CEDE17D4F5327727E74494 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A89B9D62FB4C58132ACBB2D6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AB45287A540FC170EDDC3E40 /* RainfallCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallCardView.swift; sourceTree = "<group>"; };
+		B29B68718243B090FD689424 /* MKPointOfInterestCategory+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MKPointOfInterestCategory+Display.swift"; sourceTree = "<group>"; };
+		B876682F4F64F2632825553F /* SoilService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilService.swift; sourceTree = "<group>"; };
+		BA8E7E72BF47DB7D5856BEC5 /* RainForecastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainForecastTests.swift; sourceTree = "<group>"; };
+		C4DA86C9D29E5D4C17E7A3AE /* RainfallOverlaySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlaySheet.swift; sourceTree = "<group>"; };
+		C997AAA1E345188130182397 /* HeroDirt.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeroDirt.entitlements; sourceTree = "<group>"; };
+		CFEEC963BADB40987E872E33 /* RainfallColorScaleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallColorScaleTests.swift; sourceTree = "<group>"; };
+		D0E124553B7C822887D173AF /* POICategoryIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = POICategoryIcon.swift; sourceTree = "<group>"; };
+		D539D05B699B0CEA6A7DE7FB /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
+		D68B7F1086966D4A65FC5E50 /* RainfallDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallDataTests.swift; sourceTree = "<group>"; };
+		D6DB2363E554843332552538 /* SavedPlacesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesListView.swift; sourceTree = "<group>"; };
+		E1F48522B33C2F81E44E05DA /* SoilOverrideSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilOverrideSheet.swift; sourceTree = "<group>"; };
+		FAFF130037B3BC9282D4E65C /* RainfallLegendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallLegendView.swift; sourceTree = "<group>"; };
+		FDA711FAA9C73494197B849B /* UIKitMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitMapView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		382210521ECE5A516A6F4865 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				300314E67304AF76F06DDEAC /* Place.swift */,
+				D539D05B699B0CEA6A7DE7FB /* RainfallData.swift */,
+				768DECCC75A5E96692D50D5E /* RainfallOverlay.swift */,
+				30E231AF73A77CB55A0D923E /* SoilModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3E9EC9B12F37D21C0D269ADE = {
+			isa = PBXGroup;
+			children = (
+				FD098E67CDC123B3CAD7D3B3 /* HeroDirt */,
+				7425F429BB7B5208634EF33C /* HeroDirtTests */,
+				C4D977FDD91A3E0DC6B1C7DC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		60ADE5AE19BDB16C93722361 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				80334A8D0278D52DA6F52DBD /* MapItemCache.swift */,
+				33430E98E5D4E2092450CD70 /* PlaceStore.swift */,
+				60DBAB3CD0F6E799C9607960 /* RainfallColorScale.swift */,
+				9B885AB98C896F810A06ACC9 /* RainfallGridService.swift */,
+				B876682F4F64F2632825553F /* SoilService.swift */,
+				5A0F624C39C9AF95E04347CD /* WeatherService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7425F429BB7B5208634EF33C /* HeroDirtTests */ = {
+			isa = PBXGroup;
+			children = (
+				3D46A2453CB9D7C2396A870D /* PlaceStoreTests.swift */,
+				8DDB27F1D2EC8AB36884752E /* PlaceTests.swift */,
+				CFEEC963BADB40987E872E33 /* RainfallColorScaleTests.swift */,
+				D68B7F1086966D4A65FC5E50 /* RainfallDataTests.swift */,
+				565CC57CFF1DB9AD8A7D4FFD /* RainfallOverlayTests.swift */,
+				BA8E7E72BF47DB7D5856BEC5 /* RainForecastTests.swift */,
+				7555343949240EC5882599D2 /* SharedUtilitiesTests.swift */,
+				9856EFA623F9D24D38BDF38E /* SoilServiceTests.swift */,
+				6CD7D01D8EB5F9FD7D1B6C4C /* WeatherCacheTests.swift */,
+				793B1CECAA28CC13C89EAE1C /* WeatherServiceTests.swift */,
+			);
+			path = HeroDirtTests;
+			sourceTree = "<group>";
+		};
+		7C060CF61E829CE441CA62BE /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7B47E135B9BEF828AF7A25BA /* AboutView.swift */,
+				31B7529216A0A7AA0B347BAC /* CardHeader.swift */,
+				14766FF618A12BCA6CB7EF35 /* DirtConditionCardView.swift */,
+				44DB3F248DA64CFB07E49D62 /* MapView.swift */,
+				B29B68718243B090FD689424 /* MKPointOfInterestCategory+Display.swift */,
+				22F534295453A49773AECC86 /* PlaceDetailsView.swift */,
+				D0E124553B7C822887D173AF /* POICategoryIcon.swift */,
+				AB45287A540FC170EDDC3E40 /* RainfallCardView.swift */,
+				FAFF130037B3BC9282D4E65C /* RainfallLegendView.swift */,
+				C4DA86C9D29E5D4C17E7A3AE /* RainfallOverlaySheet.swift */,
+				961661F0181586585C163891 /* RainForecastCardView.swift */,
+				D6DB2363E554843332552538 /* SavedPlacesListView.swift */,
+				4CD642933A242A9FB2C24A42 /* SearchResultsView.swift */,
+				0CA1C1B61597941FE64DDD68 /* SharedUI.swift */,
+				36466A0B1B3AD9DA4BD4D968 /* SheetView.swift */,
+				E1F48522B33C2F81E44E05DA /* SoilOverrideSheet.swift */,
+				FDA711FAA9C73494197B849B /* UIKitMapView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C4D977FDD91A3E0DC6B1C7DC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0AC4456292E8130536371192 /* HeroDirt.app */,
+				59C32295EAB5EEFDB7AA90EB /* HeroDirtTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FD098E67CDC123B3CAD7D3B3 /* HeroDirt */ = {
+			isa = PBXGroup;
+			children = (
+				A89B9D62FB4C58132ACBB2D6 /* Assets.xcassets */,
+				0804FE69C3333D4DBAE32E67 /* Base.xcconfig */,
+				9625513D63CDADC35E23C201 /* ContentView.swift */,
+				C997AAA1E345188130182397 /* HeroDirt.entitlements */,
+				8621EF13FF77D5032DD1F02B /* HeroDirtApp.swift */,
+				A4CEDE17D4F5327727E74494 /* Info.plist */,
+				382210521ECE5A516A6F4865 /* Models */,
+				60ADE5AE19BDB16C93722361 /* Services */,
+				7C060CF61E829CE441CA62BE /* Views */,
+			);
+			path = HeroDirt;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1301E39461E09B28CD1C2F9A /* HeroDirtTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDCAB188A3FCEB9EE5FFCE9B /* Build configuration list for PBXNativeTarget "HeroDirtTests" */;
+			buildPhases = (
+				43D98FFAB9D2DF676977FE64 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E698E4ED9DB716FCEAC09E88 /* PBXTargetDependency */,
+			);
+			name = HeroDirtTests;
+			packageProductDependencies = (
+			);
+			productName = HeroDirtTests;
+			productReference = 59C32295EAB5EEFDB7AA90EB /* HeroDirtTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F145AC9C3FD996926BA62C58 /* HeroDirt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 016C7CC6ADA7B7E7BA355649 /* Build configuration list for PBXNativeTarget "HeroDirt" */;
+			buildPhases = (
+				20824DD284D0C46CEC4356DA /* Sources */,
+				1EBAEEAD7A2C4543D8F7399D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HeroDirt;
+			packageProductDependencies = (
+			);
+			productName = HeroDirt;
+			productReference = 0AC4456292E8130536371192 /* HeroDirt.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DDD59E8C87D55F021C8EF903 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					1301E39461E09B28CD1C2F9A = {
+						DevelopmentTeam = K3CQQKBR25;
+					};
+					F145AC9C3FD996926BA62C58 = {
+						DevelopmentTeam = K3CQQKBR25;
+					};
+				};
+			};
+			buildConfigurationList = DEBB627B900797BD8261673F /* Build configuration list for PBXProject "Hero.Dirt" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 3E9EC9B12F37D21C0D269ADE;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C4D977FDD91A3E0DC6B1C7DC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F145AC9C3FD996926BA62C58 /* HeroDirt */,
+				1301E39461E09B28CD1C2F9A /* HeroDirtTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1EBAEEAD7A2C4543D8F7399D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4BABC2DCEFABE4AC8E3CFFB /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		20824DD284D0C46CEC4356DA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE22C77864B383676E3652EE /* AboutView.swift in Sources */,
+				1EF84CEA65A0F0D2954EF08A /* CardHeader.swift in Sources */,
+				908AC82B7B93E1ECFF421F50 /* ContentView.swift in Sources */,
+				868B1165C78C5156DC4F278E /* DirtConditionCardView.swift in Sources */,
+				09DED7A4B65728DCDCB55F25 /* HeroDirtApp.swift in Sources */,
+				2000F05EA0C074EEA1A528BA /* MKPointOfInterestCategory+Display.swift in Sources */,
+				99EDD491691889402C5CF702 /* MapItemCache.swift in Sources */,
+				9F0E6B6BF72DC198A67869BE /* MapView.swift in Sources */,
+				C852FB499CE717D2B50E5543 /* POICategoryIcon.swift in Sources */,
+				4DA8A37E2BFFD6F393233154 /* Place.swift in Sources */,
+				934B5927A3ACC308DAC5502E /* PlaceDetailsView.swift in Sources */,
+				7DFF295EF102581F92F9E7CC /* PlaceStore.swift in Sources */,
+				83DA807EC990439DB1B0973F /* RainForecastCardView.swift in Sources */,
+				ABECA32C7B5294CBA1FE370F /* RainfallCardView.swift in Sources */,
+				F49362CAE95D36551C067222 /* RainfallColorScale.swift in Sources */,
+				B02891E4BF4042EADD9B5F3F /* RainfallData.swift in Sources */,
+				78A41AAD7F41F9C026FA202C /* RainfallGridService.swift in Sources */,
+				2A3A09462BEB7E0AC1C917AE /* RainfallLegendView.swift in Sources */,
+				F625B46B48B53292A8992868 /* RainfallOverlay.swift in Sources */,
+				3F643586883C98B82FDA6745 /* RainfallOverlaySheet.swift in Sources */,
+				46F2D11204F997935FD184F6 /* SavedPlacesListView.swift in Sources */,
+				F0FF341568A3BA18276E86E1 /* SearchResultsView.swift in Sources */,
+				4B83DAA2081B2183032FC15E /* SharedUI.swift in Sources */,
+				F749F3C3CA793099012982E5 /* SheetView.swift in Sources */,
+				DA9A08D7DD4696527D66D876 /* SoilModels.swift in Sources */,
+				82426FEFA26AD1EF4589190E /* SoilOverrideSheet.swift in Sources */,
+				9CE8A9F826F92AD6A1E6E600 /* SoilService.swift in Sources */,
+				8A69AE10909AB625C2A42D73 /* UIKitMapView.swift in Sources */,
+				B8A577EF7FDD56039E145DE7 /* WeatherService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43D98FFAB9D2DF676977FE64 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A1E33140ABAC65137472C14 /* PlaceStoreTests.swift in Sources */,
+				244541F101C9F46551BAB9A3 /* PlaceTests.swift in Sources */,
+				5A0BC7AF3161DC4F99DD74C6 /* RainForecastTests.swift in Sources */,
+				616C2FF2B398ADD334730D7E /* RainfallColorScaleTests.swift in Sources */,
+				C3412CE700A88711F71DCAAE /* RainfallDataTests.swift in Sources */,
+				403C282E808C9014CC7AC33D /* RainfallOverlayTests.swift in Sources */,
+				6DF41E46E26FD0737C4A42D0 /* SharedUtilitiesTests.swift in Sources */,
+				402C534E06C33FC4E94923E6 /* SoilServiceTests.swift in Sources */,
+				C88180180E422B5ED6B2BDA3 /* WeatherCacheTests.swift in Sources */,
+				9417DF32B9848284D2F4C71D /* WeatherServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E698E4ED9DB716FCEAC09E88 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F145AC9C3FD996926BA62C58 /* HeroDirt */;
+			targetProxy = 45B47DFF872584EDBC69D461 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		144E60E1687A47CBD7D27C71 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = HeroDirt/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		6090483314EC614DC3A7BFA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HeroDirt.app/HeroDirt";
+			};
+			name = Release;
+		};
+		63C3B7DC5B5D84BB850FA701 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HeroDirt/HeroDirt.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = HeroDirt/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		6CC8A9F2327D6993C4452E43 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = K3CQQKBR25;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		A6BFF168320887C407A8D87C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.herodirt.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HeroDirt.app/HeroDirt";
+			};
+			name = Debug;
+		};
+		EA18E85DD32C865E54F7493D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K3CQQKBR25;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		016C7CC6ADA7B7E7BA355649 /* Build configuration list for PBXNativeTarget "HeroDirt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				144E60E1687A47CBD7D27C71 /* Debug */,
+				63C3B7DC5B5D84BB850FA701 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DEBB627B900797BD8261673F /* Build configuration list for PBXProject "Hero.Dirt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA18E85DD32C865E54F7493D /* Debug */,
+				6CC8A9F2327D6993C4452E43 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FDCAB188A3FCEB9EE5FFCE9B /* Build configuration list for PBXNativeTarget "HeroDirtTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6BFF168320887C407A8D87C /* Debug */,
+				6090483314EC614DC3A7BFA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DDD59E8C87D55F021C8EF903 /* Project object */;
+}
