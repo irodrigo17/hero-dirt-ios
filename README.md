@@ -4,6 +4,7 @@
 [![iOS](https://img.shields.io/badge/iOS-26.0+-black?logo=apple)](https://developer.apple.com/ios/)
 [![Swift](https://img.shields.io/badge/Swift-5.9-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/irodrigo17/hero-dirt-ios)](https://github.com/irodrigo17/hero-dirt-ios/commits/main)
 
 A native iOS app that helps mountain bikers and trail runners decide if conditions are good to ride. Search for outdoor places, save your favorites, and get rainfall history, rain forecast, and a dirt condition estimate based on soil moisture modeling.
 
