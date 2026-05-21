@@ -1,4 +1,4 @@
-name: Hero.Dirt
+name: HeroDirt
 options:
   bundleIdPrefix: com.herodirt
   deploymentTarget:
