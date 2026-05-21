@@ -27,7 +27,3 @@ xcuserdata/
 
 # macOS
 .DS_Store
-
-# XcodeGen generated files
-HeroDirt/Info.plist
-HeroDirt/HeroDirt.entitlements
