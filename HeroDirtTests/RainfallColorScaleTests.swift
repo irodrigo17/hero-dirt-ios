@@ -62,9 +62,9 @@ struct RainfallColorScaleTests {
 
     @Test func interpolationBetweenStops() {
         // 3.0 is between green (1.0) and yellow (5.0)
-        let (r1, g1, b1, a1) = RainfallColorScale.rgbaComponents(for: 1.0)
-        let (r2, g2, b2, a2) = RainfallColorScale.rgbaComponents(for: 5.0)
-        let (r3, g3, b3, a3) = RainfallColorScale.rgbaComponents(for: 3.0)
+        let (r1, g1, _, a1) = RainfallColorScale.rgbaComponents(for: 1.0)
+        let (_, _, _, a2) = RainfallColorScale.rgbaComponents(for: 5.0)
+        let (r3, g3, _, a3) = RainfallColorScale.rgbaComponents(for: 3.0)
 
         // 3.0 is midpoint, so values should be between
         #expect(r3 > r1)

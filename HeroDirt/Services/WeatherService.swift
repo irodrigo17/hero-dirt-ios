@@ -28,7 +28,7 @@ actor WeatherCache {
     var rainfall: [String: Entry<[DailyWeatherData]>] = [:]
     var forecast: [String: Entry<RainForecast>] = [:]
     private var isLoaded = false
-    private var persistTask: Task<Void, Never>?
+    var persistTask: Task<Void, Never>?
 
     // MARK: - TTL
 
