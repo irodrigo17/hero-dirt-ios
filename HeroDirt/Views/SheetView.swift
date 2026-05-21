@@ -146,5 +146,10 @@ private struct SearchableContent: View {
         .onChange(of: isSearching) { _, newValue in
             onIsSearchingChanged(newValue)
         }
+        .onChange(of: selectedDetent) { _, newDetent in
+            if isSearching && newDetent == .medium {
+                dismissSearch()
+            }
+        }
     }
 }
