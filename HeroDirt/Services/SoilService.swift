@@ -20,6 +20,12 @@ enum SoilService {
 
     private static let cache = Cache()
 
+    private static let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        return URLSession(configuration: config)
+    }()
+
     // MARK: - API Response
 
     struct SoilGridsResponse: Codable {
@@ -75,10 +81,6 @@ enum SoilService {
         ]
 
         guard let url = components.url else { return .loam }
-
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 10
-        let session = URLSession(configuration: config)
 
         do {
             let (data, response) = try await session.data(from: url)
