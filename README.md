@@ -1,156 +1,88 @@
 # Hero Dirt iOS
 
-A native iOS app for tracking accumulated rainfall anywhere on the map. Search for outdoor places, save your favorites, and visualize precipitation with a smooth, interactive color-coded overlay.
+A native iOS app that helps mountain bikers and trail runners decide if conditions are good to ride. Search for outdoor places, save your favorites, and get rainfall history, rain forecast, and a dirt condition estimate based on soil moisture modeling.
 
 ## Features
 
-- **Smooth rainfall overlay** -- Bitmap-rendered heatmap using per-pixel bilinear interpolation and Gaussian blur for smooth color gradients. Supports time period switching (1d/2d/3d/7d) and an opacity slider.
-- **Place search** -- Search bar powered by `MKLocalSearch` with outdoor place prioritization (parks, forests, trails, campgrounds) via `MKLocalPointsOfInterestRequest`. Results are biased toward the current map viewport.
-- **Click-to-inspect** -- Tap anywhere on the map to see rainfall data for that location.
-- **Saved places** -- Save locations with custom names. Each saved place shows as an orange marker on the map.
-- **Rainfall summary** -- For each location, see total precipitation over the last 1, 2, 3, and 7 days, plus days since last rain.
+- **Rainfall overlay** — Bitmap-rendered heatmap using per-pixel bilinear interpolation and Gaussian blur. Supports time period switching (1d/2d/3d/7d) and an opacity slider.
+- **Dirt condition** — Estimates trail rideability using a soil moisture balance model driven by rainfall and evapotranspiration data. Soil type can be overridden per place.
+- **Rain forecast** — Shows predicted precipitation for the next 1, 2, 3, and 7 days.
+- **Place search** — `UISearchController`-powered search using `MKLocalSearch` with outdoor place prioritization (parks, forests, trails, campgrounds). Results are biased toward the current map viewport.
+- **Tap-to-inspect** — Tap anywhere on the map to see rainfall history, forecast, and dirt condition for that location.
+- **Saved places** — Save locations with custom names. Each saved place shows as a marker on the map.
 
 ## Architecture
 
-The app follows a layered SwiftUI architecture with four groups: **App**, **Views**, **Services**, and **Models**. State flows downward through SwiftUI's environment and `@StateObject` ownership, while data flows from the Open-Meteo API through services into view-bound models.
-
-### Diagram
-
-([source](docs/architecture.mmd))
-
-```mermaid
-graph TD
-    subgraph App["App Entry"]
-        HeroDirtApp["HeroDirtApp"]
-        ContentView["ContentView<br/><i>TabView</i>"]
-    end
-
-    subgraph Views["Views"]
-        MapExploreView["MapExploreView<br/><i>Map + Search + Overlay</i>"]
-        SavedPlacesView["SavedPlacesView<br/><i>Saved places list</i>"]
-        LocationRainfallSheet["LocationRainfallSheet<br/><i>Location detail sheet</i>"]
-        RainfallCardView["RainfallCardView<br/><i>Rainfall summary card</i>"]
-        RainfallOverlayControls["RainfallOverlayControls<br/><i>Timeframe, opacity, legend</i>"]
-        SearchBar["SearchBar<br/><i>UISearchBar wrapper</i>"]
-    end
-
-    subgraph Services["Services"]
-        PlaceStore["PlaceStore<br/><i>ObservableObject</i><br/>CRUD + persistence"]
-        RainfallGridService["RainfallGridService<br/><i>ObservableObject</i><br/>Grid fetch + bitmap render"]
-        WeatherService["WeatherService<br/><i>static</i><br/>Open-Meteo API client"]
-        RainfallColorScale["RainfallColorScale<br/><i>static</i><br/>mm → RGBA mapping"]
-    end
-
-    subgraph Models["Models"]
-        Place["Place<br/><i>Codable struct</i>"]
-        RainfallSummary["RainfallSummary<br/><i>1d/2d/3d/7d + daysSinceRain</i>"]
-        DailyRainfall["DailyRainfall<br/><i>date + amount</i>"]
-        RainfallTimeframe["RainfallTimeframe<br/><i>enum: 1d/2d/3d/7d</i>"]
-        RainfallGridBounds["RainfallGridBounds<br/><i>lat/lon extent</i>"]
-    end
-
-    subgraph External["External APIs"]
-        OpenMeteo["Open-Meteo API<br/><i>Precipitation data</i>"]
-        MapKit["Apple MapKit<br/><i>Map, search, geocoding</i>"]
-    end
-
-    HeroDirtApp -->|"@StateObject"| PlaceStore
-    HeroDirtApp -->|renders| ContentView
-    ContentView -->|tab 1| MapExploreView
-    ContentView -->|tab 2| SavedPlacesView
-
-    MapExploreView -->|"@EnvironmentObject"| PlaceStore
-    MapExploreView -->|"@StateObject"| RainfallGridService
-    MapExploreView -->|presents| LocationRainfallSheet
-    MapExploreView -->|contains| SearchBar
-    MapExploreView -->|contains| RainfallOverlayControls
-    MapExploreView -->|reads| RainfallTimeframe
-    MapExploreView ---|uses| MapKit
-
-    RainfallGridService -->|fetches via| WeatherService
-    RainfallGridService -->|colors via| RainfallColorScale
-    RainfallGridService -->|reads| RainfallTimeframe
-    RainfallGridService -->|stores| RainfallSummary
-    RainfallGridService -->|exposes| RainfallGridBounds
-
-    WeatherService -->|calls| OpenMeteo
-    WeatherService -->|parses into| DailyRainfall
-    WeatherService -->|returns| RainfallSummary
-
-    LocationRainfallSheet -->|"@EnvironmentObject"| PlaceStore
-    LocationRainfallSheet -->|fetches via| WeatherService
-    LocationRainfallSheet -->|renders| RainfallCardView
-    LocationRainfallSheet -->|reads| Place
-    LocationRainfallSheet ---|uses| MapKit
-
-    SavedPlacesView -->|"@EnvironmentObject"| PlaceStore
-    SavedPlacesView -->|fetches via| WeatherService
-    SavedPlacesView -->|reads| Place
-    SavedPlacesView -->|displays| RainfallSummary
-
-    RainfallCardView -->|displays| RainfallSummary
-    RainfallOverlayControls -->|binds| RainfallTimeframe
-    RainfallOverlayControls -->|legend from| RainfallColorScale
-
-    PlaceStore -->|persists| Place
-    RainfallSummary -->|computed from| DailyRainfall
-```
+The app uses a UIKit+SwiftUI hybrid. `UIKitMapView` is a `UIViewRepresentable` wrapping `MKMapView` — this gives precise control over `MKOverlayRenderer`, gesture recognizers, and `UISearchController`. All other UI is SwiftUI.
 
 ### Layers
 
-**App** -- `HeroDirtApp` is the entry point. It creates the `PlaceStore` as a `@StateObject` and injects it into the SwiftUI environment. `ContentView` is a `TabView` routing between the two main screens.
+**App** — `HeroDirtApp` is the entry point. It creates `PlaceStore` and `MapItemCache` as `@StateObject`s and injects them into the SwiftUI environment. `ContentView` renders `MapView`.
 
-**Views** -- Six view types, split across two tabs:
+**Views**
 
 | View | Role |
 |------|------|
-| `MapExploreView` | Primary map tab. Owns `RainfallGridService`, renders the rainfall bitmap overlay via `MapProxy` coordinate conversion, manages the search bar and overlay controls, and presents `LocationRainfallSheet` on tap. |
-| `SavedPlacesView` | "Places" tab. Lists saved places with concurrently-fetched rainfall data. Supports pull-to-refresh, swipe-to-delete, and rename. |
-| `LocationRainfallSheet` | Detail sheet for a tapped or selected location. Reverse-geocodes for a name, fetches rainfall, and provides save/unsave/rename actions via `PlaceStore`. |
-| `RainfallCardView` | Reusable card displaying a `RainfallSummary` (four timeframe tiles + days since last rain). |
-| `RainfallOverlayControls` | Floating panel with timeframe picker, opacity slider, and color legend. |
-| `SearchBar` | `UIViewRepresentable` wrapping `UISearchBar` for text input and focus management. |
+| `MapView` | Top-level SwiftUI view. Hosts `UIKitMapView` and the bottom sheet (`SheetView`). Owns the rainfall grid service and overlay state. |
+| `UIKitMapView` | `UIViewRepresentable` wrapping `MKMapView`. Handles annotations, the rainfall bitmap overlay via `MKOverlayRenderer`, tap gestures, and `UISearchController` integration. |
+| `SheetView` | Bottom sheet with tabs: saved places list, search results, and overlay controls. |
+| `PlaceDetailsView` | Detail sheet for a tapped or selected location. Fetches and displays rainfall history, rain forecast, and dirt condition. Provides save/unsave/rename actions. |
+| `SavedPlacesListView` | Lists saved places with concurrently-fetched rainfall summaries and soil data. |
+| `DirtConditionCardView` | Card displaying the dirt condition estimate with expandable detail and a soil type override button. |
+| `RainfallCardView` | Card displaying a `RainfallSummary` (four timeframe tiles + days since last rain). |
+| `RainForecastCardView` | Card displaying forecasted precipitation for the next 1/2/3/7 days. |
+| `RainfallOverlaySheet` | Controls for the heatmap: timeframe picker, opacity slider, and color legend. |
+| `SearchResultsView` | List of `MKMapItem` search results. |
+| `AboutView` | App info, iCloud sync status, and legal links. |
 
-**Services** -- Four service types, none requiring instantiation except `PlaceStore` and `RainfallGridService`:
+**Services**
 
 | Service | Role |
 |---------|------|
-| `RainfallGridService` | The heatmap engine. Divides the visible map region into a ~12x12 grid, fetches each cell via `WeatherService`, caches results (15-min TTL), renders an upscaled bilinearly-interpolated RGBA bitmap with Gaussian blur, and caches rendered `UIImage`s per timeframe. |
-| `WeatherService` | Stateless API client (enum namespace). Single entry point `fetchRainfall(latitude:longitude:)` calls the Open-Meteo API and returns a `RainfallSummary`. Called from three sites: `RainfallGridService`, `LocationRainfallSheet`, and `SavedPlacesView`. |
-| `PlaceStore` | The only shared mutable state. `ObservableObject` with a `@Published` array of `Place` objects. Provides CRUD operations and proximity search. Persists to `saved_places.json` via `JSONEncoder`. |
-| `RainfallColorScale` | Pure mapping from rainfall mm to RGBA color. Defines 8 threshold stops (clear → green → yellow → orange → red → purple). Pre-computes RGBA components for efficient per-pixel bitmap rendering. |
+| `RainfallGridService` | The heatmap engine. Divides the visible map region into a ~12×12 grid, fetches each cell via `WeatherService`, caches results (15-min TTL), renders an upscaled bilinearly-interpolated RGBA bitmap with Gaussian blur, and caches rendered `UIImage`s per timeframe. |
+| `WeatherService` | Stateless API client (enum namespace). Fetches rainfall history and rain forecast from Open-Meteo. |
+| `SoilService` | Fetches soil texture data from the ISRIC SoilGrids API and caches it. Used for the dirt condition model. |
+| `PlaceStore` | The only shared mutable state. `ObservableObject` with a `@Published` array of `Place` objects. Provides CRUD, proximity search, and persists to `saved_places.json` via `JSONEncoder`. |
+| `MapItemCache` | Caches `MKMapItem` lookups to avoid redundant geocoding across views. |
+| `RainfallColorScale` | Pure mapping from rainfall mm to RGBA color. Pre-computes RGBA components for efficient per-pixel bitmap rendering. |
 
-**Models** -- Five value types with no external dependencies:
+**Models**
 
 | Model | Role |
 |-------|------|
 | `Place` | A saved location (UUID, name, lat/lon). `Codable` for persistence. |
 | `DailyRainfall` | A single day's rainfall record (date + mm amount). |
-| `RainfallSummary` | Aggregated rainfall: 1/2/3/7-day totals and days since last rain. Computed from `[DailyRainfall]`. |
-| `RainfallTimeframe` | Enum (1d/2d/3d/7d) used to select which summary field to display. |
+| `RainfallSummary` | Aggregated rainfall: 1/2/3/7-day totals and days since last rain. |
+| `RainForecast` | Forecasted precipitation for the next 1/2/3/7 days. |
+| `RainfallTimeframe` | Enum (1d/2d/3d/7d) used to select which summary field to display on the overlay. |
 | `RainfallGridBounds` | Lat/lon bounding box for positioning the overlay image on the map. |
+| `SoilData` | Raw soil texture fractions (sand/clay) from the SoilGrids API. |
+| `SoilOverride` | User-specified texture class and exposure for a place, overriding the API data. |
+| `DirtConditionResult` | Output of the soil moisture model: a condition label and the underlying computed values. |
 
 ### Key data flows
 
-**Heatmap rendering** -- When the map camera moves, `MapExploreView` calls `RainfallGridService.updateRegion()` (debounced 500ms). The service builds a grid, fetches uncached cells via `WeatherService`, constructs a bitmap using `RainfallColorScale` for coloring with bilinear interpolation between cells, and publishes the result. The view reads the `UIImage` and positions it on the map using `MapProxy` coordinate-to-screen conversion.
+**Heatmap rendering** — When the map camera moves, `MapView` calls `RainfallGridService.updateRegion()` (debounced 500 ms). The service builds a grid, fetches uncached cells via `WeatherService`, renders a bilinearly-interpolated RGBA bitmap colored by `RainfallColorScale`, and publishes the result as a `UIImage`. `UIKitMapView` positions it on the map via `MKOverlayRenderer`.
 
-**Tap-to-inspect** -- A map tap converts screen coordinates to lat/lon via `MapProxy`, then presents `LocationRainfallSheet` which independently calls `WeatherService.fetchRainfall()` and reverse-geocodes the location.
+**Tap-to-inspect** — A `UITapGestureRecognizer` in `UIKitMapView` converts screen coordinates to lat/lon. `MapView` presents `PlaceDetailsView`, which independently calls `WeatherService` for rainfall and forecast, `SoilService` for soil data, and reverse-geocodes the location via `MKLocalSearch`.
 
-**Saved places** -- `PlaceStore` is injected via `.environmentObject` from the root. `LocationRainfallSheet` saves/removes places, `MapExploreView` reads them for map markers, and `SavedPlacesView` lists them with concurrently-fetched rainfall data.
+**Saved places** — `PlaceStore` is injected via `.environmentObject` from the root. `PlaceDetailsView` saves/removes places, `UIKitMapView` reads them for map annotations, and `SavedPlacesListView` lists them with concurrently-fetched data.
 
 ## Building
 
 ```bash
-xcodebuild -scheme HeroDirt -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+xcodegen generate
+xcodebuild -scheme HeroDirt -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
 ```
 
-Or open `HeroDirt.xcodeproj` in Xcode.
+Or open `HeroDirt.xcodeproj` in Xcode after running `xcodegen generate`.
 
 ## APIs
 
 | API | Purpose |
 |-----|---------|
-| [Open-Meteo](https://open-meteo.com/) | Daily precipitation data (free, no API key) |
+| [Open-Meteo](https://open-meteo.com/) | Daily rainfall history and forecast (free, no API key) |
+| [ISRIC SoilGrids](https://soilgrids.org/) | Soil texture data (free, no API key) |
 | Apple MapKit | Map rendering, search, and geocoding |
 
 ## License
