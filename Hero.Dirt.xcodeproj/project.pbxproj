@@ -60,7 +60,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0804FE69C3333D4DBAE32E67 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		0AC4456292E8130536371192 /* HeroDirt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HeroDirt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CA1C1B61597941FE64DDD68 /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
 		14766FF618A12BCA6CB7EF35 /* DirtConditionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtConditionCardView.swift; sourceTree = "<group>"; };
@@ -195,7 +194,6 @@
 			isa = PBXGroup;
 			children = (
 				A89B9D62FB4C58132ACBB2D6 /* Assets.xcassets */,
-				0804FE69C3333D4DBAE32E67 /* Base.xcconfig */,
 				9625513D63CDADC35E23C201 /* ContentView.swift */,
 				C997AAA1E345188130182397 /* HeroDirt.entitlements */,
 				8621EF13FF77D5032DD1F02B /* HeroDirtApp.swift */,

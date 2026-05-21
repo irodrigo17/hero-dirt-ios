@@ -75,7 +75,7 @@ xcodegen generate
 xcodebuild -scheme HeroDirt -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
 ```
 
-Or open `HeroDirt.xcodeproj` in Xcode after running `xcodegen generate`.
+Or open `Hero.Dirt.xcodeproj` in Xcode after running `xcodegen generate`.
 
 ## APIs
 
