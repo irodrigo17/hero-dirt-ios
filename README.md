@@ -6,7 +6,8 @@ A native iOS app that helps mountain bikers and trail runners decide if conditio
 
 - **Rainfall overlay** — Bitmap-rendered heatmap using per-pixel bilinear interpolation and Gaussian blur. Supports time period switching (1d/2d/3d/7d) and an opacity slider.
 - **Dirt condition** — Estimates trail rideability using a soil moisture balance model driven by rainfall and evapotranspiration data. Soil type can be overridden per place.
-- **Rain forecast** — Shows predicted precipitation for the next 1, 2, 3, and 7 days.
+- **Rain forecast** — Shows predicted precipitation for the next 1, 2, 3, and 7 days via Apple WeatherKit.
+- **iCloud sync** — Saved places sync across devices via CloudKit.
 - **Place search** — `UISearchController`-powered search using `MKLocalSearch` with outdoor place prioritization (parks, forests, trails, campgrounds). Results are biased toward the current map viewport.
 - **Tap-to-inspect** — Tap anywhere on the map to see rainfall history, forecast, and dirt condition for that location.
 - **Saved places** — Save locations with custom names. Each saved place shows as a marker on the map.
@@ -81,8 +82,10 @@ Or open `HeroDirt.xcodeproj` in Xcode after running `xcodegen generate`.
 
 | API | Purpose |
 |-----|---------|
-| [Open-Meteo](https://open-meteo.com/) | Daily rainfall history and forecast (free, no API key) |
+| [Open-Meteo](https://open-meteo.com/) | Historical daily rainfall (free, no API key) |
 | [ISRIC SoilGrids](https://soilgrids.org/) | Soil texture data (free, no API key) |
+| Apple WeatherKit | Rain forecast (requires Apple Developer account) |
+| Apple CloudKit | iCloud sync for saved places |
 | Apple MapKit | Map rendering, search, and geocoding |
 
 ## License
