@@ -4,72 +4,97 @@ import Foundation
 import MapKit
 import os
 
-/// Saved places, persisted locally and backed up to iCloud in two ways so they
-/// survive deleting and reinstalling the app:
+// MARK: - Key-value storage abstraction
+
+/// The subset of `NSUbiquitousKeyValueStore` the place store uses, so tests
+/// and previews can use an in-memory store.
+protocol SyncedKeyValueStore: AnyObject {
+    func data(forKey key: String) -> Data?
+    func set(_ data: Data?, forKey key: String)
+    func array(forKey key: String) -> [Any]?
+    func set(_ array: [Any]?, forKey key: String)
+    @discardableResult func synchronize() -> Bool
+}
+
+extension NSUbiquitousKeyValueStore: SyncedKeyValueStore {}
+
+final class InMemoryKeyValueStore: SyncedKeyValueStore {
+    private var values: [String: Any] = [:]
+    func data(forKey key: String) -> Data? { values[key] as? Data }
+    func set(_ data: Data?, forKey key: String) { values[key] = data }
+    func array(forKey key: String) -> [Any]? { values[key] as? [Any] }
+    func set(_ array: [Any]?, forKey key: String) { values[key] = array }
+    func synchronize() -> Bool { true }
+}
+
+// MARK: - PlaceStore
+
+/// Saved places. The single source of truth is the iCloud key-value store:
+/// it keeps data on the device (even without an iCloud account), syncs it
+/// across devices, and restores it after the app is reinstalled.
 ///
-/// 1. **iCloud key-value store** — the whole list as JSON. Needs no CloudKit
-///    schema, syncs quickly, and is the primary restore path.
-/// 2. **CloudKit private database** — one `Place` record per place.
+/// A plain JSON backup file is also written on every change, because iCloud
+/// replaces the key-value store's contents when the user signs out or
+/// switches accounts. It is only read when the key-value store comes up
+/// empty or the account changes.
 ///
-/// Copies are merged (never blindly replaced): places are matched by id, the
+/// Copies are merged, never blindly replaced: places are matched by id, the
 /// newest `updatedAt` wins, and deletions are remembered as tombstones so a
-/// stale copy can't resurrect a place you removed.
+/// stale copy can't bring back a place you removed.
 @MainActor
 class PlaceStore: ObservableObject {
     @Published private(set) var places: [Place] = []
 
-    private static let logger = Logger(
-        subsystem: "com.herodirt.app",
-        category: "PlaceStore"
-    )
+    private static let logger = Logger(subsystem: "com.herodirt.app", category: "PlaceStore")
 
-    private let fileURL: URL?
-    private var syncEnabled: Bool { fileURL == nil }
-
-    /// Ids of places deleted on any device, so merges don't bring them back.
+    private let kvs: SyncedKeyValueStore
+    private let backupURL: URL
     private var deletedIDs: Set<UUID> = []
+    private var observers: [NSObjectProtocol] = []
+
+    private static let placesKey = "places.v1"
+    private static let deletedKey = "deletedPlaceIDs.v1"
     private static let maxTombstones = 500
 
-    // iCloud key-value store
-    private let kvs = NSUbiquitousKeyValueStore.default
-    private static let kvsPlacesKey = "places.v1"
-    private static let kvsDeletedKey = "deletedPlaceIDs.v1"
-    private var kvsObserver: NSObjectProtocol?
-
-    // CloudKit
-    private lazy var container = CKContainer.default()
-    private lazy var privateDB = container.privateCloudDatabase
-    private static let recordType = "Place"
-    private struct CKKeys {
-        static let id = "id"
-        static let name = "name"
-        static let latitude = "latitude"
-        static let longitude = "longitude"
-        static let mapItemId = "mapItemId"
-        static let soilOverride = "soilOverride"
-        static let createdAt = "createdAt"
-        static let updatedAt = "updatedAt"
-    }
-
-    private static var localFileURL: URL {
+    static var defaultBackupURL: URL {
         URL.documentsDirectory.appending(path: "saved_places.json")
     }
 
-    private static let deletedIDsDefaultsKey = "deletedPlaceIDs"
-
     // MARK: - Init
 
-    init() {
-        fileURL = nil
-        load()
-        loadTombstones()
-        startKeyValueSync()
-        syncFromCloudKit()
+    /// The app's store: iCloud key-value store plus a backup in Documents.
+    convenience init() {
+        self.init(
+            kvs: NSUbiquitousKeyValueStore.default,
+            backupURL: Self.defaultBackupURL,
+            observeICloud: true
+        )
+        CloudKitImport.runOnce(into: self)
     }
 
-    init(fileURL: URL) {
-        self.fileURL = fileURL
-        load()
+    /// A store backed only by `fileURL` (and an in-memory key-value store).
+    /// Used by tests and previews.
+    convenience init(fileURL: URL) {
+        self.init(kvs: InMemoryKeyValueStore(), backupURL: fileURL, observeICloud: false)
+    }
+
+    init(kvs: SyncedKeyValueStore, backupURL: URL, observeICloud: Bool) {
+        self.kvs = kvs
+        self.backupURL = backupURL
+        if observeICloud, let ubiquitous = kvs as? NSUbiquitousKeyValueStore {
+            observers.append(NotificationCenter.default.addObserver(
+                forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+                object: ubiquitous,
+                queue: .main
+            ) { [weak self] note in
+                let reason = note.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? Int
+                MainActor.assumeIsolated {
+                    self?.reloadFromKeyValueStore(accountChanged: reason == NSUbiquitousKeyValueStoreAccountChange)
+                }
+            })
+            ubiquitous.synchronize()
+        }
+        reloadFromKeyValueStore(accountChanged: false)
     }
 
     // MARK: - CRUD
@@ -79,44 +104,41 @@ class PlaceStore: ObservableObject {
         place.updatedAt = Date()
         deletedIDs.remove(place.id)
         places.append(place)
-        persist(upsert: [place])
+        save()
     }
 
     func renamePlace(_ place: Place, to newName: String) {
-        guard let index = places.firstIndex(where: { $0.id == place.id }) else { return }
-        places[index].name = newName
-        places[index].updatedAt = Date()
-        persist(upsert: [places[index]])
+        update(place.id) { $0.name = newName }
+    }
+
+    func updateSoilOverride(_ override: SoilOverride?, for place: Place) {
+        update(place.id) { $0.soilOverride = override }
+    }
+
+    /// Saves a SoilGrids lookup on the place (enrichment, not a user edit).
+    func updateSoil(_ soil: SoilData, for placeID: UUID) {
+        guard places.first(where: { $0.id == placeID })?.soil != soil else { return }
+        update(placeID) { $0.soil = soil }
     }
 
     func removePlace(_ place: Place) {
         places.removeAll { $0.id == place.id }
         deletedIDs.insert(place.id)
-        persist(delete: [place])
+        save()
     }
 
     func removePlaces(at offsets: IndexSet) {
-        let toDelete = offsets.map { places[$0] }
+        let removed = offsets.map { places[$0].id }
         places.remove(atOffsets: offsets)
-        deletedIDs.formUnion(toDelete.map(\.id))
-        persist(delete: toDelete)
+        deletedIDs.formUnion(removed)
+        save()
     }
 
-    func updateSoilOverride(_ override: SoilOverride?, for place: Place) {
-        guard let index = places.firstIndex(where: { $0.id == place.id }) else { return }
-        places[index].soilOverride = override
+    private func update(_ id: UUID, _ change: (inout Place) -> Void) {
+        guard let index = places.firstIndex(where: { $0.id == id }) else { return }
+        change(&places[index])
         places[index].updatedAt = Date()
-        persist(upsert: [places[index]])
-    }
-
-    /// Saves a SoilGrids lookup on the place (enrichment, not a user edit).
-    func updateSoil(_ soil: SoilData, for placeID: UUID) {
-        guard let index = places.firstIndex(where: { $0.id == placeID }),
-              places[index].soil != soil
-        else { return }
-        places[index].soil = soil
-        places[index].updatedAt = Date()
-        persist(upsert: [places[index]])
+        save()
     }
 
     private static let proximityThresholdMeters: CLLocationDistance = 50
@@ -124,11 +146,8 @@ class PlaceStore: ObservableObject {
     func placeNear(latitude: Double, longitude: Double) -> Place? {
         let target = CLLocation(latitude: latitude, longitude: longitude)
         return places.first { place in
-            let placeLocation = CLLocation(
-                latitude: place.latitude,
-                longitude: place.longitude
-            )
-            return target.distance(from: placeLocation) < Self.proximityThresholdMeters
+            target.distance(from: CLLocation(latitude: place.latitude, longitude: place.longitude))
+                < Self.proximityThresholdMeters
         }
     }
 
@@ -144,7 +163,7 @@ class PlaceStore: ObservableObject {
         var result: [Place] = []
         for place in local where !deleted.contains(place.id) && seen.insert(place.id).inserted {
             if let other = remoteByID[place.id],
-                (other.updatedAt ?? .distantPast) > (place.updatedAt ?? .distantPast)
+               (other.updatedAt ?? .distantPast) > (place.updatedAt ?? .distantPast)
             {
                 result.append(other)
             } else {
@@ -157,234 +176,132 @@ class PlaceStore: ObservableObject {
         return result
     }
 
-    /// Merges a remote copy into `places`. Returns true if anything changed.
-    @discardableResult
-    private func mergeIn(remote: [Place], remoteDeleted: Set<UUID> = []) -> Bool {
+    /// Merges places from another source (iCloud change, CloudKit import).
+    func mergeIn(_ remote: [Place], deleted remoteDeleted: Set<UUID> = []) {
         deletedIDs.formUnion(remoteDeleted)
         let merged = Self.merge(local: places, remote: remote, deleted: deletedIDs)
-        guard merged != places else { return false }
+        guard merged != places else { return }
         places = merged
-        return true
+        save()
     }
 
     // MARK: - Persistence
 
-    private func persist(upsert: [Place] = [], delete: [Place] = []) {
-        save()
-        guard syncEnabled else { return }
-        saveTombstones()
-        writeKeyValueStore()
-        Task {
-            guard await iCloudAccountAvailable() else { return }
-            if !upsert.isEmpty { upsertToCloudKit(upsert) }
-            if !delete.isEmpty { deleteFromCloudKit(delete) }
+    private func reloadFromKeyValueStore(accountChanged: Bool) {
+        let remoteDeleted = Set(
+            (kvs.array(forKey: Self.deletedKey) as? [String] ?? []).compactMap(UUID.init(uuidString:))
+        )
+        var remote: [Place] = []
+        if let data = kvs.data(forKey: Self.placesKey) {
+            do {
+                remote = try JSONDecoder().decode([Place].self, from: data)
+            } catch {
+                Self.logger.error("key-value store decode failed: \(error.localizedDescription, privacy: .public)")
+            }
         }
+
+        // The backup covers first launch after updating from the file-only
+        // version, and iCloud wiping the store on sign-out/account switch.
+        if remote.isEmpty || accountChanged {
+            remote = Self.merge(local: remote, remote: loadBackup(), deleted: remoteDeleted)
+        }
+
+        deletedIDs.formUnion(remoteDeleted)
+        let merged = Self.merge(local: places, remote: remote, deleted: deletedIDs)
+        if merged != places { places = merged }
+        save()
     }
 
     private func save() {
         do {
             let data = try JSONEncoder().encode(places)
-            try data.write(to: fileURL ?? Self.localFileURL, options: .atomic)
+            if kvs.data(forKey: Self.placesKey) != data {
+                kvs.set(data, forKey: Self.placesKey)
+            }
+            let deleted = Array(deletedIDs.map(\.uuidString).sorted().prefix(Self.maxTombstones))
+            if (kvs.array(forKey: Self.deletedKey) as? [String] ?? []).sorted() != deleted {
+                kvs.set(deleted, forKey: Self.deletedKey)
+            }
+            try data.write(to: backupURL, options: .atomic)
         } catch {
             Self.logger.error("save failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
-    private func load() {
-        let url = fileURL ?? Self.localFileURL
-        guard FileManager.default.fileExists(atPath: url.path()) else { return }
+    private func loadBackup() -> [Place] {
+        guard FileManager.default.fileExists(atPath: backupURL.path()) else { return [] }
         do {
-            let data = try Data(contentsOf: url)
-            places = try JSONDecoder().decode([Place].self, from: data)
+            return try JSONDecoder().decode([Place].self, from: Data(contentsOf: backupURL))
         } catch {
-            Self.logger.error("load failed: \(error.localizedDescription, privacy: .public)")
+            Self.logger.error("backup load failed: \(error.localizedDescription, privacy: .public)")
+            return []
         }
     }
+}
 
-    private func loadTombstones() {
-        let strings = UserDefaults.standard.stringArray(forKey: Self.deletedIDsDefaultsKey) ?? []
-        deletedIDs = Set(strings.compactMap(UUID.init(uuidString:)))
-    }
+// MARK: - One-time CloudKit import
 
-    private func saveTombstones() {
-        let strings = Array(deletedIDs.map(\.uuidString).prefix(Self.maxTombstones))
-        UserDefaults.standard.set(strings, forKey: Self.deletedIDsDefaultsKey)
-    }
+/// Earlier builds synced places through custom CloudKit records. This pulls
+/// any of those into the key-value store once, then never touches CloudKit
+/// again. Safe to delete after testers have updated.
+enum CloudKitImport {
+    private static let doneKey = "cloudKitImportDone.v1"
+    private static let logger = Logger(subsystem: "com.herodirt.app", category: "CloudKitImport")
 
-    // MARK: - iCloud key-value store
-
-    private func startKeyValueSync() {
-        kvsObserver = NotificationCenter.default.addObserver(
-            forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
-            object: kvs,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.mergeFromKeyValueStore()
-            }
-        }
-        kvs.synchronize()
-        mergeFromKeyValueStore()
-    }
-
-    private func mergeFromKeyValueStore() {
-        let remoteDeleted = Set(
-            (kvs.array(forKey: Self.kvsDeletedKey) as? [String] ?? []).compactMap(UUID.init(uuidString:))
-        )
-        var remote: [Place] = []
-        if let data = kvs.data(forKey: Self.kvsPlacesKey) {
-            do {
-                remote = try JSONDecoder().decode([Place].self, from: data)
-            } catch {
-                Self.logger.error("iCloud KVS decode failed: \(error.localizedDescription, privacy: .public)")
-            }
-        }
-        let hadPlaces = !places.isEmpty
-        if mergeIn(remote: remote, remoteDeleted: remoteDeleted) {
-            Self.logger.info("merged \(remote.count) places from iCloud KVS (had local: \(hadPlaces))")
-            save()
-            saveTombstones()
-        }
-        // Push back anything only we had (e.g. first launch after an update).
-        writeKeyValueStore()
-    }
-
-    private func writeKeyValueStore() {
-        guard let data = try? JSONEncoder().encode(places) else { return }
-        if kvs.data(forKey: Self.kvsPlacesKey) != data {
-            kvs.set(data, forKey: Self.kvsPlacesKey)
-        }
-        let deleted = Array(deletedIDs.map(\.uuidString).prefix(Self.maxTombstones))
-        if Set(kvs.array(forKey: Self.kvsDeletedKey) as? [String] ?? []) != Set(deleted) {
-            kvs.set(deleted, forKey: Self.kvsDeletedKey)
-        }
-    }
-
-    // MARK: - CloudKit
-
-    private func syncFromCloudKit() {
+    @MainActor
+    static func runOnce(into store: PlaceStore) {
+        guard !UserDefaults.standard.bool(forKey: doneKey) else { return }
         Task {
-            guard await iCloudAccountAvailable() else { return }
+            let container = CKContainer.default()
+            guard (try? await container.accountStatus()) == .available else { return }
             do {
-                let remote = try await fetchAllFromCloudKit()
-                if mergeIn(remote: remote) {
-                    Self.logger.info("merged \(remote.count) places from CloudKit")
-                    save()
-                    writeKeyValueStore()
-                }
-                // Upload anything CloudKit is missing or has an older copy of.
-                let remoteByID = Dictionary(remote.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
-                let stale = places.filter { remoteByID[$0.id] != $0 }
-                if !stale.isEmpty { upsertToCloudKit(stale) }
-                let orphaned = remote.filter { deletedIDs.contains($0.id) }
-                if !orphaned.isEmpty { deleteFromCloudKit(orphaned) }
+                let places = try await fetchAll(from: container.privateCloudDatabase)
+                store.mergeIn(places)
+                logger.info("imported \(places.count) places from CloudKit")
+                UserDefaults.standard.set(true, forKey: doneKey)
+            } catch let error as CKError where error.code == .unknownItem || error.code == .invalidArguments {
+                // No Place record type (never synced) or not queryable.
+                UserDefaults.standard.set(true, forKey: doneKey)
             } catch {
-                // Usually a missing record type / index in the production
-                // schema. The key-value store still covers restores.
-                Self.logger.error("CloudKit fetch failed: \(error.localizedDescription, privacy: .public)")
+                logger.error("CloudKit import failed, will retry: \(error.localizedDescription, privacy: .public)")
             }
         }
     }
 
-    nonisolated private func recordID(for place: Place) -> CKRecord.ID {
-        CKRecord.ID(recordName: place.id.uuidString)
-    }
-
-    nonisolated private func place(from record: CKRecord) -> Place? {
-        guard
-            let name = record[CKKeys.name] as? String,
-            let latitude = record[CKKeys.latitude] as? Double,
-            let longitude = record[CKKeys.longitude] as? Double,
-            let idString = record[CKKeys.id] as? String,
-            let uuid = UUID(uuidString: idString)
-        else { return nil }
-        var mapItemId: MKMapItem.Identifier? = nil
-        if let mapItemIdString = record[CKKeys.mapItemId] as? String {
-            mapItemId = MKMapItem.Identifier(rawValue: mapItemIdString)
-        }
-        var soilOverride: SoilOverride? = nil
-        if let overrideData = record[CKKeys.soilOverride] as? Data {
-            soilOverride = try? JSONDecoder().decode(SoilOverride.self, from: overrideData)
-        }
-        return Place(
-            id: uuid,
-            name: name,
-            latitude: latitude,
-            longitude: longitude,
-            mapItemId: mapItemId,
-            soilOverride: soilOverride,
-            updatedAt: record[CKKeys.updatedAt] as? Date
-        )
-    }
-
-    nonisolated private func apply(place: Place, to record: CKRecord) {
-        record[CKKeys.id] = place.id.uuidString as CKRecordValue
-        record[CKKeys.name] = place.name as CKRecordValue
-        record[CKKeys.latitude] = place.latitude as CKRecordValue
-        record[CKKeys.longitude] = place.longitude as CKRecordValue
-        record[CKKeys.mapItemId] = place.mapItemId?.rawValue as CKRecordValue?
-        if let override = place.soilOverride,
-            let data = try? JSONEncoder().encode(override)
-        {
-            record[CKKeys.soilOverride] = data as CKRecordValue
-        } else {
-            record[CKKeys.soilOverride] = nil
-        }
-        record[CKKeys.updatedAt] = (place.updatedAt ?? Date()) as CKRecordValue
-        if record[CKKeys.createdAt] == nil {
-            record[CKKeys.createdAt] = Date() as CKRecordValue
-        }
-    }
-
-    private func fetchAllFromCloudKit() async throws -> [Place] {
-        let query = CKQuery(recordType: Self.recordType, predicate: NSPredicate(value: true))
-        var fetched: [Place] = []
-        var (results, cursor) = try await privateDB.records(matching: query)
+    private static func fetchAll(from db: CKDatabase) async throws -> [Place] {
+        let query = CKQuery(recordType: "Place", predicate: NSPredicate(value: true))
+        var places: [Place] = []
+        var (results, cursor) = try await db.records(matching: query)
         while true {
             for (_, result) in results {
-                if case .success(let record) = result, let p = place(from: record) {
-                    fetched.append(p)
+                if case .success(let record) = result, let place = place(from: record) {
+                    places.append(place)
                 }
             }
             guard let next = cursor else { break }
-            (results, cursor) = try await privateDB.records(continuingMatchFrom: next)
+            (results, cursor) = try await db.records(continuingMatchFrom: next)
         }
-        return fetched
+        return places
     }
 
-    private func upsertToCloudKit(_ places: [Place]) {
-        guard !places.isEmpty else { return }
-        let records: [CKRecord] = places.map { place in
-            let record = CKRecord(recordType: Self.recordType, recordID: recordID(for: place))
-            apply(place: place, to: record)
-            return record
-        }
-        let modify = CKModifyRecordsOperation(recordsToSave: records, recordIDsToDelete: nil)
-        modify.savePolicy = .changedKeys
-        modify.qualityOfService = .utility
-        modify.modifyRecordsResultBlock = { result in
-            if case .failure(let error) = result {
-                Self.logger.error("CloudKit save failed: \(error.localizedDescription, privacy: .public)")
-            }
-        }
-        privateDB.add(modify)
-    }
-
-    private func deleteFromCloudKit(_ places: [Place]) {
-        let op = CKModifyRecordsOperation(
-            recordsToSave: nil,
-            recordIDsToDelete: places.map { recordID(for: $0) }
+    private static func place(from record: CKRecord) -> Place? {
+        guard
+            let name = record["name"] as? String,
+            let latitude = record["latitude"] as? Double,
+            let longitude = record["longitude"] as? Double,
+            let idString = record["id"] as? String,
+            let id = UUID(uuidString: idString)
+        else { return nil }
+        let soilOverride = (record["soilOverride"] as? Data)
+            .flatMap { try? JSONDecoder().decode(SoilOverride.self, from: $0) }
+        return Place(
+            id: id,
+            name: name,
+            latitude: latitude,
+            longitude: longitude,
+            mapItemId: (record["mapItemId"] as? String).flatMap { MKMapItem.Identifier(rawValue: $0) },
+            soilOverride: soilOverride,
+            updatedAt: record["updatedAt"] as? Date
         )
-        op.qualityOfService = .utility
-        op.modifyRecordsResultBlock = { result in
-            if case .failure(let error) = result {
-                Self.logger.error("CloudKit delete failed: \(error.localizedDescription, privacy: .public)")
-            }
-        }
-        privateDB.add(op)
-    }
-
-    private func iCloudAccountAvailable() async -> Bool {
-        (try? await container.accountStatus()) == .available
     }
 }
