@@ -183,8 +183,8 @@ struct MapView: View {
             selectedSearchResult: selectedSearchResult,
             selectedAnnotation: selectedAnnotation,
             overlayVisible: overlayVisible,
-            overlayImage: gridService.rainfallImage(for: overlayTimeframe),
-            overlayBounds: gridService.gridBounds,
+            overlayImage: gridService.overlay?.image,
+            overlayBounds: gridService.overlay?.bounds,
             overlayOpacity: overlayOpacity,
             cameraCommand: $cameraCommand,
             onRegionChanged: { region in
@@ -229,6 +229,22 @@ struct MapView: View {
             }
         )
         .ignoresSafeArea()
+        .overlay(alignment: .top) {
+            if overlayVisible, let message = gridService.errorMessage {
+                Label(message, systemImage: "exclamationmark.triangle.fill")
+                    .labelStyle(.titleAndIcon)
+                    .font(.footnote.weight(.medium))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .glassEffect(.regular, in: Capsule())
+                    .padding(.top, 8)
+                    .padding(.horizontal)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onTapGesture { gridService.refetch() }
+                    .accessibilityHint("Double tap to try again")
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: gridService.errorMessage)
     }
 
     private var sidebar: some View {
