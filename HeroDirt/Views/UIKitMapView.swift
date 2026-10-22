@@ -7,7 +7,9 @@ struct CameraCommand {
     enum Action {
         case centerOnUser
         case setRegion(MKCoordinateRegion)
-        case fitAllPlaces([Place])
+        /// `bias` shifts the framed region up by that fraction so it clears
+        /// the bottom sheet (0 when there is no sheet).
+        case fitAllPlaces([Place], bias: Double)
     }
     let id = UUID()
     let action: Action
@@ -186,61 +188,95 @@ struct UIKitMapView: UIViewRepresentable {
 
         // MARK: - Annotation management
 
+        /// Annotations currently animating out; ignored when diffing.
+        private var removing = Set<ObjectIdentifier>()
+
         func updateAnnotations(on mapView: MKMapView, view: UIKitMapView) {
             let existing = mapView.annotations.filter {
                 !($0 is MKUserLocation) && !($0 is MKMapFeatureAnnotation)
+                    && !removing.contains(ObjectIdentifier($0))
             }
 
-            let existingIDs = Set(existing.compactMap { annotationID($0) })
-
-            var desired: [(id: String, annotation: NSObject & MKAnnotation)] = []
+            var desired: [(id: String, make: () -> MKAnnotation)] = []
             for place in view.places {
-                desired.append((place.id.uuidString, PlaceAnnotation(place: place)))
+                desired.append((place.id.uuidString, { PlaceAnnotation(place: place) }))
             }
             if let coord = view.newPinCoordinate {
-                desired.append(("new-place", NewPinAnnotation(coordinate: coord)))
+                desired.append(("new-place", { NewPinAnnotation(coordinate: coord) }))
             }
             if let item = view.selectedSearchResult {
                 let tag = item.identifier?.rawValue ?? "search-result"
-                desired.append((tag, SearchResultAnnotation(mapItem: item)))
+                desired.append((tag, { SearchResultAnnotation(mapItem: item) }))
             }
-
             let desiredIDs = Set(desired.map(\.id))
 
-            if existingIDs == desiredIDs {
-                // Update new-pin coordinate if it moved
-                if let existingPin = existing.first(where: { $0 is NewPinAnnotation }) as? NewPinAnnotation,
-                   let coord = view.newPinCoordinate
-                {
-                    if existingPin.coordinate.latitude != coord.latitude
-                        || existingPin.coordinate.longitude != coord.longitude
-                    {
-                        existingPin.coordinate = coord
-                    }
-                    if let title = view.newPinTitle, existingPin.title != title {
-                        existingPin.title = title
-                    }
+            var existingIDs = Set<String>()
+            var toRemove: [MKAnnotation] = []
+            for annotation in existing {
+                guard let id = annotationID(annotation), desiredIDs.contains(id),
+                      existingIDs.insert(id).inserted
+                else {
+                    toRemove.append(annotation)
+                    continue
                 }
-                // Update title and marker appearance if changed
-                for annotation in existing {
-                    guard let ann = annotation as? PlaceAnnotation else { continue }
-                    if let place = view.places.first(where: { $0.id == ann.place.id }),
-                       ann.place.name != place.name
-                    {
-                        ann.place = place
-                        ann.title = place.name
-                    }
-                    if let annView = mapView.view(for: ann) as? MKMarkerAnnotationView {
-                        let category = ann.place.mapItem?.pointOfInterestCategory
-                        annView.markerTintColor = UIColor(category?.iconColor ?? .orange)
-                        annView.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
-                    }
-                }
-                return
             }
 
-            mapView.removeAnnotations(existing)
-            mapView.addAnnotations(desired.map(\.annotation))
+            // Animate removals: shrink and fade, then remove.
+            for annotation in toRemove {
+                guard let annotationView = mapView.view(for: annotation) else {
+                    mapView.removeAnnotation(annotation)
+                    continue
+                }
+                let key = ObjectIdentifier(annotation)
+                removing.insert(key)
+                UIView.animate(
+                    withDuration: 0.22,
+                    delay: 0,
+                    options: [.curveEaseIn, .beginFromCurrentState],
+                    animations: {
+                        annotationView.alpha = 0
+                        annotationView.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
+                    },
+                    completion: { [weak self, weak mapView] _ in
+                        mapView?.removeAnnotation(annotation)
+                        annotationView.alpha = 1
+                        annotationView.transform = .identity
+                        self?.removing.remove(key)
+                    }
+                )
+            }
+
+            // Additions pop in via MKMarkerAnnotationView.animatesWhenAdded.
+            let toAdd = desired.filter { !existingIDs.contains($0.id) }.map { $0.make() }
+            if !toAdd.isEmpty {
+                mapView.addAnnotations(toAdd)
+            }
+
+            // Update annotations that stayed.
+            for annotation in existing {
+                if let pin = annotation as? NewPinAnnotation, let coord = view.newPinCoordinate {
+                    if pin.coordinate.latitude != coord.latitude
+                        || pin.coordinate.longitude != coord.longitude
+                    {
+                        pin.coordinate = coord
+                    }
+                    if let title = view.newPinTitle, pin.title != title {
+                        pin.title = title
+                    }
+                }
+                guard let ann = annotation as? PlaceAnnotation else { continue }
+                if let place = view.places.first(where: { $0.id == ann.place.id }),
+                   ann.place.name != place.name
+                {
+                    ann.place = place
+                    ann.title = place.name
+                }
+                if let annView = mapView.view(for: ann) as? MKMarkerAnnotationView {
+                    let category = ann.place.mapItem?.pointOfInterestCategory
+                    annView.markerTintColor = UIColor(category?.iconColor ?? .orange)
+                    annView.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
+                }
+            }
         }
 
         private func annotationID(_ annotation: MKAnnotation) -> String? {
@@ -301,12 +337,12 @@ struct UIKitMapView: UIViewRepresentable {
                 }
             case .setRegion(let region):
                 mapView.setRegion(region, animated: true)
-            case .fitAllPlaces(let places):
-                fitAllPlaces(places, on: mapView)
+            case .fitAllPlaces(let places, let bias):
+                fitAllPlaces(places, bias: bias, on: mapView)
             }
         }
 
-        private func fitAllPlaces(_ places: [Place], on mapView: MKMapView) {
+        private func fitAllPlaces(_ places: [Place], bias: Double, on mapView: MKMapView) {
             guard !places.isEmpty else {
                 if let coordinate = mapView.userLocation.location?.coordinate {
                     let region = MKCoordinateRegion(
@@ -332,13 +368,16 @@ struct UIKitMapView: UIViewRepresentable {
             let minSpan = 0.2
             let latSpan = max(maxLat - minLat, minSpan)
             let lonSpan = max(maxLon - minLon, minSpan)
+            // With a bottom sheet (bias > 0) the places need to sit in the top
+            // part of the map, so zoom out more and shift the center down.
+            let zoom = bias > 0 ? 1.6 : 1.3
             let regionCenter = CLLocationCoordinate2D(
-                latitude: centerLat - latSpan * 0.7,
+                latitude: centerLat - latSpan * bias * 2.33,
                 longitude: centerLon
             )
             let region = MKCoordinateRegion(
                 center: regionCenter,
-                span: MKCoordinateSpan(latitudeDelta: latSpan * 1.6, longitudeDelta: lonSpan * 1.6)
+                span: MKCoordinateSpan(latitudeDelta: latSpan * zoom, longitudeDelta: lonSpan * zoom)
             )
             mapView.setRegion(region, animated: true)
         }
@@ -377,6 +416,8 @@ struct UIKitMapView: UIViewRepresentable {
                 view.markerTintColor = UIColor(category?.iconColor ?? .orange)
                 view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
                 view.canShowCallout = false
+                view.animatesWhenAdded = true
+                view.displayPriority = .required
                 return view
             }
 
@@ -387,6 +428,8 @@ struct UIKitMapView: UIViewRepresentable {
                 view.markerTintColor = .systemBlue
                 view.glyphImage = nil
                 view.canShowCallout = false
+                view.animatesWhenAdded = true
+                view.displayPriority = .required
                 return view
             }
 
@@ -398,6 +441,8 @@ struct UIKitMapView: UIViewRepresentable {
                 view.markerTintColor = UIColor(category?.iconColor ?? .orange)
                 view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
                 view.canShowCallout = false
+                view.animatesWhenAdded = true
+                view.displayPriority = .required
                 return view
             }
 
