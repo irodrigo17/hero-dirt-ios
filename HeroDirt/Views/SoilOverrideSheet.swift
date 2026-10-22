@@ -19,40 +19,52 @@ struct SoilOverrideSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Soil Type") {
-                    Picker("Texture", selection: $textureClass) {
+                Section {
+                    Picker("Dirt", selection: $textureClass) {
                         ForEach(SoilOverride.TextureClass.allCases, id: \.self) { tc in
-                            Text(tc.rawValue).tag(tc)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(tc.displayName)
+                                Text(tc.hint)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .tag(tc)
                         }
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
+                } header: {
+                    Text("What's the dirt like?")
                 }
 
-                Section("Sun Exposure") {
-                    Picker("Exposure", selection: $exposure) {
+                Section {
+                    Picker("Sun", selection: $exposure) {
                         ForEach(SoilOverride.Exposure.allCases, id: \.self) { exp in
-                            Label(exp.rawValue, systemImage: exp.icon).tag(exp)
+                            Label(exp.displayName, systemImage: exp.icon).tag(exp)
                         }
                     }
                     .pickerStyle(.segmented)
+                } header: {
+                    Text("How much sun does it get?")
+                } footer: {
+                    Text("You know your local trails best. These settings fine-tune how fast this spot dries out after rain.")
                 }
 
                 if currentOverride != nil {
                     Section {
-                        Button("Remove Override", role: .destructive) {
+                        Button("Reset to Automatic", role: .destructive) {
                             onSave(nil)
                         }
                     }
                 }
             }
-            .navigationTitle("Soil Settings")
+            .navigationTitle("Tune This Trail")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         onSave(SoilOverride(textureClass: textureClass, exposure: exposure))
                     }

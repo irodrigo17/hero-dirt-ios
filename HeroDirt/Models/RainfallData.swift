@@ -10,11 +10,22 @@ enum DirtCondition {
 
     var label: String {
         switch self {
-        case .veryWet: return "Very Wet"
-        case .wet: return "Wet"
+        case .veryWet: return "Soaked"
+        case .wet: return "Muddy"
         case .heroDirt: return "Hero Dirt"
         case .dry: return "Dry"
-        case .veryDry: return "Very Dry"
+        case .veryDry: return "Dusty"
+        }
+    }
+
+    /// Higher is wetter; used to compare conditions.
+    var wetness: Int {
+        switch self {
+        case .veryWet: return 4
+        case .wet: return 3
+        case .heroDirt: return 2
+        case .dry: return 1
+        case .veryDry: return 0
         }
     }
 
@@ -40,11 +51,22 @@ enum DirtCondition {
 
     var description: String {
         switch self {
-        case .veryWet: return "Trails are flooded or deeply muddy"
-        case .wet: return "Trails are likely muddy"
-        case .heroDirt: return "Perfect conditions"
-        case .dry: return "Trails may be loose or dusty"
-        case .veryDry: return "Trails are very dry and loose"
+        case .veryWet: return "Puddles and peanut butter mud. Give the trails a few days."
+        case .wet: return "Riding now can leave ruts. Give it a day or so."
+        case .heroDirt: return "Tacky and grippy. Go ride!"
+        case .dry: return "Firm and fast, getting loose in spots."
+        case .veryDry: return "Loose and dusty. Expect sketchy corners."
+        }
+    }
+
+    /// Short line used in compact rows.
+    var shortDescription: String {
+        switch self {
+        case .veryWet: return "Give it a few days"
+        case .wet: return "Likely muddy"
+        case .heroDirt: return "Go ride!"
+        case .dry: return "Firm and fast"
+        case .veryDry: return "Loose and dusty"
         }
     }
 }

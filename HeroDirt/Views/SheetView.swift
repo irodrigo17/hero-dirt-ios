@@ -32,8 +32,8 @@ struct SheetView: View {
             .navigationTitle("Saved places")
             .searchable(
                 text: $searchText,
-                placement: .navigationBarDrawer,
-                prompt: "Search places"
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search trails, parks, places"
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -43,6 +43,7 @@ struct SheetView: View {
                     } label: {
                         Image(systemName: "info.circle")
                     }
+                    .accessibilityLabel("About Hero Dirt")
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
@@ -57,7 +58,7 @@ struct SheetView: View {
                         }
                     }
                     .tint(overlayVisible ? .blue : nil)
-                    .accessibilityLabel("Rainfall overlay settings")
+                    .accessibilityLabel("Rain map")
 
                     Button(action: onCenterLocation) {
                         Image(systemName: "location.fill")
@@ -109,6 +110,7 @@ struct SheetView: View {
             let response = try await MKLocalSearch(request: request).start()
             guard !Task.isCancelled else { return }
             searchResults = response.mapItems
+            Telemetry.signal(.searchPerformed, ["results": "\(response.mapItems.count)"])
         } catch {
             guard !Task.isCancelled else { return }
             searchResults = []

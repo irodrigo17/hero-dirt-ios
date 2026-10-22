@@ -14,6 +14,27 @@ struct SoilOverride: Codable, Hashable, Sendable {
         case clayLoam = "Clay Loam"
         case clay = "Clay"
 
+        /// Rider-friendly name. `rawValue` is persisted, so it must not change.
+        var displayName: String {
+            switch self {
+            case .sand: return "Sandy"
+            case .sandyLoam: return "Mostly sandy"
+            case .loam: return "Loamy"
+            case .clayLoam: return "Some clay"
+            case .clay: return "Clay"
+            }
+        }
+
+        var hint: String {
+            switch self {
+            case .sand: return "Drains fast, dries out quickly"
+            case .sandyLoam: return "Drains well"
+            case .loam: return "Classic brown dirt, a bit of everything"
+            case .clayLoam: return "Gets sticky when wet"
+            case .clay: return "Peanut butter when wet, slow to dry"
+            }
+        }
+
         var sandFraction: Double {
             switch self {
             case .sand: return 0.90
@@ -39,6 +60,14 @@ struct SoilOverride: Codable, Hashable, Sendable {
         case sunny = "Sunny"
         case partial = "Partial"
         case shaded = "Shaded"
+
+        var displayName: String {
+            switch self {
+            case .sunny: return "Sunny"
+            case .partial: return "Some shade"
+            case .shaded: return "Shady"
+            }
+        }
 
         var dryingMultiplier: Double {
             switch self {
@@ -102,6 +131,17 @@ struct SoilData: Sendable {
         if c >= 0.27 { return "Clay Loam" }
         if s < 0.20 { return "Silt Loam" }
         return "Loam"
+    }
+
+    /// Rider-friendly version of `textureLabel`.
+    var riderLabel: String {
+        switch textureLabel {
+        case "Sand", "Loamy Sand": return "Sandy"
+        case "Sandy Loam": return "Mostly sandy"
+        case "Clay Loam", "Sandy Clay": return "Some clay"
+        case "Clay": return "Clay"
+        default: return "Loamy"
+        }
     }
 
     static let loam = SoilData(sandFraction: 0.4, clayFraction: 0.2, isEstimated: true)

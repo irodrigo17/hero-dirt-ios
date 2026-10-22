@@ -12,20 +12,22 @@ struct RainfallOverlaySheet: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Show rainfall overlay", isOn: $isVisible)
+                    Toggle("Show rain on the map", isOn: $isVisible)
+                } footer: {
+                    Text("Colors show how much rain fell over the time window you pick.")
                 }
 
-                Section("Timeframe") {
+                Section("Rain over the last") {
                     Picker("Timeframe", selection: $timeframe) {
                         ForEach(RainfallTimeframe.allCases) { tf in
-                            Text(tf.rawValue).tag(tf)
+                            Text(tf.label).tag(tf)
                         }
                     }
                     .pickerStyle(.segmented)
                     .listRowInsets(.init(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
 
-                Section("Opacity") {
+                Section("Overlay strength") {
                     HStack {
                         Image(systemName: "circle.dotted")
                             .foregroundStyle(.secondary)
@@ -42,7 +44,7 @@ struct RainfallOverlaySheet: View {
                         .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 16))
                 }
             }
-            .navigationTitle("Rainfall Overlay")
+            .navigationTitle("Rain Map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
