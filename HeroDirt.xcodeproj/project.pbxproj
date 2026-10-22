@@ -47,6 +47,12 @@
 		EFF7D4F1494082B927E7C3D6 /* SoilService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A742A14C6A8B8F08A953E9 /* SoilService.swift */; };
 		F1F29134729ED0BD0699DFEE /* PlaceDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D59D7D187BE00C6967B78F7 /* PlaceDetailsView.swift */; };
 		F90AC25370526C2747B4959F /* RainfallOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FD5C632881824C2479B0C8 /* RainfallOverlayTests.swift */; };
+		5E16EA905962B21B12EAD344 /* RainUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EED6DEB2AEFC44DF7E5841 /* RainUnit.swift */; };
+		887207BABD9C4394F7B4CA79 /* RainTiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DE7EB7537871AD0805212CA /* RainTiles.swift */; };
+		75C4CDE2E1A6DDEB523D036F /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2438BC60C119BB50DE75E460 /* Shimmer.swift */; };
+		2ECE1D776DCA4E777D0FECE4 /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */; };
+		7C5DF642626CFA94542D954B /* RainUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 651C49D15C30B686E6953047 /* RainUnitTests.swift */; };
+		FC1BF74EFF0A0F07743DABF9 /* PlaceMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51B5E70A68C62D6F626166B /* PlaceMergeTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +110,12 @@
 		EFDCB15D7909852E9F7677ED /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUI.swift; sourceTree = "<group>"; };
 		FA4FDD2381347C02A1215178 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FCDEC702EB7094CF94991149 /* WeatherServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherServiceTests.swift; sourceTree = "<group>"; };
+		55EED6DEB2AEFC44DF7E5841 /* RainUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainUnit.swift; sourceTree = "<group>"; };
+		2DE7EB7537871AD0805212CA /* RainTiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainTiles.swift; sourceTree = "<group>"; };
+		2438BC60C119BB50DE75E460 /* Shimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shimmer.swift; sourceTree = "<group>"; };
+		1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
+		651C49D15C30B686E6953047 /* RainUnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainUnitTests.swift; sourceTree = "<group>"; };
+		F51B5E70A68C62D6F626166B /* PlaceMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceMergeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -134,6 +146,8 @@
 		5B12376377E7B1FD5758568D /* HeroDirtTests */ = {
 			isa = PBXGroup;
 			children = (
+				F51B5E70A68C62D6F626166B /* PlaceMergeTests.swift */,
+				651C49D15C30B686E6953047 /* RainUnitTests.swift */,
 				44692038F44E67135E0B38AB /* PlaceStoreTests.swift */,
 				32C6E0BABF8E70A0502E1DD2 /* PlaceTests.swift */,
 				923B2079001426116C580872 /* RainfallColorScaleTests.swift */,
@@ -151,6 +165,7 @@
 		75710BBBBC944EF6A70628BA /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				55EED6DEB2AEFC44DF7E5841 /* RainUnit.swift */,
 				544289F591E5EE646407FF37 /* Place.swift */,
 				C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */,
 				49C37481A6448709D5937CF2 /* RainfallOverlay.swift */,
@@ -162,6 +177,7 @@
 		82AD055064B80AE78D55E8D6 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */,
 				49E6F6768545D13720077183 /* MapItemCache.swift */,
 				0A6212CF0607C8E212CC4494 /* PlaceStore.swift */,
 				B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */,
@@ -175,6 +191,8 @@
 		853D24C281FCC9239BB5DBDF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2438BC60C119BB50DE75E460 /* Shimmer.swift */,
+				2DE7EB7537871AD0805212CA /* RainTiles.swift */,
 				A8D3E5B9A3AECAD3BF81D6F9 /* AboutView.swift */,
 				B47BBCDE17750E3EE9B3BEBB /* CardHeader.swift */,
 				34B4E7778CAA336AADDCF385 /* DirtConditionCardView.swift */,
@@ -307,6 +325,8 @@
 				B46BF0C959A8CDF4AE4354F1 /* SoilServiceTests.swift in Sources */,
 				374F078B45EE8E2B13B5FA33 /* WeatherCacheTests.swift in Sources */,
 				3520ED0386A97A3281BB3345 /* WeatherServiceTests.swift in Sources */,
+				7C5DF642626CFA94542D954B /* RainUnitTests.swift in Sources */,
+				FC1BF74EFF0A0F07743DABF9 /* PlaceMergeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,6 +363,10 @@
 				EFF7D4F1494082B927E7C3D6 /* SoilService.swift in Sources */,
 				AC98CE93622E346B525B36C1 /* UIKitMapView.swift in Sources */,
 				69145AFD0B0F8FBADC14C612 /* WeatherService.swift in Sources */,
+				5E16EA905962B21B12EAD344 /* RainUnit.swift in Sources */,
+				887207BABD9C4394F7B4CA79 /* RainTiles.swift in Sources */,
+				75C4CDE2E1A6DDEB523D036F /* Shimmer.swift in Sources */,
+				2ECE1D776DCA4E777D0FECE4 /* Telemetry.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

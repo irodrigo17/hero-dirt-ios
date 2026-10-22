@@ -18,10 +18,14 @@ targets:
     info:
       path: HeroDirt/Info.plist
       properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
         NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         UILaunchScreen:
           BackgroundColor: LaunchBackground
           ImageName: LaunchImage
