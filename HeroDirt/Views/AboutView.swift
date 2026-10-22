@@ -3,36 +3,48 @@ import SwiftUI
 
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var iCloudStatus: CKAccountStatus?
+    @AppStorage(RainUnitPreference.storageKey) private var unitPreference = RainUnitPreference.automatic
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Text("Hero Dirt is a free, open source app that helps mountain bikers check trail conditions based on recent and forecasted rainfall data.")
+                    Text("Hero Dirt is a free, open source app that helps mountain bikers find hero dirt: that perfect tacky, grippy trail you get a day or two after the rain.")
                         .foregroundStyle(.secondary)
                 } header: {
                     Text("About")
                 }
                 
                 Section {
-                    Link(destination: URL(string: "https://github.com/irodrigo17/hero-dirt-ios/issues")!) {
-                        Label("Report a Bug or Request a Feature", systemImage: "exclamationmark.bubble")
+                    Button {
+                        openIssue(kind: .bug)
+                    } label: {
+                        Label("Report a Bug", systemImage: "ladybug")
+                    }
+                    Button {
+                        openIssue(kind: .idea)
+                    } label: {
+                        Label("Request a Feature", systemImage: "lightbulb")
                     }
                 } header: {
                     Text("Feedback")
                 } footer: {
-                    Text("Feedback and feature requests are tracked as GitHub Issues.")
+                    Text("Opens a new GitHub issue with your app version and device details filled in.")
                 }
 
-                Section {
-                    Link(destination: URL(string: "https://github.com/irodrigo17/hero-dirt-ios")!) {
-                        Label("View Source on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                Section("Settings") {
+                    Picker(selection: $unitPreference) {
+                        ForEach(RainUnitPreference.allCases) { pref in
+                            Text(pref == .automatic ? "Automatic (\(pref.resolved().symbol))" : pref.label)
+                                .tag(pref)
+                        }
+                    } label: {
+                        Label("Rain Units", systemImage: "ruler")
                     }
-                } footer: {
-                    Text("Source code is freely available on GitHub.")
                 }
-                
+
                 Section("Your Data") {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -57,7 +69,15 @@ struct AboutView: View {
                 Section("Data Sources") {
                     VStack(alignment: .leading, spacing: 4) {
                         Label("Open-Meteo", systemImage: "cloud.rain")
-                        Text("Free weather API providing historical and forecasted rainfall data. No account or API key required.")
+                        Text("Free weather data for recent rain and how fast the ground dries out.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 2)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("ISRIC SoilGrids", systemImage: "square.3.layers.3d.down.right")
+                        Text("Global soil maps used to estimate how sandy or clay-heavy the dirt is.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -65,11 +85,21 @@ struct AboutView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Label("Apple WeatherKit", systemImage: "cloud.sun")
-                        Text("Apple's weather service providing 7-day precipitation forecasts.")
+                        Text("Apple's weather service, used for the rain forecast.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 2)
+                }
+
+                Section {
+                    Link(destination: URL(string: "https://github.com/irodrigo17/hero-dirt-ios")!) {
+                        Label("View Source on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                    }
+                } footer: {
+                    Text("Hero Dirt \(AppInfo.versionString)")
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 8)
                 }
             }
             .navigationTitle("About")
@@ -86,6 +116,25 @@ struct AboutView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Feedback
+
+    private enum FeedbackKind {
+        case bug, idea
+    }
+
+    private func openIssue(kind: FeedbackKind) {
+        Telemetry.signal(.feedbackOpened, ["kind": kind == .bug ? "bug" : "idea"])
+        let body = kind == .bug
+            ? "**What happened?**\n\n\n**What did you expect to happen?**\n\n\n---\n"
+                + AppInfo.diagnosticsSummary
+            : "**What would make Hero Dirt better for you?**\n\n"
+        var components = URLComponents(string: "https://github.com/irodrigo17/hero-dirt-ios/issues/new")!
+        components.queryItems = [URLQueryItem(name: "body", value: body)]
+        if let url = components.url {
+            openURL(url)
         }
     }
 

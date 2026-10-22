@@ -4,6 +4,7 @@ import CoreImage.CIFilterBuiltins
 import Foundation
 import MapKit
 import UIKit
+import os
 
 struct RainfallGridBounds: Equatable {
     let minLat: Double
@@ -21,6 +22,12 @@ struct RainfallGridBounds: Equatable {
 
 @MainActor
 final class RainfallGridService: ObservableObject {
+
+    /// Points of Interest intervals for Instruments (grid fetches and renders).
+    private static let signposter = OSSignposter(
+        subsystem: "com.herodirt.app",
+        category: .pointsOfInterest
+    )
 
     // MARK: - Public state
 
@@ -109,6 +116,9 @@ final class RainfallGridService: ObservableObject {
         }
 
         guard coarseRows > 0, coarseCols > 0 else { return nil }
+
+        let signpostState = Self.signposter.beginInterval("Render rain map")
+        defer { Self.signposter.endInterval("Render rain map", signpostState) }
 
         let scale = 8  // pixels per coarse cell
         let imgWidth = coarseCols * scale
@@ -295,6 +305,10 @@ final class RainfallGridService: ObservableObject {
 
         if !uncachedPoints.isEmpty {
             isLoading = true
+            let signpostState = Self.signposter.beginInterval(
+                "Fetch rain grid", "\(uncachedPoints.count) points"
+            )
+            defer { Self.signposter.endInterval("Fetch rain grid", signpostState) }
 
             let batchPoints = uncachedPoints.map { (lat: $0.lat, lon: $0.lon) }
             if let summaries = try? await WeatherService.fetchRainfallBatch(
