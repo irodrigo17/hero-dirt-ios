@@ -171,13 +171,20 @@ struct RainfallSummary: Sendable {
         }
 
         let index = moisture / resolvedSoil.fieldCapacity
-        let condition: DirtCondition
+        var condition: DirtCondition
         switch index {
         case let x where x > 0.80: condition = .veryWet
         case let x where x > 0.60: condition = .wet
         case let x where x >= 0.25: condition = .heroDirt
         case let x where x >= 0.10: condition = .dry
         default: condition = .veryDry
+        }
+
+        // The daily water balance can't tell that rain is falling right now:
+        // after a dry spell a soaking day only brings the bucket to "Hero
+        // Dirt". Real trails are muddy during and right after decent rain.
+        if hasFreshRain, condition.wetness < DirtCondition.wet.wetness {
+            condition = .wet
         }
 
         return DirtConditionResult(
@@ -190,6 +197,13 @@ struct RainfallSummary: Sendable {
 
     func dirtCondition(soil: SoilData? = nil) -> DirtCondition {
         dirtConditionResult(soil: soil).condition
+    }
+
+    /// Meaningful rain today (≥ 4 mm) or a soaking yesterday (≥ 12 mm).
+    var hasFreshRain: Bool {
+        let today = dailyHistory.first?.amount ?? 0
+        let yesterday = dailyHistory.dropFirst().first?.amount ?? 0
+        return today >= 4 || yesterday >= 12
     }
 
     private var legacyDirtCondition: DirtCondition {

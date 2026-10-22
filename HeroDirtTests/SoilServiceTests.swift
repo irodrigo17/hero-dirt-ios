@@ -183,6 +183,31 @@ struct MoistureBalanceTests {
         #expect(idx >= 2)
     }
 
+    // A soaking day after a dry spell only half-fills the bucket, but trails
+    // are muddy while it's raining: the fresh-rain guard reports at least wet.
+    @Test func freshRainTodayIsAtLeastWet() {
+        var days = Array(repeating: (rain: 0.0, et0: 3.0), count: 30)
+        days[0] = (rain: 18.0, et0: 1.0)
+        let summary = makeSummary(days: days)
+        #expect(summary.hasFreshRain)
+        #expect(summary.dirtCondition(soil: .loam).wetness >= DirtCondition.wet.wetness)
+    }
+
+    @Test func soakingYesterdayIsAtLeastWet() {
+        var days = Array(repeating: (rain: 0.0, et0: 3.0), count: 30)
+        days[1] = (rain: 15.0, et0: 3.0)
+        let summary = makeSummary(days: days)
+        #expect(summary.hasFreshRain)
+        #expect(summary.dirtCondition(soil: .loam).wetness >= DirtCondition.wet.wetness)
+    }
+
+    @Test func lightDrizzleTodayDoesNotTriggerGuard() {
+        var days = Array(repeating: (rain: 0.0, et0: 3.0), count: 30)
+        days[0] = (rain: 1.0, et0: 3.0)
+        let summary = makeSummary(days: days)
+        #expect(!summary.hasFreshRain)
+    }
+
     // Estimated soil is used when nil is passed
     @Test func nilSoilUsesEstimatedLoam() {
         let days = Array(repeating: (rain: 5.0, et0: 4.0), count: 10)
