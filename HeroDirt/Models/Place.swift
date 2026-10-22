@@ -9,6 +9,9 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
     var longitude: Double
     var mapItemIdString: String?
     var soilOverride: SoilOverride?
+    /// Last local modification, used for last-writer-wins when merging copies
+    /// from iCloud. Optional so older saved data still decodes.
+    var updatedAt: Date?
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -27,7 +30,8 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         latitude: Double,
         longitude: Double,
         mapItemId: MKMapItem.Identifier? = nil,
-        soilOverride: SoilOverride? = nil
+        soilOverride: SoilOverride? = nil,
+        updatedAt: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -35,5 +39,6 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         self.longitude = longitude
         self.mapItemIdString = mapItemId?.rawValue
         self.soilOverride = soilOverride
+        self.updatedAt = updatedAt
     }
 }
