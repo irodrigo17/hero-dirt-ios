@@ -39,10 +39,10 @@ struct SavedPlacesListView: View {
     private var content: some View {
         if placeStore.places.isEmpty {
             ContentUnavailableView(
-                "No saved places",
+                "No saved spots yet",
                 systemImage: "star",
                 description: Text(
-                    "Search for a place by name, tap a pin on the map, or long-press to drop a new pin — then tap the star to save it here."
+                    "Search for a trail or park, tap a spot on the map, or long-press to drop a pin. Then tap Save to keep an eye on it here."
                 )
             )
         } else {
@@ -71,7 +71,7 @@ struct SavedPlacesListView: View {
                                 editingName = place.name
                                 renamingPlace = place
                             } label: {
-                                Label("Edit", systemImage: "pencil")
+                                Label("Rename", systemImage: "pencil")
                             }
                             .tint(.blue)
                         }
@@ -102,11 +102,14 @@ struct SavedPlacesListView: View {
     }
 
     private func loadAllRainfall() async {
-        let placesToLoad = placeStore.places.filter {
-            rainfallData[$0.id] == nil && !loadingPlaces.contains($0.id)
-        }
+        // Load anything without data, even if a previous (now cancelled) task
+        // had it in flight: `.task(id:)` restarts whenever the list changes or
+        // the view is rebuilt (e.g. folding/unfolding), and results are cached.
+        let placesToLoad = placeStore.places.filter { rainfallData[$0.id] == nil }
+        guard !placesToLoad.isEmpty else { return }
         for place in placesToLoad {
             loadingPlaces.insert(place.id)
+            errors[place.id] = nil
         }
 
         await withTaskGroup(of: (UUID, Result<(RainfallSummary, SoilData), Error>).self) {
@@ -132,17 +135,40 @@ struct SavedPlacesListView: View {
             }
 
             for await (id, result) in group {
-                loadingPlaces.remove(id)
                 switch result {
                 case .success(let (summary, soil)):
                     rainfallData[id] = summary
                     soilData[id] = soil
                     errors[id] = nil
+                    loadingPlaces.remove(id)
                 case .failure(let error):
-                    errors[id] = error.localizedDescription
+                    // A cancelled load is not an error; the restarted task
+                    // picks the place up again.
+                    if Task.isCancelled || (error as? URLError)?.code == .cancelled
+                        || error is CancellationError
+                    {
+                        continue
+                    }
+                    errors[id] = Self.friendlyMessage(for: error)
+                    loadingPlaces.remove(id)
                 }
             }
         }
+    }
+
+    static func friendlyMessage(for error: Error, includeRetryHint: Bool = true) -> String {
+        let hint = includeRetryHint ? " Pull down to try again." : ""
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed:
+                return "You're offline." + hint
+            case .timedOut:
+                return "The weather service is slow right now." + hint
+            default:
+                break
+            }
+        }
+        return "Couldn't load conditions." + hint
     }
 }
 
@@ -161,97 +187,62 @@ private struct PlaceRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                POICategoryIcon(category: place.mapItem?.pointOfInterestCategory, size: 28)
                 Text(place.name)
                     .font(.headline)
                     .lineLimit(1)
                 Spacer()
                 Image(systemName: "chevron.forward")
-            }
-            HStack {
-                if let rainfall {
-                    dirtConditionBadge(rainfall.dirtCondition(soil: effectiveSoil))
-                    Spacer()
-                    lastRainBadge(rainfall)
-                }
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
             }
 
-            if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 4)
-            } else if let error {
+            if let error {
                 Label(error, systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.red)
-            } else if let rainfall {
-                HStack(spacing: 8) {
-                    compactTile("1 day", value: rainfall.last1Day)
-                    compactTile("2 days", value: rainfall.last2Days)
-                    compactTile("3 days", value: rainfall.last3Days)
-                    compactTile("7 days", value: rainfall.last7Days)
+            } else if let rainfall, !isLoading {
+                let condition = rainfall.dirtCondition(soil: effectiveSoil)
+                // Drop the short description when the row is narrow (e.g. the
+                // landscape sidebar) instead of truncating everything.
+                ViewThatFits(in: .horizontal) {
+                    statusLine(condition: condition, rainfall: rainfall, showDescription: true)
+                    statusLine(condition: condition, rainfall: rainfall, showDescription: false)
                 }
+                RainTilesRow(tiles: rainfall.pastTiles, style: .compact)
+            } else {
+                PlaceRowSkeleton()
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
+        .animation(.easeInOut(duration: 0.25), value: rainfall == nil)
     }
 
-    @ViewBuilder
-    private func dirtConditionBadge(_ condition: DirtCondition) -> some View {
-        Label(condition.label, systemImage: condition.icon)
-            .font(.footnote)
-            .foregroundStyle(condition.color)
-            .padding(8)
-            .background(
-                condition.color.opacity(0.12),
-                in: RoundedRectangle(cornerRadius: 8)
-            )
-            .labelIconToTitleSpacing(4)
-    }
-
-    @ViewBuilder
-    private func lastRainBadge(_ rainfall: RainfallSummary) -> some View {
-        if let days = rainfall.daysSinceLastRain {
-            switch days {
-            case 0:
-                Label("Today", systemImage: "cloud.rain")
+    private func statusLine(
+        condition: DirtCondition,
+        rainfall: RainfallSummary,
+        showDescription: Bool
+    ) -> some View {
+        HStack(spacing: 8) {
+            ConditionBadge(condition: condition)
+            if showDescription {
+                Text(condition.shortDescription)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            case 1:
-                Label("1 day ago", systemImage: "cloud.rain")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            default:
-                Label("\(days) days ago", systemImage: "cloud.rain")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize()
             }
-        } else {
-            Label("30+ days", systemImage: "sun.max")
+            Spacer(minLength: 4)
+            Label(rainfall.lastRainText, systemImage: "cloud.rain")
+                .labelStyle(.titleAndIcon)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .labelIconToTitleSpacing(3)
+                .lineLimit(1)
+                .fixedSize()
+                .accessibilityLabel("Last rain \(rainfall.lastRainText)")
         }
-    }
-
-    private func compactTile(_ label: String, value: Double) -> some View {
-        VStack(spacing: 2) {
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Text(value.formatMillimeters())
-                .font(.callout)
-                .fontWeight(.semibold)
-                .foregroundStyle(value > 0 ? .blue : .secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 6)
-        .background(
-            value > 0 ? Color.blue.opacity(0.08) : Color.gray.opacity(0.05),
-            in: RoundedRectangle(cornerRadius: .cornerSmall)
-        )
-        .accessibilityLabel(
-            "\(label) rainfall: \(value.formatMillimeters()) millimeters"
-        )
     }
 }

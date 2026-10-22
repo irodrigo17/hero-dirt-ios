@@ -12,8 +12,9 @@ struct PlaceDetailsView: View {
     var onClose: (() -> Void)? = nil
     var onNameResolved: ((String) -> Void)? = nil
     var onSaved: ((Place) -> Void)? = nil
+    var onUnsaved: ((Place) -> Void)? = nil
 
-    @State private var placeName = "Loading..."
+    @State private var placeName = "Loading…"
     @State private var rainfallSummary: RainfallSummary?
     @State private var rainForecast: RainForecast?
     @State private var soilData: SoilData?
@@ -48,14 +49,19 @@ struct PlaceDetailsView: View {
                     actionBar
 
                     if isLoading {
-                        ProgressView("Loading rainfall data...")
-                            .padding(.top, 40)
+                        PlaceDetailsSkeleton()
+                            .transition(.opacity)
                     } else if let errorMessage {
-                        ContentUnavailableView(
-                            "Unable to load rainfall data",
-                            systemImage: "exclamationmark.triangle",
-                            description: Text(errorMessage)
-                        )
+                        ContentUnavailableView {
+                            Label("Couldn't load trail conditions", systemImage: "exclamationmark.triangle")
+                        } description: {
+                            Text(errorMessage)
+                        } actions: {
+                            Button("Try Again") {
+                                Task { await reload() }
+                            }
+                            .buttonStyle(.bordered)
+                        }
                     } else if let summary = rainfallSummary {
                         DirtConditionCardView(
                             result: summary.dirtConditionResult(soil: soilData),
@@ -70,6 +76,7 @@ struct PlaceDetailsView: View {
                     }
                 }
                 .padding()
+                .animation(.easeInOut(duration: 0.25), value: isLoading)
             }
             .refreshable {
                 await refreshData()
@@ -149,8 +156,8 @@ struct PlaceDetailsView: View {
                 action: toggleSaved
             )
             SheetActionButton(
-                icon: "map",
-                label: "Maps",
+                icon: "car.fill",
+                label: "Directions",
                 isPrimary: false,
                 isDisabled: isLoading,
                 action: openInMaps
@@ -170,7 +177,7 @@ struct PlaceDetailsView: View {
     // MARK: - Data Loading
 
     private func loadData() async {
-        placeName = "Loading..."
+        placeName = "Loading…"
         rainfallSummary = nil
         rainForecast = nil
         soilData = nil
@@ -216,6 +223,13 @@ struct PlaceDetailsView: View {
         isLoading = false
     }
 
+    private func reload() async {
+        isLoading = true
+        errorMessage = nil
+        await refreshData()
+        isLoading = false
+    }
+
     private func refreshData() async {
         let key = WeatherCache.key(
             latitude: coordinate.latitude,
@@ -243,9 +257,12 @@ struct PlaceDetailsView: View {
         do {
             rainfallSummary = try await rainfallTask
             errorMessage = nil
+            if let summary = rainfallSummary {
+                Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
+            }
         } catch {
             guard !Task.isCancelled else { return }
-            errorMessage = error.localizedDescription
+            errorMessage = SavedPlacesListView.friendlyMessage(for: error, includeRetryHint: false)
         }
 
         guard !Task.isCancelled else { return }
@@ -273,6 +290,8 @@ struct PlaceDetailsView: View {
     private func toggleSaved() {
         if let existing = savedPlace {
             placeStore.removePlace(existing)
+            onUnsaved?(existing)
+            Telemetry.signal(.placeRemoved)
         } else {
             let newPlace = Place(
                 name: placeName,
@@ -282,13 +301,16 @@ struct PlaceDetailsView: View {
             )
             placeStore.addPlace(newPlace)
             onSaved?(newPlace)
+            Telemetry.signal(.placeSaved)
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     private func openInMaps() {
+        Telemetry.signal(.directionsOpened)
+        let options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
         if let item = effectiveMapItem {
-            item.openInMaps()
+            item.openInMaps(launchOptions: options)
         } else {
             let item = MKMapItem(
                 location: CLLocation(
@@ -298,7 +320,7 @@ struct PlaceDetailsView: View {
                 address: nil
             )
             item.name = placeName
-            item.openInMaps()
+            item.openInMaps(launchOptions: options)
         }
     }
 }
