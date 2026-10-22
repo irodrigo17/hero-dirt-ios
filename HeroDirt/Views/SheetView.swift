@@ -13,6 +13,8 @@ struct SheetView: View {
     @Binding var overlayOpacity: Double
     let isOverlayLoading: Bool
     var onCenterLocation: () -> Void = {}
+    /// False in the split layout, where the map has its own floating controls.
+    var showsMapActions: Bool = true
 
     @State private var searchText = ""
     @State private var searchResults: [MKMapItem] = []
@@ -37,33 +39,8 @@ struct SheetView: View {
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingAbout = true
-                    } label: {
-                        Image(systemName: "info.circle")
-                    }
-                    .accessibilityLabel("About Hero Dirt")
-                }
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button {
-                        showingOverlayControls = true
-                    } label: {
-                        ZStack {
-                            if isOverlayLoading {
-                                ProgressView().controlSize(.small)
-                            }
-                            Image(systemName: overlayVisible ? "cloud.rain.fill" : "cloud.rain")
-                                .opacity(isOverlayLoading ? 0 : 1)
-                        }
-                    }
-                    .tint(overlayVisible ? .blue : nil)
-                    .accessibilityLabel("Rain map")
-
-                    Button(action: onCenterLocation) {
-                        Image(systemName: "location.fill")
-                    }
-                    .accessibilityLabel("Center map on your location")
+                if showsMapActions {
+                    mapActionsToolbar
                 }
             }
             .sheet(isPresented: $showingAbout) {
@@ -97,6 +74,38 @@ struct SheetView: View {
                 await runSearch(query: newValue)
             }
         }
+    }
+
+    @ToolbarContentBuilder
+    private var mapActionsToolbar: some ToolbarContent {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showingAbout = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("About Hero Dirt")
+                }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        showingOverlayControls = true
+                    } label: {
+                        ZStack {
+                            if isOverlayLoading {
+                                ProgressView().controlSize(.small)
+                            }
+                            Image(systemName: overlayVisible ? "cloud.rain.fill" : "cloud.rain")
+                                .opacity(isOverlayLoading ? 0 : 1)
+                        }
+                    }
+                    .tint(overlayVisible ? .blue : nil)
+                    .accessibilityLabel("Rain map")
+
+                    Button(action: onCenterLocation) {
+                        Image(systemName: "location.fill")
+                    }
+                    .accessibilityLabel("Center map on your location")
+                }
     }
 
     private func runSearch(query: String) async {

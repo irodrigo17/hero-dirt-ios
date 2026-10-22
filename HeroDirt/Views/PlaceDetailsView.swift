@@ -13,6 +13,8 @@ struct PlaceDetailsView: View {
     var onNameResolved: ((String) -> Void)? = nil
     var onSaved: ((Place) -> Void)? = nil
     var onUnsaved: ((Place) -> Void)? = nil
+    /// Shown inside the split-layout sidebar: close becomes a leading back button.
+    var isEmbedded: Bool = false
 
     @State private var placeName = "Loading…"
     @State private var rainfallSummary: RainfallSummary?
@@ -89,15 +91,28 @@ struct PlaceDetailsView: View {
                 Text(subtitle ?? "")
             )
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        if let onClose { onClose() } else { dismiss() }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(.primary)
+                if isEmbedded {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            if let onClose { onClose() } else { dismiss() }
+                        } label: {
+                            Image(systemName: "chevron.backward")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.primary)
+                        }
+                        .accessibilityLabel("Back to saved places")
                     }
-                    .accessibilityLabel("Close")
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            if let onClose { onClose() } else { dismiss() }
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.primary)
+                        }
+                        .accessibilityLabel("Close")
+                    }
                 }
             }
             .alert("Rename", isPresented: $showingRenameAlert) {

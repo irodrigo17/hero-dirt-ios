@@ -27,7 +27,12 @@ struct MapView: View {
     @State private var overlayOpacity: Double = 0.3
     @State private var visibleRegion: MKCoordinateRegion?
 
-    private let collapsedDetent = PresentationDetent.fraction(0.09)
+    /// Fixed height (not a fraction) so the collapsed header isn't clipped on
+    /// short screens like the folded iPhone Duo.
+    private let collapsedDetent = PresentationDetent.height(84)
+
+    @State private var showingAboutFromMap = false
+    @State private var showingRainMapFromMap = false
 
     private var hasSelection: Bool {
         selectedPlace != nil || selectedMapItem != nil || newPinCoordinate != nil
@@ -49,6 +54,7 @@ struct MapView: View {
             HStack(spacing: 0) {
                 if isSplit {
                     sidebar
+                        .verticalBarDisabled(true)
                         .frame(width: min(max(proxy.size.width * 0.4, 300), 420))
                         .background(Color(.systemGroupedBackground).ignoresSafeArea())
                         .transition(.move(edge: .leading))
@@ -56,6 +62,14 @@ struct MapView: View {
                         .ignoresSafeArea()
                 }
                 map
+                    .overlay(alignment: .bottomTrailing) {
+                        if isSplit {
+                            floatingMapControls
+                                .padding(.trailing, 16)
+                                .padding(.bottom, 24)
+                                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                        }
+                    }
             }
             .onAppear { applyLayout(split: split, animated: false) }
             .onChange(of: split) { _, newValue in applyLayout(split: newValue, animated: true) }
@@ -98,6 +112,68 @@ struct MapView: View {
     }
 
     // MARK: - Layouts
+
+    /// Map actions for the split layout, in the bottom-trailing corner for
+    /// easy thumb reach.
+    private var floatingMapControls: some View {
+        VStack(spacing: 12) {
+            Button {
+                showingAboutFromMap = true
+            } label: {
+                Image(systemName: "info")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 48, height: 48)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .accessibilityLabel("About Hero Dirt")
+
+            VStack(spacing: 0) {
+                Button {
+                    showingRainMapFromMap = true
+                } label: {
+                    ZStack {
+                        if gridService.isLoading {
+                            ProgressView().controlSize(.small)
+                        }
+                        Image(systemName: overlayVisible ? "cloud.rain.fill" : "cloud.rain")
+                            .opacity(gridService.isLoading ? 0 : 1)
+                    }
+                    .font(.title3)
+                    .foregroundStyle(overlayVisible ? Color.blue : Color.primary)
+                    .frame(width: 48, height: 48)
+                }
+                .accessibilityLabel("Rain map")
+                .popover(isPresented: $showingRainMapFromMap, arrowEdge: .trailing) {
+                    RainfallOverlaySheet(
+                        isVisible: $overlayVisible,
+                        timeframe: $overlayTimeframe,
+                        opacity: $overlayOpacity,
+                        isLoading: gridService.isLoading
+                    )
+                    .frame(idealWidth: 360, idealHeight: 520)
+                    .presentationCompactAdaptation(.popover)
+                }
+
+                Divider().frame(width: 32)
+
+                Button {
+                    cameraCommand = CameraCommand(action: .centerOnUser)
+                } label: {
+                    Image(systemName: "location.fill")
+                        .font(.title3)
+                        .foregroundStyle(Color.primary)
+                        .frame(width: 48, height: 48)
+                }
+                .accessibilityLabel("Center map on your location")
+            }
+            .buttonStyle(.plain)
+            .glassEffect(.regular.interactive(), in: Capsule())
+        }
+        .sheet(isPresented: $showingAboutFromMap) {
+            AboutView()
+        }
+    }
 
     private var map: some View {
         UIKitMapView(
@@ -159,7 +235,7 @@ struct MapView: View {
         ZStack {
             sheetContent
             if hasSelection {
-                placeDetails(onClose: closeDetails)
+                placeDetails(onClose: closeDetails, isEmbedded: true)
                     .background(Color(.systemGroupedBackground).ignoresSafeArea())
                     .transition(.move(edge: .leading).combined(with: .opacity))
                     .id(detailsIdentity)
@@ -240,7 +316,8 @@ struct MapView: View {
             onCenterLocation: {
                 cameraCommand = CameraCommand(action: .centerOnUser)
                 if !isSplit { selectedDetent = collapsedDetent }
-            }
+            },
+            showsMapActions: !isSplit
         )
     }
 
@@ -266,7 +343,7 @@ struct MapView: View {
             }
     }
 
-    private func placeDetails(onClose: @escaping () -> Void) -> some View {
+    private func placeDetails(onClose: @escaping () -> Void, isEmbedded: Bool = false) -> some View {
         PlaceDetailsView(
             coordinate: selectedCoordinate ?? CLLocationCoordinate2D(),
             placeID: selectedPlace?.id,
@@ -287,7 +364,8 @@ struct MapView: View {
                 newPinName = place.name
                 selectedPlace = nil
                 selectedAnnotation = .newPin
-            }
+            },
+            isEmbedded: isEmbedded
         )
         .environmentObject(placeStore)
         .environmentObject(mapItemCache)
