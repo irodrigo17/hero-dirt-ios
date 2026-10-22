@@ -5,54 +5,19 @@ struct MapView: View {
     @EnvironmentObject private var placeStore: PlaceStore
     @EnvironmentObject private var mapItemCache: MapItemCache
 
-    @State private var cameraCommand: CameraCommand?
-    @State private var selectedAnnotation: AnnotationSelection?
-    @State private var newPinCoordinate: CLLocationCoordinate2D?
-    @State private var newPinName: String?
-    @State private var sheetPresented = true
-    @State private var selectedDetent: PresentationDetent = .medium
-    @State private var showingPlaceDetails = false
-    @State private var selectedPlace: Place?
-    @State private var selectedMapItem: MKMapItem?
-    @State private var selectedSearchResult: MKMapItem?
-    @State private var didInitialFit = false
-
-    /// Side-by-side layout (sidebar + map) used in landscape and on wide
-    /// windows such as the unfolded iPhone Duo in landscape.
-    @State private var isSplit = false
-
-    @StateObject private var gridService = RainfallGridService()
-    @State private var overlayVisible = false
-    @State private var overlayTimeframe: RainfallTimeframe = .threeDays
-    @State private var overlayOpacity: Double = 0.3
-    @State private var visibleRegion: MKCoordinateRegion?
-
-    /// Fixed height (not a fraction) so the collapsed header isn't clipped on
-    /// short screens like the folded iPhone Duo.
-    private let collapsedDetent = PresentationDetent.height(84)
-
+    @State private var model = MapModel()
+    @State private var gridService = RainfallGridService()
     @State private var showingAboutFromMap = false
     @State private var showingRainMapFromMap = false
 
-    private var hasSelection: Bool {
-        selectedPlace != nil || selectedMapItem != nil || newPinCoordinate != nil
-    }
-
-    /// How far below the visual center a focused coordinate should sit so it
-    /// isn't hidden behind the bottom sheet. Zero in split layout.
-    private var sheetBias: Double { isSplit ? 0 : 0.3 }
-
-    static func prefersSplit(for size: CGSize) -> Bool {
-        size.width > size.height && size.width >= 560
-    }
-
     var body: some View {
+        @Bindable var model = model
         GeometryReader { proxy in
-            let split = Self.prefersSplit(for: proxy.size)
+            let split = MapModel.prefersSplit(for: proxy.size)
             // `map` keeps the same structural position in both layouts so the
             // MKMapView (and its camera) survives rotation.
             HStack(spacing: 0) {
-                if isSplit {
+                if model.isSplit {
                     sidebar
                         .verticalBarDisabled(true)
                         .frame(width: min(max(proxy.size.width * 0.4, 300), 420))
@@ -63,7 +28,7 @@ struct MapView: View {
                 }
                 map
                     .overlay(alignment: .bottomTrailing) {
-                        if isSplit {
+                        if model.isSplit {
                             floatingMapControls
                                 .padding(.trailing, 16)
                                 .padding(.bottom, 24)
@@ -71,39 +36,41 @@ struct MapView: View {
                         }
                     }
             }
-            .onAppear { applyLayout(split: split, animated: false) }
-            .onChange(of: split) { _, newValue in applyLayout(split: newValue, animated: true) }
+            .onAppear { model.applyLayout(split: split, places: placeStore.places, animated: false) }
+            .onChange(of: split) { _, newValue in
+                model.applyLayout(split: newValue, places: placeStore.places, animated: true)
+            }
         }
         .onAppear {
-            fitPlacesIfNeeded()
+            model.fitPlacesIfNeeded(placeStore.places)
         }
         .onChange(of: placeStore.places.isEmpty) { _, _ in
             // Saved places can arrive from iCloud after launch (e.g. after a
             // reinstall); frame them once they do.
-            fitPlacesIfNeeded()
+            model.fitPlacesIfNeeded(placeStore.places)
         }
         .task(id: placeStore.places.map(\.id)) {
             mapItemCache.prefetch(places: placeStore.places)
         }
-        .onChange(of: overlayVisible) { _, visible in
+        .onChange(of: model.overlayVisible) { _, visible in
             Telemetry.signal(.rainMapToggled, ["visible": visible ? "true" : "false"])
-            if visible, let region = visibleRegion {
-                gridService.timeframe = overlayTimeframe
+            if visible, let region = model.visibleRegion {
+                gridService.timeframe = model.overlayTimeframe
                 gridService.updateRegion(region)
             }
         }
-        .onChange(of: overlayTimeframe) { _, timeframe in
-            if overlayVisible {
+        .onChange(of: model.overlayTimeframe) { _, timeframe in
+            if model.overlayVisible {
                 gridService.timeframe = timeframe
                 gridService.refetch()
             }
         }
         .sheet(
-            isPresented: $sheetPresented,
+            isPresented: $model.isMainSheetPresented,
             onDismiss: {
                 // The bottom sheet is permanent in the stacked layout.
-                if !isSplit {
-                    Task { @MainActor in sheetPresented = true }
+                if !model.isSplit {
+                    Task { @MainActor in model.isMainSheetPresented = true }
                 }
             }
         ) {
@@ -111,12 +78,83 @@ struct MapView: View {
         }
     }
 
-    // MARK: - Layouts
+    // MARK: - Map
+
+    private var map: some View {
+        UIKitMapView(
+            places: placeStore.places,
+            newPinCoordinate: model.droppedPin?.coordinate,
+            newPinTitle: model.droppedPin?.name,
+            selectedSearchResult: model.searchResult,
+            selectedAnnotation: model.annotationSelection(in: placeStore.places),
+            overlayVisible: model.overlayVisible,
+            overlayImage: gridService.overlay?.image,
+            overlayBounds: gridService.overlay?.bounds,
+            overlayOpacity: model.overlayOpacity,
+            cameraCommand: Bindable(model).cameraCommand,
+            onRegionChanged: { region in
+                model.visibleRegion = region
+                if model.overlayVisible {
+                    gridService.updateRegion(region)
+                }
+            },
+            onRegionWillChange: {
+                if model.overlayVisible {
+                    gridService.cancelUpdate()
+                }
+            },
+            onLongPress: { coordinate in
+                model.select(.droppedPin(coordinate, name: nil), places: placeStore.places, focus: false)
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            },
+            onAnnotationSelected: { annotation in
+                switch annotation {
+                case .place(let place):
+                    model.select(.saved(place.id), places: placeStore.places)
+                case .newPin, .searchResult:
+                    // Already the selection; re-open details and re-center.
+                    if let selection = model.selection {
+                        model.select(selection, places: placeStore.places)
+                    }
+                }
+            },
+            onFeatureTapped: { item in
+                model.select(.mapItem(item), places: placeStore.places)
+            },
+            onTap: {
+                UIApplication.shared.sendAction(
+                    #selector(UIResponder.resignFirstResponder),
+                    to: nil, from: nil, for: nil
+                )
+            },
+            onUserLocationAvailable: { coordinate in
+                model.userLocationAvailable(coordinate, hasPlaces: !placeStore.places.isEmpty)
+            }
+        )
+        .ignoresSafeArea()
+        .overlay(alignment: .top) {
+            if model.overlayVisible, let message = gridService.errorMessage {
+                Label(message, systemImage: "exclamationmark.triangle.fill")
+                    .labelStyle(.titleAndIcon)
+                    .font(.footnote.weight(.medium))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .glassEffect(.regular, in: Capsule())
+                    .padding(.top, 8)
+                    .padding(.horizontal)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onTapGesture { gridService.refetch() }
+                    .accessibilityHint("Double tap to try again")
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: gridService.errorMessage)
+    }
 
     /// Map actions for the split layout, in the bottom-trailing corner for
     /// easy thumb reach.
     private var floatingMapControls: some View {
-        VStack(spacing: 12) {
+        @Bindable var model = model
+        return VStack(spacing: 12) {
             Button {
                 showingAboutFromMap = true
             } label: {
@@ -136,19 +174,19 @@ struct MapView: View {
                         if gridService.isLoading {
                             ProgressView().controlSize(.small)
                         }
-                        Image(systemName: overlayVisible ? "cloud.rain.fill" : "cloud.rain")
+                        Image(systemName: model.overlayVisible ? "cloud.rain.fill" : "cloud.rain")
                             .opacity(gridService.isLoading ? 0 : 1)
                     }
                     .font(.title3)
-                    .foregroundStyle(overlayVisible ? Color.blue : Color.primary)
+                    .foregroundStyle(model.overlayVisible ? Color.blue : Color.primary)
                     .frame(width: 48, height: 48)
                 }
                 .accessibilityLabel("Rain map")
                 .popover(isPresented: $showingRainMapFromMap, arrowEdge: .trailing) {
                     RainfallOverlaySheet(
-                        isVisible: $overlayVisible,
-                        timeframe: $overlayTimeframe,
-                        opacity: $overlayOpacity,
+                        isVisible: $model.overlayVisible,
+                        timeframe: $model.overlayTimeframe,
+                        opacity: $model.overlayOpacity,
                         isLoading: gridService.isLoading
                     )
                     .frame(idealWidth: 360, idealHeight: 520)
@@ -158,7 +196,7 @@ struct MapView: View {
                 Divider().frame(width: 32)
 
                 Button {
-                    cameraCommand = CameraCommand(action: .centerOnUser)
+                    model.centerOnUser()
                 } label: {
                     Image(systemName: "location.fill")
                         .font(.title3)
@@ -175,265 +213,91 @@ struct MapView: View {
         }
     }
 
-    private var map: some View {
-        UIKitMapView(
-            places: placeStore.places,
-            newPinCoordinate: newPinCoordinate,
-            newPinTitle: newPinName,
-            selectedSearchResult: selectedSearchResult,
-            selectedAnnotation: selectedAnnotation,
-            overlayVisible: overlayVisible,
-            overlayImage: gridService.overlay?.image,
-            overlayBounds: gridService.overlay?.bounds,
-            overlayOpacity: overlayOpacity,
-            cameraCommand: $cameraCommand,
-            onRegionChanged: { region in
-                visibleRegion = region
-                if overlayVisible {
-                    gridService.updateRegion(region)
-                }
-            },
-            onRegionWillChange: {
-                if overlayVisible {
-                    gridService.cancelUpdate()
-                }
-            },
-            onLongPress: { coordinate in
-                newPinCoordinate = coordinate
-                newPinName = nil
-                selectedPlace = nil
-                selectedMapItem = nil
-                selectedSearchResult = nil
-                selectedAnnotation = .newPin
-                showingPlaceDetails = true
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            },
-            onAnnotationSelected: { handleAnnotationSelected($0) },
-            onFeatureTapped: { item in
-                selectedMapItem = item
-                selectedPlace = nil
-                newPinCoordinate = nil
-                selectedSearchResult = nil
-                showingPlaceDetails = true
-                focus(on: item.location.coordinate)
-            },
-            onTap: {
-                UIApplication.shared.sendAction(
-                    #selector(UIResponder.resignFirstResponder),
-                    to: nil, from: nil, for: nil
-                )
-            },
-            onUserLocationAvailable: { coordinate in
-                guard placeStore.places.isEmpty, !didInitialFit else { return }
-                focus(on: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2))
-            }
-        )
-        .ignoresSafeArea()
-        .overlay(alignment: .top) {
-            if overlayVisible, let message = gridService.errorMessage {
-                Label(message, systemImage: "exclamationmark.triangle.fill")
-                    .labelStyle(.titleAndIcon)
-                    .font(.footnote.weight(.medium))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .glassEffect(.regular, in: Capsule())
-                    .padding(.top, 8)
-                    .padding(.horizontal)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .onTapGesture { gridService.refetch() }
-                    .accessibilityHint("Double tap to try again")
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: gridService.errorMessage)
-    }
+    // MARK: - Sidebar (split layout)
 
     private var sidebar: some View {
         ZStack {
             sheetContent
-            if hasSelection {
-                placeDetails(onClose: closeDetails, isEmbedded: true)
+            if let selection = model.selection {
+                placeDetails(for: selection, onClose: model.closeDetails, isEmbedded: true)
                     .background(Color(.systemGroupedBackground).ignoresSafeArea())
                     .transition(.move(edge: .leading).combined(with: .opacity))
-                    .id(detailsIdentity)
+                    .id(selection.identity)
                     .zIndex(1)
             }
         }
-        .animation(.spring(duration: 0.35), value: hasSelection)
+        .animation(.spring(duration: 0.35), value: model.selection != nil)
     }
 
-    private var selectedCoordinate: CLLocationCoordinate2D? {
-        selectedPlace?.coordinate ?? selectedMapItem?.location.coordinate ?? newPinCoordinate
-    }
-
-    /// Changes when a different place is selected so the details view resets.
-    private var detailsIdentity: String {
-        if let selectedPlace { return selectedPlace.id.uuidString }
-        if let selectedMapItem { return "item-\(selectedMapItem.hashValue)" }
-        if let newPinCoordinate { return "pin-\(newPinCoordinate.latitude),\(newPinCoordinate.longitude)" }
-        return "none"
-    }
-
-    private func applyLayout(split: Bool, animated: Bool) {
-        guard split != isSplit || sheetPresented == split else { return }
-        let hadDetails = hasSelection
-        isSplit = split
-        sheetPresented = !split
-        if animated, let coordinate = selectedCoordinate {
-            // Re-center the selection for the new layout once the map resizes.
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(350))
-                focus(on: coordinate)
-            }
-        }
-        if split {
-            showingPlaceDetails = false
-        } else if hadDetails {
-            // Present the details sheet once the bottom sheet is back.
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(500))
-                if hasSelection && !isSplit { showingPlaceDetails = true }
-            }
-        }
-    }
-
-    // MARK: - Sheets
+    // MARK: - Sheets (stacked layout)
 
     private var sheetContent: some View {
-        SheetView(
+        @Bindable var model = model
+        return SheetView(
             onSelectPlace: { place in
-                selectedPlace = place
-                selectedMapItem = nil
-                newPinCoordinate = nil
-                selectedSearchResult = nil
-                selectedAnnotation = .place(place)
-                showingPlaceDetails = true
-                focus(on: place.coordinate)
+                model.select(.saved(place.id), places: placeStore.places)
             },
             onSelectSearchResult: { item in
                 Telemetry.signal(.searchResultSelected)
-                selectedSearchResult = item
-                selectedMapItem = item
-                selectedPlace = nil
-                newPinCoordinate = nil
-                selectedAnnotation = .searchResult(item)
-                showingPlaceDetails = true
-                focus(on: item.location.coordinate)
+                model.select(.searchResult(item), places: placeStore.places)
             },
             onSearchFocusChanged: { focused in
-                guard !isSplit else { return }
-                selectedDetent = focused ? .large : .medium
+                guard !model.isSplit else { return }
+                model.sheetDetent = focused ? .large : .medium
             },
-            visibleRegion: visibleRegion,
-            selectedDetent: isSplit ? .large : selectedDetent,
-            overlayVisible: $overlayVisible,
-            overlayTimeframe: $overlayTimeframe,
-            overlayOpacity: $overlayOpacity,
+            visibleRegion: model.visibleRegion,
+            selectedDetent: model.isSplit ? .large : model.sheetDetent,
+            overlayVisible: $model.overlayVisible,
+            overlayTimeframe: $model.overlayTimeframe,
+            overlayOpacity: $model.overlayOpacity,
             isOverlayLoading: gridService.isLoading,
-            onCenterLocation: {
-                cameraCommand = CameraCommand(action: .centerOnUser)
-                if !isSplit { selectedDetent = collapsedDetent }
-            },
-            showsMapActions: !isSplit
+            onCenterLocation: model.centerOnUser,
+            showsMapActions: !model.isSplit
         )
     }
 
     private var mainSheet: some View {
-        sheetContent
+        @Bindable var model = model
+        return sheetContent
             .presentationDetents(
-                [collapsedDetent, .medium, .large],
-                selection: $selectedDetent
+                [MapModel.collapsedDetent, .medium, .large],
+                selection: $model.sheetDetent
             )
             .presentationBackgroundInteraction(.enabled)
             .interactiveDismissDisabled(true)
             .sheet(
-                isPresented: $showingPlaceDetails,
+                isPresented: $model.isDetailsSheetPresented,
                 onDismiss: {
                     // Rotating into the split layout dismisses the sheets but
                     // keeps the selection, which moves into the sidebar.
-                    guard !isSplit else { return }
-                    closeDetails()
+                    guard !model.isSplit else { return }
+                    model.closeDetails()
                 }
             ) {
-                placeDetails(onClose: { showingPlaceDetails = false })
-                    .presentationBackgroundInteraction(.enabled)
+                if let selection = model.selection {
+                    placeDetails(for: selection, onClose: { model.isDetailsSheetPresented = false })
+                        .presentationBackgroundInteraction(.enabled)
+                }
             }
     }
 
-    private func placeDetails(onClose: @escaping () -> Void, isEmbedded: Bool = false) -> some View {
-        PlaceDetailsView(
-            coordinate: selectedCoordinate ?? CLLocationCoordinate2D(),
-            placeID: selectedPlace?.id,
-            mapItem: selectedMapItem,
+    private func placeDetails(
+        for selection: Selection,
+        onClose: @escaping () -> Void,
+        isEmbedded: Bool = false
+    ) -> some View {
+        let isDroppedPin = model.droppedPin != nil
+        return PlaceDetailsView(
+            coordinate: selection.coordinate(in: placeStore.places) ?? CLLocationCoordinate2D(),
+            placeID: selection.savedPlaceID,
+            mapItem: selection.mapItem,
             onClose: onClose,
-            onNameResolved: newPinCoordinate != nil ? { name in newPinName = name } : nil,
-            onSaved: newPinCoordinate != nil ? { place in
-                selectedPlace = place
-                newPinCoordinate = nil
-                newPinName = nil
-                selectedAnnotation = .place(place)
-            } : nil,
-            onUnsaved: { place in
-                // Keep a pin where the place was so it doesn't vanish while
-                // its details are still open.
-                guard selectedMapItem == nil else { return }
-                newPinCoordinate = place.coordinate
-                newPinName = place.name
-                selectedPlace = nil
-                selectedAnnotation = .newPin
-            },
+            onNameResolved: isDroppedPin ? { model.droppedPinNamed($0) } : nil,
+            onSaved: isDroppedPin ? { model.didSave($0) } : nil,
+            onUnsaved: { model.didUnsave($0) },
             isEmbedded: isEmbedded
         )
         .environmentObject(placeStore)
         .environmentObject(mapItemCache)
-    }
-
-    private func closeDetails() {
-        showingPlaceDetails = false
-        selectedAnnotation = nil
-        selectedPlace = nil
-        newPinCoordinate = nil
-        newPinName = nil
-        selectedSearchResult = nil
-        selectedMapItem = nil
-        selectedDetent = .medium
-    }
-
-    // MARK: - Map Interaction
-
-    private func handleAnnotationSelected(_ selection: AnnotationSelection) {
-        switch selection {
-        case .place(let place):
-            selectedPlace = place
-            selectedMapItem = nil
-            newPinCoordinate = nil
-            selectedSearchResult = nil
-            selectedAnnotation = .place(place)
-            showingPlaceDetails = true
-            focus(on: place.coordinate)
-        case .newPin:
-            showingPlaceDetails = true
-            if let coord = newPinCoordinate { focus(on: coord) }
-        case .searchResult(let item):
-            showingPlaceDetails = true
-            focus(on: item.location.coordinate)
-        }
-    }
-
-    private func fitPlacesIfNeeded() {
-        guard !didInitialFit, !placeStore.places.isEmpty else { return }
-        didInitialFit = true
-        cameraCommand = CameraCommand(action: .fitAllPlaces(placeStore.places, bias: sheetBias))
-    }
-
-    /// Moves the camera to a coordinate, keeping it clear of the bottom sheet.
-    private func focus(on coordinate: CLLocationCoordinate2D, span: MKCoordinateSpan? = nil) {
-        let span = span ?? visibleRegion?.span ?? MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-        let newCenter = CLLocationCoordinate2D(
-            latitude: coordinate.latitude - span.latitudeDelta * sheetBias,
-            longitude: coordinate.longitude
-        )
-        cameraCommand = CameraCommand(
-            action: .setRegion(MKCoordinateRegion(center: newCenter, span: span))
-        )
     }
 }

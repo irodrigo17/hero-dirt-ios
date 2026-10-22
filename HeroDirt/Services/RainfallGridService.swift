@@ -1,9 +1,9 @@
-import Combine
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import Foundation
 import MapKit
 import UIKit
+import Observation
 import os
 
 struct RainfallGridBounds: Equatable, Sendable {
@@ -71,10 +71,11 @@ struct RainGridLattice: Equatable, Sendable {
 }
 
 @MainActor
-final class RainfallGridService: ObservableObject {
+@Observable
+final class RainfallGridService {
 
     /// Points of Interest intervals for Instruments (grid fetches and renders).
-    nonisolated private static let signposter = OSSignposter(
+    @ObservationIgnored nonisolated private static let signposter = OSSignposter(
         subsystem: "com.herodirt.app",
         category: .pointsOfInterest
     )
@@ -82,12 +83,12 @@ final class RainfallGridService: ObservableObject {
 
     // MARK: - Public state
 
-    @Published private(set) var isLoading = false
-    @Published private(set) var overlay: RainfallOverlayImage?
+    private(set) var isLoading = false
+    private(set) var overlay: RainfallOverlayImage?
     /// Set when the last fetch failed (e.g. rate limited); cleared on success.
-    @Published private(set) var errorMessage: String?
+    private(set) var errorMessage: String?
 
-    var timeframe: RainfallTimeframe = .threeDays
+    @ObservationIgnored var timeframe: RainfallTimeframe = .threeDays
 
     // MARK: - Cache
 
@@ -103,18 +104,18 @@ final class RainfallGridService: ObservableObject {
         let timestamp: Date
     }
 
-    private var cache: [CacheKey: CacheEntry] = [:]
-    private let cacheTTL: TimeInterval = 60 * 60
-    private let maxCacheEntries = 20_000
+    @ObservationIgnored private var cache: [CacheKey: CacheEntry] = [:]
+    @ObservationIgnored private let cacheTTL: TimeInterval = 60 * 60
+    @ObservationIgnored private let maxCacheEntries = 20_000
 
     // MARK: - Tasks
 
-    private var updateTask: Task<Void, Never>?
-    private var renderTask: Task<Void, Never>?
-    private var lastRegion: MKCoordinateRegion?
-    private var renderGeneration = 0
+    @ObservationIgnored private var updateTask: Task<Void, Never>?
+    @ObservationIgnored private var renderTask: Task<Void, Never>?
+    @ObservationIgnored private var lastRegion: MKCoordinateRegion?
+    @ObservationIgnored private var renderGeneration = 0
 
-    private let gridSession: URLSession = {
+    @ObservationIgnored private let gridSession: URLSession = {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         return URLSession(configuration: config)

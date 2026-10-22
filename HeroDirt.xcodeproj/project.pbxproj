@@ -58,6 +58,8 @@
 		D122EAEDD015F4BA61D9DDFF /* ObservedRainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94AEC4284BD3F7B45E6886D9 /* ObservedRainTests.swift */; };
 		190F7FC3A721B9CCC540F990 /* RainGridLatticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */; };
 		D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */; };
+		4EE6059C483EA2DA8A95EBEC /* MapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151B63F8C849696F369BD6A /* MapModel.swift */; };
+		B39E0AE4ECA5A274266085DB /* MapModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F79A8FD92C9223CB39002C /* MapModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,6 +128,8 @@
 		94AEC4284BD3F7B45E6886D9 /* ObservedRainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservedRainTests.swift; sourceTree = "<group>"; };
 		0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainGridLatticeTests.swift; sourceTree = "<group>"; };
 		A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilStoreTests.swift; sourceTree = "<group>"; };
+		E151B63F8C849696F369BD6A /* MapModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapModel.swift; sourceTree = "<group>"; };
+		90F79A8FD92C9223CB39002C /* MapModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -157,6 +161,7 @@
 		5B12376377E7B1FD5758568D /* HeroDirtTests */ = {
 			isa = PBXGroup;
 			children = (
+				90F79A8FD92C9223CB39002C /* MapModelTests.swift */,
 				A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */,
 				0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */,
 				94AEC4284BD3F7B45E6886D9 /* ObservedRainTests.swift */,
@@ -205,6 +210,7 @@
 		853D24C281FCC9239BB5DBDF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E151B63F8C849696F369BD6A /* MapModel.swift */,
 				BC1542104E6D15D323F2BB10 /* WeatherAttributionView.swift */,
 				2438BC60C119BB50DE75E460 /* Shimmer.swift */,
 				2DE7EB7537871AD0805212CA /* RainTiles.swift */,
@@ -346,6 +352,7 @@
 				D122EAEDD015F4BA61D9DDFF /* ObservedRainTests.swift in Sources */,
 				190F7FC3A721B9CCC540F990 /* RainGridLatticeTests.swift in Sources */,
 				D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */,
+				B39E0AE4ECA5A274266085DB /* MapModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -387,6 +394,7 @@
 				75C4CDE2E1A6DDEB523D036F /* Shimmer.swift in Sources */,
 				2ECE1D776DCA4E777D0FECE4 /* Telemetry.swift in Sources */,
 				C4D634D2B5369E837019918B /* WeatherAttributionView.swift in Sources */,
+				4EE6059C483EA2DA8A95EBEC /* MapModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
