@@ -98,7 +98,7 @@ struct SoilOverride: Codable, Hashable, Sendable {
 
 // MARK: - SoilData
 
-struct SoilData: Sendable {
+struct SoilData: Codable, Hashable, Sendable {
     let sandFraction: Double           // 0.0–1.0
     let clayFraction: Double           // 0.0–1.0
     let isEstimated: Bool              // true when using loam fallback, not from API

@@ -255,16 +255,15 @@ struct PlaceDetailsView: View {
     }
 
     private func fetchWeatherAndSoil() async {
+        // Soil can be slow (throttled SoilGrids); don't hold the screen for
+        // it. Conditions show with estimated loam and refine when it lands.
+        Task { await loadSoil() }
+
         async let rainfallTask = WeatherService.fetchRainfall(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
         async let forecastTask = WeatherService.fetchRainForecast(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-        async let soilTask = SoilService.resolveOrFetch(
-            override: savedPlace?.soilOverride,
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
@@ -281,20 +280,28 @@ struct PlaceDetailsView: View {
         }
 
         guard !Task.isCancelled else { return }
-        soilData = await soilTask
         rainForecast = try? await forecastTask
+    }
+
+    private func loadSoil() async {
+        let place = savedPlace
+        let soil = await SoilService.resolve(
+            override: place?.soilOverride,
+            stored: place?.soil,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+        soilData = soil
+        if let place, place.soil == nil, place.soilOverride == nil, !soil.isEstimated {
+            placeStore.updateSoil(soil, for: place.id)
+        }
     }
 
     private func applySoilOverride(_ override: SoilOverride?) {
         if let override {
             soilData = override.asSoilData
         } else {
-            Task {
-                soilData = await SoilService.fetchSoilData(
-                    latitude: coordinate.latitude,
-                    longitude: coordinate.longitude
-                )
-            }
+            Task { await loadSoil() }
         }
     }
 
@@ -317,6 +324,18 @@ struct PlaceDetailsView: View {
             placeStore.addPlace(newPlace)
             onSaved?(newPlace)
             Telemetry.signal(.placeSaved)
+            // Keep the soil with the place so it never needs another lookup.
+            if let soilData, !soilData.isEstimated {
+                placeStore.updateSoil(soilData, for: newPlace.id)
+            } else {
+                Task {
+                    if let soil = await SoilService.fetchSoilData(
+                        latitude: newPlace.latitude, longitude: newPlace.longitude
+                    ) {
+                        placeStore.updateSoil(soil, for: newPlace.id)
+                    }
+                }
+            }
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }

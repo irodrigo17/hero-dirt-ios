@@ -9,6 +9,9 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
     var longitude: Double
     var mapItemIdString: String?
     var soilOverride: SoilOverride?
+    /// SoilGrids lookup saved with the place (soil doesn't change), so it
+    /// survives reinstalls and syncs across devices. Optional for old data.
+    var soil: SoilData?
     /// Last local modification, used for last-writer-wins when merging copies
     /// from iCloud. Optional so older saved data still decodes.
     var updatedAt: Date?
@@ -31,6 +34,7 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         longitude: Double,
         mapItemId: MKMapItem.Identifier? = nil,
         soilOverride: SoilOverride? = nil,
+        soil: SoilData? = nil,
         updatedAt: Date? = nil
     ) {
         self.id = id
@@ -39,6 +43,7 @@ struct Place: Identifiable, Codable, Hashable, Sendable {
         self.longitude = longitude
         self.mapItemIdString = mapItemId?.rawValue
         self.soilOverride = soilOverride
+        self.soil = soil
         self.updatedAt = updatedAt
     }
 }

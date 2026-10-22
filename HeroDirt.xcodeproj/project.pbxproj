@@ -57,6 +57,7 @@
 		C4D634D2B5369E837019918B /* WeatherAttributionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1542104E6D15D323F2BB10 /* WeatherAttributionView.swift */; };
 		D122EAEDD015F4BA61D9DDFF /* ObservedRainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94AEC4284BD3F7B45E6886D9 /* ObservedRainTests.swift */; };
 		190F7FC3A721B9CCC540F990 /* RainGridLatticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */; };
+		D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,6 +125,7 @@
 		BC1542104E6D15D323F2BB10 /* WeatherAttributionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAttributionView.swift; sourceTree = "<group>"; };
 		94AEC4284BD3F7B45E6886D9 /* ObservedRainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservedRainTests.swift; sourceTree = "<group>"; };
 		0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainGridLatticeTests.swift; sourceTree = "<group>"; };
+		A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -155,6 +157,7 @@
 		5B12376377E7B1FD5758568D /* HeroDirtTests */ = {
 			isa = PBXGroup;
 			children = (
+				A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */,
 				0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */,
 				94AEC4284BD3F7B45E6886D9 /* ObservedRainTests.swift */,
 				F51B5E70A68C62D6F626166B /* PlaceMergeTests.swift */,
@@ -342,6 +345,7 @@
 				FC1BF74EFF0A0F07743DABF9 /* PlaceMergeTests.swift in Sources */,
 				D122EAEDD015F4BA61D9DDFF /* ObservedRainTests.swift in Sources */,
 				190F7FC3A721B9CCC540F990 /* RainGridLatticeTests.swift in Sources */,
+				D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -109,6 +109,16 @@ class PlaceStore: ObservableObject {
         persist(upsert: [places[index]])
     }
 
+    /// Saves a SoilGrids lookup on the place (enrichment, not a user edit).
+    func updateSoil(_ soil: SoilData, for placeID: UUID) {
+        guard let index = places.firstIndex(where: { $0.id == placeID }),
+              places[index].soil != soil
+        else { return }
+        places[index].soil = soil
+        places[index].updatedAt = Date()
+        persist(upsert: [places[index]])
+    }
+
     private static let proximityThresholdMeters: CLLocationDistance = 50
 
     func placeNear(latitude: Double, longitude: Double) -> Place? {

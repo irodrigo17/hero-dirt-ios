@@ -6,7 +6,6 @@ struct SavedPlacesListView: View {
     var selectedDetent: PresentationDetent
 
     @State private var rainfallData: [UUID: RainfallSummary] = [:]
-    @State private var soilData: [UUID: SoilData] = [:]
     @State private var loadingPlaces: Set<UUID> = []
     @State private var errors: [UUID: String] = [:]
     @State private var renamingPlace: Place?
@@ -55,7 +54,6 @@ struct SavedPlacesListView: View {
                             PlaceRow(
                                 place: place,
                                 rainfall: rainfallData[place.id],
-                                fetchedSoil: soilData[place.id],
                                 isLoading: loadingPlaces.contains(place.id),
                                 error: errors[place.id],
                                 onRename: {
@@ -83,7 +81,6 @@ struct SavedPlacesListView: View {
                 .listStyle(.plain)
                 .refreshable {
                     rainfallData = [:]
-                    soilData = [:]
                     errors = [:]
                     for place in placeStore.places {
                         let key = WeatherCache.key(
@@ -106,28 +103,22 @@ struct SavedPlacesListView: View {
         // had it in flight: `.task(id:)` restarts whenever the list changes or
         // the view is rebuilt (e.g. folding/unfolding), and results are cached.
         let placesToLoad = placeStore.places.filter { rainfallData[$0.id] == nil }
+        loadMissingSoil()
         guard !placesToLoad.isEmpty else { return }
         for place in placesToLoad {
             loadingPlaces.insert(place.id)
             errors[place.id] = nil
         }
 
-        await withTaskGroup(of: (UUID, Result<(RainfallSummary, SoilData), Error>).self) {
-            group in
+        await withTaskGroup(of: (UUID, Result<RainfallSummary, Error>).self) { group in
             for place in placesToLoad {
                 group.addTask {
-                    async let summaryTask = WeatherService.fetchRainfall(
-                        latitude: place.latitude,
-                        longitude: place.longitude
-                    )
-                    async let soilTask = SoilService.fetchSoilData(
-                        latitude: place.latitude,
-                        longitude: place.longitude
-                    )
                     do {
-                        let summary = try await summaryTask
-                        let soil = await soilTask
-                        return (place.id, .success((summary, soil)))
+                        let summary = try await WeatherService.fetchRainfall(
+                            latitude: place.latitude,
+                            longitude: place.longitude
+                        )
+                        return (place.id, .success(summary))
                     } catch {
                         return (place.id, .failure(error))
                     }
@@ -136,9 +127,8 @@ struct SavedPlacesListView: View {
 
             for await (id, result) in group {
                 switch result {
-                case .success(let (summary, soil)):
+                case .success(let summary):
                     rainfallData[id] = summary
-                    soilData[id] = soil
                     errors[id] = nil
                     loadingPlaces.remove(id)
                 case .failure(let error):
@@ -151,6 +141,23 @@ struct SavedPlacesListView: View {
                     }
                     errors[id] = Self.friendlyMessage(for: error)
                     loadingPlaces.remove(id)
+                }
+            }
+        }
+    }
+
+    /// Looks up soil for saved places that don't have it yet (older saves),
+    /// one at a time through the throttled SoilService, and stores it on the
+    /// place. Rows use estimated loam until then.
+    private func loadMissingSoil() {
+        let missing = placeStore.places.filter { $0.soil == nil && $0.soilOverride == nil }
+        guard !missing.isEmpty else { return }
+        Task {
+            for place in missing {
+                if let soil = await SoilService.fetchSoilData(
+                    latitude: place.latitude, longitude: place.longitude
+                ) {
+                    placeStore.updateSoil(soil, for: place.id)
                 }
             }
         }
@@ -177,13 +184,12 @@ struct SavedPlacesListView: View {
 private struct PlaceRow: View {
     let place: Place
     let rainfall: RainfallSummary?
-    let fetchedSoil: SoilData?
     let isLoading: Bool
     let error: String?
     var onRename: () -> Void
 
     private var effectiveSoil: SoilData? {
-        place.soilOverride?.asSoilData ?? fetchedSoil
+        place.soilOverride?.asSoilData ?? place.soil
     }
 
     var body: some View {
