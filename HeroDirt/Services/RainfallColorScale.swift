@@ -7,25 +7,32 @@ enum RainfallColorScale {
         let threshold: Double  // mm
         let color: Color
         let label: String
+        var inchLabel: String = ""
+
+        func label(for unit: RainUnit) -> String {
+            unit == .inches ? inchLabel : label
+        }
     }
 
     static let stops: [Stop] = [
-        Stop(threshold: 0, color: .clear, label: "0"),
+        Stop(threshold: 0, color: .clear, label: "0", inchLabel: "0"),
         Stop(
             threshold: 0.1,
             color: Color(.sRGB, red: 0.6, green: 0.9, blue: 0.6, opacity: 1),
-            label: "0.1"
+            label: "0.1",
+            inchLabel: "0"
         ),
-        Stop(threshold: 1, color: .green, label: "1"),
-        Stop(threshold: 5, color: .yellow, label: "5"),
-        Stop(threshold: 10, color: .orange, label: "10"),
-        Stop(threshold: 25, color: .red, label: "25"),
+        Stop(threshold: 1, color: .green, label: "1", inchLabel: ".04"),
+        Stop(threshold: 5, color: .yellow, label: "5", inchLabel: ".2"),
+        Stop(threshold: 10, color: .orange, label: "10", inchLabel: ".4"),
+        Stop(threshold: 25, color: .red, label: "25", inchLabel: "1"),
         Stop(
             threshold: 50,
             color: Color(.sRGB, red: 0.8, green: 0.2, blue: 0.8, opacity: 1),
-            label: "50"
+            label: "50",
+            inchLabel: "2"
         ),
-        Stop(threshold: 100, color: .purple, label: "100+"),
+        Stop(threshold: 100, color: .purple, label: "100+", inchLabel: "4+"),
     ]
 
     // Pre-computed RGBA components for each stop (avoids repeated UIColor conversions)

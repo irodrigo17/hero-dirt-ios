@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct RainfallLegendView: View {
+    @Environment(\.rainUnit) private var unit
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("mm")
+            Text(unit.symbol)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
             LinearGradient(
@@ -14,18 +16,19 @@ struct RainfallLegendView: View {
             .frame(height: 12)
             .clipShape(RoundedRectangle(cornerRadius: 2))
             HStack {
-                ForEach(
-                    Array(RainfallColorScale.stops.dropFirst().enumerated()),
-                    id: \.offset
-                ) { _, stop in
-                    Text(stop.label)
-                        .font(.system(size: 8))
+                let visible = Array(RainfallColorScale.stops.dropFirst())
+                ForEach(Array(visible.enumerated()), id: \.offset) { index, stop in
+                    Text(stop.label(for: unit))
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
-                    if stop.label != RainfallColorScale.stops.last?.label {
+                        .monospacedDigit()
+                    if index < visible.count - 1 {
                         Spacer(minLength: 2)
                     }
                 }
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Rain map legend, from light green for a trace of rain to purple for heavy rain")
     }
 }
