@@ -129,7 +129,7 @@ struct WeatherServiceTests {
     @Test func httpErrorRateLimitDescription() {
         #expect(
             WeatherService.WeatherError.httpError(statusCode: 429)
-                .errorDescription == "Rate limited. Please try again later."
+                .errorDescription == "Too many requests. Please try again in a minute."
         )
     }
 

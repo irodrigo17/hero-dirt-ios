@@ -19,7 +19,7 @@ actor WeatherCache {
     let forecastURL: URL
 
     init(directory: URL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]) {
-        rainfallURL = directory.appending(path: "hero_dirt_rainfall.json")
+        rainfallURL = directory.appending(path: "hero_dirt_rainfall_v2.json")
         forecastURL = directory.appending(path: "hero_dirt_forecast.json")
     }
 
@@ -135,7 +135,9 @@ enum WeatherService {
     // MARK: - API Response
 
     struct OpenMeteoResponse: Codable {
+        let utcOffsetSeconds: Int?
         let daily: DailyData
+        let hourly: HourlyData?
 
         struct DailyData: Codable {
             let time: [String]
@@ -148,6 +150,29 @@ enum WeatherService {
                 case et0FaoEvapotranspiration = "et0_fao_evapotranspiration"
             }
         }
+
+        enum CodingKeys: String, CodingKey {
+            case utcOffsetSeconds = "utc_offset_seconds"
+            case daily
+            case hourly
+        }
+    }
+
+    struct HourlyData: Codable {
+        let time: [String]
+        let precipitation: [Double?]
+        let et0FaoEvapotranspiration: [Double?]?
+
+        enum CodingKeys: String, CodingKey {
+            case time
+            case precipitation
+            case et0FaoEvapotranspiration = "et0_fao_evapotranspiration"
+        }
+    }
+
+    /// Hourly-only response used by the rain map grid.
+    struct HourlyResponse: Codable {
+        let hourly: HourlyData
     }
 
     // MARK: - Errors
@@ -163,7 +188,7 @@ enum WeatherService {
                 return "Could not build request URL."
             case .httpError(let statusCode):
                 switch statusCode {
-                case 429: return "Rate limited. Please try again later."
+                case 429: return "Too many requests. Please try again in a minute."
                 case 500...599:
                     return "Weather service is temporarily unavailable."
                 default: return "Weather service error (HTTP \(statusCode))."
@@ -183,24 +208,80 @@ enum WeatherService {
         return f
     }()
 
-    static func parseResponse(_ data: Data) throws -> RainfallSummary {
-        let decoded = try JSONDecoder().decode(
-            OpenMeteoResponse.self,
-            from: data
-        )
+    private static func localFormatter(_ format: String, offsetSeconds: Int) -> DateFormatter {
+        let f = DateFormatter()
+        f.dateFormat = format
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = TimeZone(secondsFromGMT: offsetSeconds)
+        return f
+    }
 
-        var daily: [DailyWeatherData] = []
-        for (i, dateString) in decoded.daily.time.enumerated() {
-            guard i < decoded.daily.precipitationSum.count else { continue }
-            guard let date = Self.dateFormatter.date(from: dateString) else { continue }
-            let amount = decoded.daily.precipitationSum[i] ?? 0.0
-            let et0 = decoded.daily.et0FaoEvapotranspiration.flatMap { arr in
-                i < arr.count ? arr[i] : nil
-            } ?? 0.0
-            daily.append(DailyWeatherData(date: date, amount: amount, et0: et0))
+    static func parseResponse(_ data: Data, now: Date = Date()) throws -> RainfallSummary {
+        let decoded = try JSONDecoder().decode(OpenMeteoResponse.self, from: data)
+        return RainfallSummary(daily: observedDaily(from: decoded, now: now))
+    }
+
+    /// Daily rain and ET0, with **today** limited to what has actually
+    /// happened so far. Open-Meteo's daily values for today are full-day
+    /// totals that include the forecast for the remaining hours; when hourly
+    /// data is present, today's values are re-summed from hours up to `now`
+    /// (in the location's time zone). Future days are dropped.
+    static func observedDaily(from response: OpenMeteoResponse, now: Date) -> [DailyWeatherData] {
+        let offset = response.utcOffsetSeconds ?? TimeZone.current.secondsFromGMT(for: now)
+        let today = localFormatter("yyyy-MM-dd", offsetSeconds: offset).string(from: now)
+        let hourFormatter = localFormatter("yyyy-MM-dd'T'HH:mm", offsetSeconds: offset)
+
+        // Observed (≤ now) hourly sums for today.
+        var todayRain: Double?
+        var todayET0: Double?
+        if let hourly = response.hourly {
+            var rain = 0.0
+            var et0 = 0.0
+            for (i, time) in hourly.time.enumerated() where time.hasPrefix(today) {
+                guard let hourDate = hourFormatter.date(from: time), hourDate <= now else { continue }
+                rain += i < hourly.precipitation.count ? (hourly.precipitation[i] ?? 0) : 0
+                if let values = hourly.et0FaoEvapotranspiration, i < values.count {
+                    et0 += values[i] ?? 0
+                }
+            }
+            todayRain = rain
+            todayET0 = et0
         }
 
-        return RainfallSummary(daily: daily)
+        var daily: [DailyWeatherData] = []
+        let days = response.daily
+        for (i, dateString) in days.time.enumerated() {
+            guard i < days.precipitationSum.count,
+                  let date = Self.dateFormatter.date(from: dateString)
+            else { continue }
+            if dateString > today { continue }
+            var amount = days.precipitationSum[i] ?? 0
+            var et0 = days.et0FaoEvapotranspiration.flatMap { i < $0.count ? $0[i] : nil } ?? 0
+            if dateString == today {
+                amount = todayRain ?? amount
+                et0 = todayET0 ?? et0
+            }
+            daily.append(DailyWeatherData(date: date, amount: amount, et0: et0))
+        }
+        return daily
+    }
+
+    /// Groups an hourly series (oldest first) into rolling 24-hour buckets,
+    /// most recent first: bucket 0 is the last 24 hours.
+    static func rollingDays(from hourly: HourlyData, now: Date = Date()) -> [DailyWeatherData] {
+        let values = hourly.precipitation.map { $0 ?? 0 }
+        var result: [DailyWeatherData] = []
+        var end = values.count
+        var dayIndex = 0
+        while end > 0 {
+            let start = max(0, end - 24)
+            let sum = values[start..<end].reduce(0, +)
+            let date = Calendar.current.date(byAdding: .day, value: -dayIndex, to: now) ?? now
+            result.append(DailyWeatherData(date: date, amount: sum))
+            end = start
+            dayIndex += 1
+        }
+        return result
     }
 
     // MARK: - Network
@@ -211,6 +292,9 @@ enum WeatherService {
         return URLSession(configuration: config)
     }()
 
+    /// Rain for many points at once (rain map grid). Each point gets rolling
+    /// 24-hour totals for the last `pastDays` days, observed rain only.
+    /// Throws on HTTP errors (e.g. 429) so the caller can tell the user.
     static func fetchRainfallBatch(
         points: [(lat: Double, lon: Double)],
         pastDays: Int,
@@ -222,53 +306,42 @@ enum WeatherService {
         var results = [RainfallSummary?](repeating: nil, count: points.count)
 
         for chunkStart in stride(from: 0, to: points.count, by: chunkSize) {
+            try Task.checkCancellation()
             let chunk = Array(points[chunkStart..<min(chunkStart + chunkSize, points.count)])
 
             var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
             components.queryItems = [
-                URLQueryItem(name: "latitude", value: chunk.map { String(format: "%.6f", $0.lat) }.joined(separator: ",")),
-                URLQueryItem(name: "longitude", value: chunk.map { String(format: "%.6f", $0.lon) }.joined(separator: ",")),
-                URLQueryItem(name: "daily", value: "precipitation_sum"),
-                URLQueryItem(name: "past_days", value: "\(pastDays)"),
-                URLQueryItem(name: "forecast_days", value: "1"),
-                URLQueryItem(name: "timezone", value: "auto"),
+                URLQueryItem(name: "latitude", value: chunk.map { String(format: "%.4f", $0.lat) }.joined(separator: ",")),
+                URLQueryItem(name: "longitude", value: chunk.map { String(format: "%.4f", $0.lon) }.joined(separator: ",")),
+                URLQueryItem(name: "hourly", value: "precipitation"),
+                URLQueryItem(name: "past_hours", value: "\(pastDays * 24)"),
+                URLQueryItem(name: "forecast_hours", value: "0"),
+                URLQueryItem(name: "timezone", value: "GMT"),
             ]
 
-            guard let url = components.url else { continue }
+            guard let url = components.url else { throw WeatherError.invalidURL }
 
             let (data, response) = try await session.data(from: url)
-            guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode)
-            else { continue }
+            guard let http = response as? HTTPURLResponse else { throw WeatherError.invalidResponse }
+            guard (200...299).contains(http.statusCode) else {
+                throw WeatherError.httpError(statusCode: http.statusCode)
+            }
 
-            let responses: [OpenMeteoResponse]
-            if let array = try? JSONDecoder().decode([OpenMeteoResponse].self, from: data) {
+            let responses: [HourlyResponse]
+            if let array = try? JSONDecoder().decode([HourlyResponse].self, from: data) {
                 responses = array
-            } else if let single = try? JSONDecoder().decode(OpenMeteoResponse.self, from: data) {
-                responses = [single]
             } else {
-                continue
+                responses = [try JSONDecoder().decode(HourlyResponse.self, from: data)]
             }
 
             for (i, resp) in responses.enumerated() {
                 let globalIndex = chunkStart + i
                 guard globalIndex < points.count else { break }
-                results[globalIndex] = try? parseResponse(data: resp)
+                results[globalIndex] = RainfallSummary(daily: rollingDays(from: resp.hourly))
             }
         }
 
         return results
-    }
-
-    private static func parseResponse(data resp: OpenMeteoResponse) throws -> RainfallSummary {
-        var daily: [DailyWeatherData] = []
-        for (i, dateString) in resp.daily.time.enumerated() {
-            guard i < resp.daily.precipitationSum.count else { continue }
-            guard let date = Self.dateFormatter.date(from: dateString) else { continue }
-            let amount = resp.daily.precipitationSum[i] ?? 0.0
-            daily.append(DailyWeatherData(date: date, amount: amount))
-        }
-        return RainfallSummary(daily: daily)
     }
 
     static func fetchRainfall(
@@ -285,15 +358,11 @@ enum WeatherService {
             string: "https://api.open-meteo.com/v1/forecast"
         )!
         components.queryItems = [
-            URLQueryItem(
-                name: "latitude",
-                value: String(format: "%.6f", latitude)
-            ),
-            URLQueryItem(
-                name: "longitude",
-                value: String(format: "%.6f", longitude)
-            ),
+            URLQueryItem(name: "latitude", value: String(format: "%.6f", latitude)),
+            URLQueryItem(name: "longitude", value: String(format: "%.6f", longitude)),
             URLQueryItem(name: "daily", value: "precipitation_sum,et0_fao_evapotranspiration"),
+            // Hourly values let us count only the part of today that has happened.
+            URLQueryItem(name: "hourly", value: "precipitation,et0_fao_evapotranspiration"),
             URLQueryItem(name: "past_days", value: "30"),
             URLQueryItem(name: "forecast_days", value: "1"),
             URLQueryItem(name: "timezone", value: "auto"),
@@ -303,9 +372,7 @@ enum WeatherService {
             throw WeatherError.invalidURL
         }
 
-        let (data, response) = try await (session ?? detailSession).data(
-            from: url
-        )
+        let (data, response) = try await (session ?? detailSession).data(from: url)
 
         guard let http = response as? HTTPURLResponse else {
             throw WeatherError.invalidResponse
