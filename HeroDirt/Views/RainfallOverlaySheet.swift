@@ -59,3 +59,10 @@ struct RainfallOverlaySheet: View {
         }
     }
 }
+
+#Preview {
+    @Previewable @State var visible = true
+    @Previewable @State var timeframe = RainfallTimeframe.threeDays
+    @Previewable @State var opacity = 0.4
+    RainfallOverlaySheet(isVisible: $visible, timeframe: $timeframe, opacity: $opacity)
+}

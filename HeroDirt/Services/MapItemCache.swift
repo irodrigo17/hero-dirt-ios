@@ -1,12 +1,14 @@
 import Foundation
 import MapKit
+import Observation
 
+/// MapKit place details (category, address) for saved places, fetched by
+/// their stored map item identifier.
 @MainActor
-final class MapItemCache: ObservableObject {
-    static let shared = MapItemCache()
-
-    @Published private(set) var items: [UUID: MKMapItem] = [:]
-    private var inFlight: [UUID: Task<MKMapItem?, Never>] = [:]
+@Observable
+final class MapItemCache {
+    private(set) var items: [UUID: MKMapItem] = [:]
+    @ObservationIgnored private var inFlight: [UUID: Task<MKMapItem?, Never>] = [:]
 
     @discardableResult
     func fetch(for place: Place) async -> MKMapItem? {

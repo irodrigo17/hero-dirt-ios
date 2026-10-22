@@ -94,6 +94,8 @@ private final class RainfallImageRenderer: MKOverlayRenderer {
 
 struct UIKitMapView: UIViewRepresentable {
     let places: [Place]
+    /// Map items for saved places (category icon and tint), by place id.
+    var mapItems: [UUID: MKMapItem] = [:]
     let newPinCoordinate: CLLocationCoordinate2D?
     let newPinTitle: String?
     let selectedSearchResult: MKMapItem?
@@ -146,6 +148,7 @@ struct UIKitMapView: UIViewRepresentable {
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let c = context.coordinator
+        c.mapItems = mapItems
         c.callbacks = (onRegionChanged, onRegionWillChange, onLongPress, onAnnotationSelected, onFeatureTapped, onTap, onUserLocationAvailable)
         c.updateAnnotations(on: mapView, view: self)
         c.updateSelection(on: mapView, selectedAnnotation: selectedAnnotation)
@@ -182,6 +185,7 @@ struct UIKitMapView: UIViewRepresentable {
         var callbacks: Callbacks = ({ _ in }, {}, { _ in }, { _ in }, { _ in }, {}, { _ in })
         private var didFireInitialUserLocation = false
         var lastCommandID: UUID?
+        var mapItems: [UUID: MKMapItem] = [:]
 
         fileprivate let rainfallOverlay = RainfallImageOverlay()
         private weak var rainfallRenderer: RainfallImageRenderer?
@@ -272,7 +276,7 @@ struct UIKitMapView: UIViewRepresentable {
                     ann.title = place.name
                 }
                 if let annView = mapView.view(for: ann) as? MKMarkerAnnotationView {
-                    let category = ann.place.mapItem?.pointOfInterestCategory
+                    let category = mapItems[ann.place.id]?.pointOfInterestCategory
                     annView.markerTintColor = UIColor(category?.iconColor ?? .orange)
                     annView.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
                 }
@@ -412,7 +416,7 @@ struct UIKitMapView: UIViewRepresentable {
                 let view = mapView.dequeueReusableAnnotationView(
                     withIdentifier: "place", for: ann
                 ) as! MKMarkerAnnotationView
-                let category = ann.place.mapItem?.pointOfInterestCategory
+                let category = mapItems[ann.place.id]?.pointOfInterestCategory
                 view.markerTintColor = UIColor(category?.iconColor ?? .orange)
                 view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
                 view.canShowCallout = false

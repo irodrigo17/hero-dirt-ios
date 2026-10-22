@@ -2,8 +2,10 @@ import MapKit
 import SwiftUI
 
 struct PlaceDetailsView: View {
-    @EnvironmentObject private var placeStore: PlaceStore
-    @EnvironmentObject private var mapItemCache: MapItemCache
+    @Environment(PlaceStore.self) private var placeStore
+    @Environment(MapItemCache.self) private var mapItemCache
+    @Environment(\.weather) private var weather
+    @Environment(\.soil) private var soil
     @Environment(\.dismiss) private var dismiss
 
     let coordinate: CLLocationCoordinate2D
@@ -37,7 +39,9 @@ struct PlaceDetailsView: View {
         )
     }
 
-    private var effectiveMapItem: MKMapItem? { mapItem ?? savedPlace?.mapItem }
+    private var effectiveMapItem: MKMapItem? {
+        mapItem ?? savedPlace.flatMap { mapItemCache.items[$0.id] }
+    }
 
     private var subtitle: String? {
         effectiveMapItem?.pointOfInterestCategory?.displayName
@@ -246,11 +250,7 @@ struct PlaceDetailsView: View {
     }
 
     private func refreshData() async {
-        let key = WeatherCache.key(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-        await WeatherService.cache.invalidate(key: key)
+        await weather.invalidate(latitude: coordinate.latitude, longitude: coordinate.longitude)
         await fetchWeatherAndSoil()
     }
 
@@ -259,11 +259,11 @@ struct PlaceDetailsView: View {
         // it. Conditions show with estimated loam and refine when it lands.
         Task { await loadSoil() }
 
-        async let rainfallTask = WeatherService.fetchRainfall(
+        async let rainfallTask = weather.rainfall(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
-        async let forecastTask = WeatherService.fetchRainForecast(
+        async let forecastTask = weather.forecast(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
@@ -276,7 +276,7 @@ struct PlaceDetailsView: View {
             }
         } catch {
             guard !Task.isCancelled else { return }
-            errorMessage = SavedPlacesListView.friendlyMessage(for: error, includeRetryHint: false)
+            errorMessage = PlaceConditionsModel.friendlyMessage(for: error, includeRetryHint: false)
         }
 
         guard !Task.isCancelled else { return }
@@ -285,15 +285,15 @@ struct PlaceDetailsView: View {
 
     private func loadSoil() async {
         let place = savedPlace
-        let soil = await SoilService.resolve(
+        let resolved = await soil.resolve(
             override: place?.soilOverride,
             stored: place?.soil,
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
-        soilData = soil
-        if let place, place.soil == nil, place.soilOverride == nil, !soil.isEstimated {
-            placeStore.updateSoil(soil, for: place.id)
+        soilData = resolved
+        if let place, place.soil == nil, place.soilOverride == nil, !resolved.isEstimated {
+            placeStore.updateSoil(resolved, for: place.id)
         }
     }
 
@@ -329,10 +329,10 @@ struct PlaceDetailsView: View {
                 placeStore.updateSoil(soilData, for: newPlace.id)
             } else {
                 Task {
-                    if let soil = await SoilService.fetchSoilData(
+                    if let result = await soil.soil(
                         latitude: newPlace.latitude, longitude: newPlace.longitude
                     ) {
-                        placeStore.updateSoil(soil, for: newPlace.id)
+                        placeStore.updateSoil(result, for: newPlace.id)
                     }
                 }
             }
@@ -387,4 +387,18 @@ private struct SheetActionButton: View {
         }
         .disabled(isDisabled)
     }
+}
+
+#Preview("Saved place") {
+    PlaceDetailsView(
+        coordinate: SampleData.places[0].coordinate,
+        placeID: SampleData.places[0].id
+    )
+    .previewEnvironment()
+}
+
+#Preview("Error") {
+    PlaceDetailsView(coordinate: SampleData.places[1].coordinate)
+        .previewEnvironment()
+        .environment(\.weather, FakeWeatherProvider(failure: URLError(.notConnectedToInternet)))
 }

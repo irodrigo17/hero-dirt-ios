@@ -121,6 +121,17 @@ final class RainfallGridService {
         return URLSession(configuration: config)
     }()
 
+    /// Fetches rain for many points; injectable for tests.
+    typealias BatchFetcher = @Sendable (_ points: [(lat: Double, lon: Double)], _ pastDays: Int) async throws -> [RainfallSummary?]
+    @ObservationIgnored private let fetchBatch: BatchFetcher
+
+    init(fetchBatch: BatchFetcher? = nil) {
+        let session = gridSession
+        self.fetchBatch = fetchBatch ?? { points, pastDays in
+            try await WeatherService.fetchRainfallBatch(points: points, pastDays: pastDays, session: session)
+        }
+    }
+
     // MARK: - Public API
 
     func updateRegion(_ region: MKCoordinateRegion) {
@@ -169,10 +180,9 @@ final class RainfallGridService {
             defer { Self.signposter.endInterval("Fetch rain grid", state) }
             do {
                 let points = missing.map { lattice.center(row: $0.row, col: $0.col) }
-                let summaries = try await WeatherService.fetchRainfallBatch(
-                    points: points.map { (lat: $0.lat, lon: $0.lon) },
-                    pastDays: pastDays,
-                    session: gridSession
+                let summaries = try await fetchBatch(
+                    points.map { (lat: $0.lat, lon: $0.lon) },
+                    pastDays
                 )
                 let now = Date()
                 for (i, cell) in missing.enumerated() {

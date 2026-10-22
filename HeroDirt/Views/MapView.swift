@@ -2,8 +2,8 @@ import MapKit
 import SwiftUI
 
 struct MapView: View {
-    @EnvironmentObject private var placeStore: PlaceStore
-    @EnvironmentObject private var mapItemCache: MapItemCache
+    @Environment(PlaceStore.self) private var placeStore
+    @Environment(MapItemCache.self) private var mapItemCache
 
     @State private var model = MapModel()
     @State private var gridService = RainfallGridService()
@@ -83,6 +83,7 @@ struct MapView: View {
     private var map: some View {
         UIKitMapView(
             places: placeStore.places,
+            mapItems: mapItemCache.items,
             newPinCoordinate: model.droppedPin?.coordinate,
             newPinTitle: model.droppedPin?.name,
             selectedSearchResult: model.searchResult,
@@ -297,7 +298,10 @@ struct MapView: View {
             onUnsaved: { model.didUnsave($0) },
             isEmbedded: isEmbedded
         )
-        .environmentObject(placeStore)
-        .environmentObject(mapItemCache)
     }
+}
+
+#Preview {
+    MapView()
+        .previewEnvironment()
 }

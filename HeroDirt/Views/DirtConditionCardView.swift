@@ -157,3 +157,14 @@ struct DirtConditionCardView: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+#Preview {
+    ScrollView {
+        VStack(spacing: 16) {
+            DirtConditionCardView(result: SampleData.heroDirt.dirtConditionResult(soil: SampleData.loam), onCustomize: {})
+            DirtConditionCardView(result: SampleData.muddy.dirtConditionResult(soil: SampleData.loam))
+            DirtConditionCardView(result: SampleData.dusty.dirtConditionResult(soil: SampleData.loam))
+        }
+        .padding()
+    }
+}

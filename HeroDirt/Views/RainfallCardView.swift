@@ -25,3 +25,12 @@ struct RainfallCardView: View {
         }
     }
 }
+
+#Preview {
+    VStack(spacing: 16) {
+        RainfallCardView(summary: SampleData.muddy)
+        RainfallCardView(summary: SampleData.heroDirt)
+            .environment(\.rainUnit, .millimeters)
+    }
+    .padding()
+}

@@ -44,21 +44,6 @@ enum SoilService {
         }
     }
 
-    // MARK: - Resolve
-
-    /// The soil to use for a location: the user's override, then the place's
-    /// stored soil, then a (cached or fetched) SoilGrids lookup, then loam.
-    static func resolve(
-        override: SoilOverride?,
-        stored: SoilData?,
-        latitude: Double,
-        longitude: Double
-    ) async -> SoilData {
-        if let override { return override.asSoilData }
-        if let stored { return stored }
-        return await fetchSoilData(latitude: latitude, longitude: longitude) ?? .loam
-    }
-
     // MARK: - Fetch
 
     /// Cached or freshly fetched soil, or nil if SoilGrids couldn't answer.

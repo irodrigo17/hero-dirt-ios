@@ -60,6 +60,10 @@
 		D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */; };
 		4EE6059C483EA2DA8A95EBEC /* MapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E151B63F8C849696F369BD6A /* MapModel.swift */; };
 		B39E0AE4ECA5A274266085DB /* MapModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F79A8FD92C9223CB39002C /* MapModelTests.swift */; };
+		E1630D177CFD041BF4E9044A /* Providers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA91CED24E75D1E596E0A8C /* Providers.swift */; };
+		CEE138596972E91A180FB067 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E373280E940C0364F1A79B0B /* SampleData.swift */; };
+		99B577FE91F1E6A276EE6B4C /* PlaceConditionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C258A96B6D143231186270 /* PlaceConditionsModel.swift */; };
+		67D09FA51322AB6FD7F645AE /* PlaceConditionsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +134,10 @@
 		A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilStoreTests.swift; sourceTree = "<group>"; };
 		E151B63F8C849696F369BD6A /* MapModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapModel.swift; sourceTree = "<group>"; };
 		90F79A8FD92C9223CB39002C /* MapModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapModelTests.swift; sourceTree = "<group>"; };
+		9AA91CED24E75D1E596E0A8C /* Providers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Providers.swift; sourceTree = "<group>"; };
+		E373280E940C0364F1A79B0B /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		28C258A96B6D143231186270 /* PlaceConditionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModel.swift; sourceTree = "<group>"; };
+		57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -161,6 +169,7 @@
 		5B12376377E7B1FD5758568D /* HeroDirtTests */ = {
 			isa = PBXGroup;
 			children = (
+				57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */,
 				90F79A8FD92C9223CB39002C /* MapModelTests.swift */,
 				A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */,
 				0A6C8CAA4F855D0334C35E6B /* RainGridLatticeTests.swift */,
@@ -196,6 +205,8 @@
 		82AD055064B80AE78D55E8D6 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				E373280E940C0364F1A79B0B /* SampleData.swift */,
+				9AA91CED24E75D1E596E0A8C /* Providers.swift */,
 				1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */,
 				49E6F6768545D13720077183 /* MapItemCache.swift */,
 				0A6212CF0607C8E212CC4494 /* PlaceStore.swift */,
@@ -210,6 +221,7 @@
 		853D24C281FCC9239BB5DBDF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				28C258A96B6D143231186270 /* PlaceConditionsModel.swift */,
 				E151B63F8C849696F369BD6A /* MapModel.swift */,
 				BC1542104E6D15D323F2BB10 /* WeatherAttributionView.swift */,
 				2438BC60C119BB50DE75E460 /* Shimmer.swift */,
@@ -353,6 +365,7 @@
 				190F7FC3A721B9CCC540F990 /* RainGridLatticeTests.swift in Sources */,
 				D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */,
 				B39E0AE4ECA5A274266085DB /* MapModelTests.swift in Sources */,
+				67D09FA51322AB6FD7F645AE /* PlaceConditionsModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +408,9 @@
 				2ECE1D776DCA4E777D0FECE4 /* Telemetry.swift in Sources */,
 				C4D634D2B5369E837019918B /* WeatherAttributionView.swift in Sources */,
 				4EE6059C483EA2DA8A95EBEC /* MapModel.swift in Sources */,
+				E1630D177CFD041BF4E9044A /* Providers.swift in Sources */,
+				CEE138596972E91A180FB067 /* SampleData.swift in Sources */,
+				99B577FE91F1E6A276EE6B4C /* PlaceConditionsModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

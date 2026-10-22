@@ -11,3 +11,8 @@ struct RainForecastCardView: View {
         }
     }
 }
+
+#Preview {
+    RainForecastCardView(forecast: SampleData.forecast)
+        .padding()
+}

@@ -1,13 +1,15 @@
+import MapKit
 import SwiftUI
 
 struct SavedPlacesListView: View {
-    @EnvironmentObject private var placeStore: PlaceStore
+    @Environment(PlaceStore.self) private var placeStore
+    @Environment(MapItemCache.self) private var mapItemCache
+    @Environment(\.weather) private var weather
+    @Environment(\.soil) private var soil
     var onSelectPlace: (Place) -> Void = { _ in }
     var selectedDetent: PresentationDetent
 
-    @State private var rainfallData: [UUID: RainfallSummary] = [:]
-    @State private var loadingPlaces: Set<UUID> = []
-    @State private var errors: [UUID: String] = [:]
+    @State private var conditions = PlaceConditionsModel()
     @State private var renamingPlace: Place?
     @State private var editingName = ""
 
@@ -22,9 +24,7 @@ struct SavedPlacesListView: View {
             ) {
                 TextField("Name", text: $editingName)
                 Button("Save") {
-                    let trimmed = editingName.trimmingCharacters(
-                        in: .whitespaces
-                    )
+                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
                     if let place = renamingPlace, !trimmed.isEmpty {
                         placeStore.renamePlace(place, to: trimmed)
                     }
@@ -45,137 +45,44 @@ struct SavedPlacesListView: View {
                 )
             )
         } else {
-            VStack(spacing: 0) {
-                List {
-                    ForEach(placeStore.places) { place in
+            List {
+                ForEach(placeStore.places) { place in
+                    Button {
+                        onSelectPlace(place)
+                    } label: {
+                        PlaceRow(
+                            place: place,
+                            category: mapItemCache.items[place.id]?.pointOfInterestCategory,
+                            rainfall: conditions.rainfall[place.id],
+                            isLoading: conditions.loading.contains(place.id),
+                            error: conditions.errors[place.id]
+                        )
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .swipeActions(edge: .leading) {
                         Button {
-                            onSelectPlace(place)
+                            editingName = place.name
+                            renamingPlace = place
                         } label: {
-                            PlaceRow(
-                                place: place,
-                                rainfall: rainfallData[place.id],
-                                isLoading: loadingPlaces.contains(place.id),
-                                error: errors[place.id],
-                                onRename: {
-                                    editingName = place.name
-                                    renamingPlace = place
-                                }
-                            )
-                            .contentShape(Rectangle())
+                            Label("Rename", systemImage: "pencil")
                         }
-                        .buttonStyle(.plain)
-                        .swipeActions(edge: .leading) {
-                            Button {
-                                editingName = place.name
-                                renamingPlace = place
-                            } label: {
-                                Label("Rename", systemImage: "pencil")
-                            }
-                            .tint(.blue)
-                        }
-                    }
-                    .onDelete { offsets in
-                        placeStore.removePlaces(at: offsets)
+                        .tint(.blue)
                     }
                 }
-                .listStyle(.plain)
-                .refreshable {
-                    rainfallData = [:]
-                    errors = [:]
-                    for place in placeStore.places {
-                        let key = WeatherCache.key(
-                            latitude: place.latitude,
-                            longitude: place.longitude
-                        )
-                        await WeatherService.cache.invalidate(key: key)
-                    }
-                    await loadAllRainfall()
-                }
-                .task(id: placeStore.places.map(\.id)) {
-                    await loadAllRainfall()
+                .onDelete { offsets in
+                    placeStore.removePlaces(at: offsets)
                 }
             }
-        }
-    }
-
-    private func loadAllRainfall() async {
-        // Load anything without data, even if a previous (now cancelled) task
-        // had it in flight: `.task(id:)` restarts whenever the list changes or
-        // the view is rebuilt (e.g. folding/unfolding), and results are cached.
-        let placesToLoad = placeStore.places.filter { rainfallData[$0.id] == nil }
-        loadMissingSoil()
-        guard !placesToLoad.isEmpty else { return }
-        for place in placesToLoad {
-            loadingPlaces.insert(place.id)
-            errors[place.id] = nil
-        }
-
-        await withTaskGroup(of: (UUID, Result<RainfallSummary, Error>).self) { group in
-            for place in placesToLoad {
-                group.addTask {
-                    do {
-                        let summary = try await WeatherService.fetchRainfall(
-                            latitude: place.latitude,
-                            longitude: place.longitude
-                        )
-                        return (place.id, .success(summary))
-                    } catch {
-                        return (place.id, .failure(error))
-                    }
-                }
+            .listStyle(.plain)
+            .refreshable {
+                await conditions.refresh(placeStore.places, weather: weather)
             }
-
-            for await (id, result) in group {
-                switch result {
-                case .success(let summary):
-                    rainfallData[id] = summary
-                    errors[id] = nil
-                    loadingPlaces.remove(id)
-                case .failure(let error):
-                    // A cancelled load is not an error; the restarted task
-                    // picks the place up again.
-                    if Task.isCancelled || (error as? URLError)?.code == .cancelled
-                        || error is CancellationError
-                    {
-                        continue
-                    }
-                    errors[id] = Self.friendlyMessage(for: error)
-                    loadingPlaces.remove(id)
-                }
+            .task(id: placeStore.places.map(\.id)) {
+                conditions.backfillSoil(placeStore.places, soil: soil, store: placeStore)
+                await conditions.load(placeStore.places, weather: weather)
             }
         }
-    }
-
-    /// Looks up soil for saved places that don't have it yet (older saves),
-    /// one at a time through the throttled SoilService, and stores it on the
-    /// place. Rows use estimated loam until then.
-    private func loadMissingSoil() {
-        let missing = placeStore.places.filter { $0.soil == nil && $0.soilOverride == nil }
-        guard !missing.isEmpty else { return }
-        Task {
-            for place in missing {
-                if let soil = await SoilService.fetchSoilData(
-                    latitude: place.latitude, longitude: place.longitude
-                ) {
-                    placeStore.updateSoil(soil, for: place.id)
-                }
-            }
-        }
-    }
-
-    static func friendlyMessage(for error: Error, includeRetryHint: Bool = true) -> String {
-        let hint = includeRetryHint ? " Pull down to try again." : ""
-        if let urlError = error as? URLError {
-            switch urlError.code {
-            case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed:
-                return "You're offline." + hint
-            case .timedOut:
-                return "The weather service is slow right now." + hint
-            default:
-                break
-            }
-        }
-        return "Couldn't load conditions." + hint
     }
 }
 
@@ -183,10 +90,10 @@ struct SavedPlacesListView: View {
 
 private struct PlaceRow: View {
     let place: Place
+    let category: MKPointOfInterestCategory?
     let rainfall: RainfallSummary?
     let isLoading: Bool
     let error: String?
-    var onRename: () -> Void
 
     private var effectiveSoil: SoilData? {
         place.soilOverride?.asSoilData ?? place.soil
@@ -195,7 +102,7 @@ private struct PlaceRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                POICategoryIcon(category: place.mapItem?.pointOfInterestCategory, size: 28)
+                POICategoryIcon(category: category, size: 28)
                 Text(place.name)
                     .font(.headline)
                     .lineLimit(1)
@@ -251,4 +158,18 @@ private struct PlaceRow: View {
                 .accessibilityLabel("Last rain \(rainfall.lastRainText)")
         }
     }
+}
+
+#Preview("Saved places") {
+    NavigationStack {
+        SavedPlacesListView(selectedDetent: .large)
+            .navigationTitle("Saved places")
+            .navigationBarTitleDisplayMode(.inline)
+    }
+    .previewEnvironment()
+}
+
+#Preview("Empty") {
+    SavedPlacesListView(selectedDetent: .large)
+        .previewEnvironment(store: SampleData.placeStore([]))
 }

@@ -74,3 +74,7 @@ struct SoilOverrideSheet: View {
         }
     }
 }
+
+#Preview {
+    SoilOverrideSheet(currentOverride: SoilOverride(textureClass: .clayLoam, exposure: .shaded)) { _ in }
+}

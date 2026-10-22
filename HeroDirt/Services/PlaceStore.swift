@@ -1,7 +1,7 @@
 import CloudKit
-import Combine
 import Foundation
 import MapKit
+import Observation
 import os
 
 // MARK: - Key-value storage abstraction
@@ -42,15 +42,16 @@ final class InMemoryKeyValueStore: SyncedKeyValueStore {
 /// newest `updatedAt` wins, and deletions are remembered as tombstones so a
 /// stale copy can't bring back a place you removed.
 @MainActor
-class PlaceStore: ObservableObject {
-    @Published private(set) var places: [Place] = []
+@Observable
+class PlaceStore {
+    private(set) var places: [Place] = []
 
-    private static let logger = Logger(subsystem: "com.herodirt.app", category: "PlaceStore")
+    @ObservationIgnored private static let logger = Logger(subsystem: "com.herodirt.app", category: "PlaceStore")
 
-    private let kvs: SyncedKeyValueStore
-    private let backupURL: URL
-    private var deletedIDs: Set<UUID> = []
-    private var observers: [NSObjectProtocol] = []
+    @ObservationIgnored private let kvs: SyncedKeyValueStore
+    @ObservationIgnored private let backupURL: URL
+    @ObservationIgnored private var deletedIDs: Set<UUID> = []
+    @ObservationIgnored private var observers: [NSObjectProtocol] = []
 
     private static let placesKey = "places.v1"
     private static let deletedKey = "deletedPlaceIDs.v1"
