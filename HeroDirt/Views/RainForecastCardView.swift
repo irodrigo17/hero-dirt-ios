@@ -7,6 +7,7 @@ struct RainForecastCardView: View {
         CardContainer {
             CardHeader(title: "Rain on the Way", subtitle: "Next 7 days")
             RainTilesRow(tiles: forecast.nextTiles)
+            WeatherAttributionView()
         }
     }
 }
