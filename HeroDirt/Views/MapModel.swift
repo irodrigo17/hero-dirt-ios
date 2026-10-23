@@ -157,12 +157,19 @@ final class MapModel {
     func applyLayout(split: Bool, places: [Place], animated: Bool) {
         guard split != isSplit || isMainSheetPresented == split else { return }
         isSplit = split
-        isMainSheetPresented = !split
         if split {
+            isMainSheetPresented = false
             isDetailsSheetPresented = false
-        } else if selection != nil {
-            // Present the details sheet once the bottom sheet is back.
+        } else {
+            // Presenting while the rotation is still animating is silently
+            // dropped by UIKit, which left portrait without its bottom sheet.
+            // Wait for the transition, then bring the sheets back.
+            let delay: Duration = animated ? .milliseconds(450) : .zero
             Task { @MainActor in
+                try? await Task.sleep(for: delay)
+                guard !self.isSplit else { return }
+                self.isMainSheetPresented = true
+                guard self.selection != nil else { return }
                 try? await Task.sleep(for: .milliseconds(500))
                 if self.selection != nil && !self.isSplit { self.isDetailsSheetPresented = true }
             }
