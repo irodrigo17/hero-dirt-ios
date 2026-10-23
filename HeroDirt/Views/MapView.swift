@@ -156,15 +156,17 @@ struct MapView: View {
     private var floatingMapControls: some View {
         @Bindable var model = model
         return VStack(spacing: 12) {
+            // Same size, icon weight and glass as the capsule below.
             Button {
                 showingAboutFromMap = true
             } label: {
-                Image(systemName: "info")
-                    .font(.body.weight(.semibold))
+                Image(systemName: "info.circle")
+                    .font(.title3)
+                    .foregroundStyle(Color.primary)
                     .frame(width: 48, height: 48)
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
+            .buttonStyle(.plain)
+            .glassEffect(.regular.interactive(), in: Circle())
             .accessibilityLabel("About Hero Dirt")
 
             VStack(spacing: 0) {
