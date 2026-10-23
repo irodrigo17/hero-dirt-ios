@@ -2,6 +2,9 @@ import MapKit
 import SwiftUI
 
 struct MapView: View {
+    /// Switches back to the trails list (nil hides the button).
+    var onShowList: (() -> Void)? = nil
+
     @Environment(PlaceStore.self) private var placeStore
     @Environment(MapItemCache.self) private var mapItemCache
     @Environment(PlaceConditionsModel.self) private var conditions
@@ -163,6 +166,13 @@ struct MapView: View {
     private var mapToolbar: some ToolbarContent {
         @Bindable var model = model
         if model.isSplit {
+            if let onShowList {
+                ToolbarItem(placement: .bottomBar) {
+                    Button(action: onShowList) {
+                        Label("Show trails list", systemImage: "list.bullet")
+                    }
+                }
+            }
             ToolbarSpacer(.flexible, placement: .bottomBar)
             ToolbarItem(placement: .bottomBar) {
                 Button {
@@ -210,7 +220,7 @@ struct MapView: View {
         ZStack {
             sheetContent
             if let selection = model.selection {
-                placeDetails(for: selection, onClose: model.closeDetails, isEmbedded: true)
+                placeDetails(for: selection, onClose: model.closeDetails, style: .sidebar)
                     .background(Color(.systemGroupedBackground).ignoresSafeArea())
                     .transition(.move(edge: .leading).combined(with: .opacity))
                     .id(selection.identity)
@@ -243,6 +253,7 @@ struct MapView: View {
             overlayOpacity: $model.overlayOpacity,
             isOverlayLoading: gridService.isLoading,
             onCenterLocation: model.centerOnUser,
+            onShowList: onShowList,
             showsMapActions: !model.isSplit
         )
     }
@@ -275,7 +286,7 @@ struct MapView: View {
     private func placeDetails(
         for selection: Selection,
         onClose: @escaping () -> Void,
-        isEmbedded: Bool = false
+        style: PlaceDetailsView.Style = .sheet
     ) -> some View {
         let isDroppedPin = model.droppedPin != nil
         return PlaceDetailsView(
@@ -286,7 +297,7 @@ struct MapView: View {
             onNameResolved: isDroppedPin ? { model.droppedPinNamed($0) } : nil,
             onSaved: isDroppedPin ? { model.didSave($0) } : nil,
             onUnsaved: { model.didUnsave($0) },
-            isEmbedded: isEmbedded
+            style: style
         )
     }
 }

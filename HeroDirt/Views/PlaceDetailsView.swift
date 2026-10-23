@@ -15,8 +15,16 @@ struct PlaceDetailsView: View {
     var onNameResolved: ((String) -> Void)? = nil
     var onSaved: ((Place) -> Void)? = nil
     var onUnsaved: ((Place) -> Void)? = nil
-    /// Shown inside the split-layout sidebar: close becomes a leading back button.
-    var isEmbedded: Bool = false
+    var style: Style = .sheet
+
+    enum Style {
+        /// Presented as a sheet: own navigation stack, close button.
+        case sheet
+        /// Inside the map's split-layout sidebar: leading back button.
+        case sidebar
+        /// Pushed onto an existing navigation stack (trails list): system back.
+        case pushed
+    }
 
     @State private var placeName = "Loading…"
     @State private var rainfallSummary: RainfallSummary?
@@ -49,7 +57,29 @@ struct PlaceDetailsView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        Group {
+            if style == .pushed {
+                page
+            } else {
+                NavigationStack { page }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .task(id: loadKey) {
+            await loadData()
+        }
+        .sheet(isPresented: $showSoilOverrideSheet) {
+            if let place = savedPlace {
+                SoilOverrideSheet(currentOverride: place.soilOverride) { newOverride in
+                    placeStore.updateSoilOverride(newOverride, for: place)
+                    applySoilOverride(newOverride)
+                    showSoilOverrideSheet = false
+                }
+            }
+        }
+    }
+
+    private var page: some View {
             ScrollView {
                 VStack(spacing: 20) {
                     actionBar
@@ -95,7 +125,10 @@ struct PlaceDetailsView: View {
                 Text(subtitle ?? "")
             )
             .toolbar {
-                if isEmbedded {
+                switch style {
+                case .pushed:
+                    ToolbarItem(placement: .topBarTrailing) { EmptyView() }
+                case .sidebar:
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
                             if let onClose { onClose() } else { dismiss() }
@@ -106,7 +139,7 @@ struct PlaceDetailsView: View {
                         }
                         .accessibilityLabel("Back to saved places")
                     }
-                } else {
+                case .sheet:
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             if let onClose { onClose() } else { dismiss() }
@@ -133,20 +166,6 @@ struct PlaceDetailsView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-        }
-        .presentationDetents([.medium, .large])
-        .task(id: loadKey) {
-            await loadData()
-        }
-        .sheet(isPresented: $showSoilOverrideSheet) {
-            if let place = savedPlace {
-                SoilOverrideSheet(currentOverride: place.soilOverride) { newOverride in
-                    placeStore.updateSoilOverride(newOverride, for: place)
-                    applySoilOverride(newOverride)
-                    showSoilOverrideSheet = false
-                }
-            }
-        }
     }
 
     private struct LoadKey: Hashable {

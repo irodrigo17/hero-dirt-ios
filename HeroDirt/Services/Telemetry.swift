@@ -19,6 +19,7 @@ enum TelemetryEvent: String, Sendable {
     case searchResultSelected
     case rainMapToggled
     case feedbackOpened
+    case homeModeChanged
 }
 
 enum Telemetry {

@@ -135,6 +135,12 @@ class PlaceStore {
         save()
     }
 
+    /// Reorders saved places (drag to reorder in the trails list).
+    func movePlaces(from source: IndexSet, to destination: Int) {
+        places.move(fromOffsets: source, toOffset: destination)
+        save()
+    }
+
     private func update(_ id: UUID, _ change: (inout Place) -> Void) {
         guard let index = places.firstIndex(where: { $0.id == id }) else { return }
         change(&places[index])

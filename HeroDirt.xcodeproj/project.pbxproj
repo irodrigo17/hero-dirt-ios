@@ -66,6 +66,8 @@
 		67D09FA51322AB6FD7F645AE /* PlaceConditionsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */; };
 		FB4FC47F36B48629CF9301EB /* Outlook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DBB856398F5A921D43E2383 /* Outlook.swift */; };
 		6BA0145C443D1708E15B818A /* OutlookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF9CD6B5B5B15EC72BA1ADD /* OutlookTests.swift */; };
+		B16A0EA60527E5A3B554196B /* TrailCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318982408F309DD4DF9578CC /* TrailCard.swift */; };
+		47BC24862DEB0725B13771F7 /* TrailsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B78604CD246E7CFCEE105EE0 /* TrailsHomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -142,6 +144,8 @@
 		57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModelTests.swift; sourceTree = "<group>"; };
 		6DBB856398F5A921D43E2383 /* Outlook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Outlook.swift; sourceTree = "<group>"; };
 		7DF9CD6B5B5B15EC72BA1ADD /* OutlookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookTests.swift; sourceTree = "<group>"; };
+		318982408F309DD4DF9578CC /* TrailCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailCard.swift; sourceTree = "<group>"; };
+		B78604CD246E7CFCEE105EE0 /* TrailsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailsHomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -227,6 +231,8 @@
 		853D24C281FCC9239BB5DBDF /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B78604CD246E7CFCEE105EE0 /* TrailsHomeView.swift */,
+				318982408F309DD4DF9578CC /* TrailCard.swift */,
 				28C258A96B6D143231186270 /* PlaceConditionsModel.swift */,
 				E151B63F8C849696F369BD6A /* MapModel.swift */,
 				BC1542104E6D15D323F2BB10 /* WeatherAttributionView.swift */,
@@ -419,6 +425,8 @@
 				CEE138596972E91A180FB067 /* SampleData.swift in Sources */,
 				99B577FE91F1E6A276EE6B4C /* PlaceConditionsModel.swift in Sources */,
 				FB4FC47F36B48629CF9301EB /* Outlook.swift in Sources */,
+				B16A0EA60527E5A3B554196B /* TrailCard.swift in Sources */,
+				47BC24862DEB0725B13771F7 /* TrailsHomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

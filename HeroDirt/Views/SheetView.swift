@@ -13,6 +13,8 @@ struct SheetView: View {
     @Binding var overlayOpacity: Double
     let isOverlayLoading: Bool
     var onCenterLocation: () -> Void = {}
+    /// Switches to the trails list home (nil hides the button).
+    var onShowList: (() -> Void)? = nil
     /// False in the split layout, where the map has its own floating controls.
     var showsMapActions: Bool = true
 
@@ -78,13 +80,20 @@ struct SheetView: View {
 
     @ToolbarContentBuilder
     private var mapActionsToolbar: some ToolbarContent {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingAbout = true
-                    } label: {
-                        Image(systemName: "info.circle")
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    if let onShowList {
+                        Button(action: onShowList) {
+                            Image(systemName: "list.bullet")
+                        }
+                        .accessibilityLabel("Show trails list")
+                    } else {
+                        Button {
+                            showingAbout = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                        }
+                        .accessibilityLabel("About Hero Dirt")
                     }
-                    .accessibilityLabel("About Hero Dirt")
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {

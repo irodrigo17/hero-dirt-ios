@@ -131,3 +131,15 @@ struct PlaceStoreSyncTests {
         #expect(reopened.places.first?.soil == soil)
     }
 }
+
+@MainActor
+struct PlaceStoreMoveTests {
+    @Test func movePersistsNewOrder() {
+        let url = FileManager.default.temporaryDirectory.appending(path: "move_\(UUID().uuidString).json")
+        let store = PlaceStore(fileURL: url)
+        for name in ["A", "B", "C"] { store.addPlace(Place(name: name, latitude: 1, longitude: 1)) }
+        store.movePlaces(from: IndexSet(integer: 2), to: 0)
+        #expect(store.places.map(\.name) == ["C", "A", "B"])
+        #expect(PlaceStore(fileURL: url).places.map(\.name) == ["C", "A", "B"])
+    }
+}
