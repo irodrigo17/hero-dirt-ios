@@ -36,14 +36,19 @@ struct ObservedRainTests {
 
     @Test func todayET0OnlyCountsElapsedHours() {
         let daily = WeatherService.observedDaily(from: response(hourlyRain: [:]), now: now)
-        let today = daily.max { $0.date < $1.date }!
+        let today = daily.filter { !$0.isForecast }.max { $0.date < $1.date }!
         // Hours 00:00 through 15:00 have elapsed: 16 × 0.1.
         #expect(abs(today.et0 - 1.6) < 0.0001)
     }
 
-    @Test func futureDaysAreDropped() {
+    @Test func futureDaysAreFlaggedAsForecast() {
         let daily = WeatherService.observedDaily(from: response(hourlyRain: [:]), now: now)
-        #expect(daily.count == 2)
+        #expect(daily.filter { !$0.isForecast }.count == 2)
+        #expect(daily.filter(\.isForecast).map(\.amount) == [9.0])
+        let summary = RainfallSummary(daily: daily)
+        #expect(summary.dailyHistory.count == 2)
+        #expect(summary.upcoming.count == 1)
+        #expect(summary.last7Days == 3.0)  // forecast rain is not counted
     }
 
     @Test func withoutHourlyFallsBackToDaily() {

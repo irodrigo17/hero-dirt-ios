@@ -19,7 +19,7 @@ actor WeatherCache {
     let forecastURL: URL
 
     init(directory: URL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]) {
-        rainfallURL = directory.appending(path: "hero_dirt_rainfall_v2.json")
+        rainfallURL = directory.appending(path: "hero_dirt_rainfall_v3.json")
         forecastURL = directory.appending(path: "hero_dirt_forecast.json")
     }
 
@@ -225,7 +225,8 @@ enum WeatherService {
     /// happened so far. Open-Meteo's daily values for today are full-day
     /// totals that include the forecast for the remaining hours; when hourly
     /// data is present, today's values are re-summed from hours up to `now`
-    /// (in the location's time zone). Future days are dropped.
+    /// (in the location's time zone). Days after today are returned flagged
+    /// `isForecast`.
     static func observedDaily(from response: OpenMeteoResponse, now: Date) -> [DailyWeatherData] {
         let offset = response.utcOffsetSeconds ?? TimeZone.current.secondsFromGMT(for: now)
         let today = localFormatter("yyyy-MM-dd", offsetSeconds: offset).string(from: now)
@@ -254,14 +255,13 @@ enum WeatherService {
             guard i < days.precipitationSum.count,
                   let date = Self.dateFormatter.date(from: dateString)
             else { continue }
-            if dateString > today { continue }
             var amount = days.precipitationSum[i] ?? 0
             var et0 = days.et0FaoEvapotranspiration.flatMap { i < $0.count ? $0[i] : nil } ?? 0
             if dateString == today {
                 amount = todayRain ?? amount
                 et0 = todayET0 ?? et0
             }
-            daily.append(DailyWeatherData(date: date, amount: amount, et0: et0))
+            daily.append(DailyWeatherData(date: date, amount: amount, et0: et0, isForecast: dateString > today))
         }
         return daily
     }
@@ -364,7 +364,8 @@ enum WeatherService {
             // Hourly values let us count only the part of today that has happened.
             URLQueryItem(name: "hourly", value: "precipitation,et0_fao_evapotranspiration"),
             URLQueryItem(name: "past_days", value: "30"),
-            URLQueryItem(name: "forecast_days", value: "1"),
+            // Today plus 7 forecast days for the condition outlook.
+            URLQueryItem(name: "forecast_days", value: "8"),
             URLQueryItem(name: "timezone", value: "auto"),
         ]
 
@@ -383,7 +384,7 @@ enum WeatherService {
         }
 
         let summary = try parseResponse(data)
-        await cache.setRainfall(key, summary.dailyHistory)
+        await cache.setRainfall(key, summary.dailyHistory + summary.upcoming)
         return summary
     }
 

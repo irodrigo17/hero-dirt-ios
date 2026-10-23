@@ -64,6 +64,8 @@
 		CEE138596972E91A180FB067 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E373280E940C0364F1A79B0B /* SampleData.swift */; };
 		99B577FE91F1E6A276EE6B4C /* PlaceConditionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C258A96B6D143231186270 /* PlaceConditionsModel.swift */; };
 		67D09FA51322AB6FD7F645AE /* PlaceConditionsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */; };
+		FB4FC47F36B48629CF9301EB /* Outlook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DBB856398F5A921D43E2383 /* Outlook.swift */; };
+		6BA0145C443D1708E15B818A /* OutlookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF9CD6B5B5B15EC72BA1ADD /* OutlookTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +140,8 @@
 		E373280E940C0364F1A79B0B /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		28C258A96B6D143231186270 /* PlaceConditionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModel.swift; sourceTree = "<group>"; };
 		57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModelTests.swift; sourceTree = "<group>"; };
+		6DBB856398F5A921D43E2383 /* Outlook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Outlook.swift; sourceTree = "<group>"; };
+		7DF9CD6B5B5B15EC72BA1ADD /* OutlookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -169,6 +173,7 @@
 		5B12376377E7B1FD5758568D /* HeroDirtTests */ = {
 			isa = PBXGroup;
 			children = (
+				7DF9CD6B5B5B15EC72BA1ADD /* OutlookTests.swift */,
 				57246E7EE8406B7EB4BCC1A3 /* PlaceConditionsModelTests.swift */,
 				90F79A8FD92C9223CB39002C /* MapModelTests.swift */,
 				A6D87F1D1F976D7ECF7ADFC9 /* SoilStoreTests.swift */,
@@ -193,6 +198,7 @@
 		75710BBBBC944EF6A70628BA /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				6DBB856398F5A921D43E2383 /* Outlook.swift */,
 				55EED6DEB2AEFC44DF7E5841 /* RainUnit.swift */,
 				544289F591E5EE646407FF37 /* Place.swift */,
 				C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */,
@@ -366,6 +372,7 @@
 				D921C92696B4553007870D4A /* SoilStoreTests.swift in Sources */,
 				B39E0AE4ECA5A274266085DB /* MapModelTests.swift in Sources */,
 				67D09FA51322AB6FD7F645AE /* PlaceConditionsModelTests.swift in Sources */,
+				6BA0145C443D1708E15B818A /* OutlookTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,6 +418,7 @@
 				E1630D177CFD041BF4E9044A /* Providers.swift in Sources */,
 				CEE138596972E91A180FB067 /* SampleData.swift in Sources */,
 				99B577FE91F1E6A276EE6B4C /* PlaceConditionsModel.swift in Sources */,
+				FB4FC47F36B48629CF9301EB /* Outlook.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

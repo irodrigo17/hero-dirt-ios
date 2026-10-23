@@ -18,6 +18,17 @@ enum DirtCondition {
         }
     }
 
+    /// Condition for a soil moisture index (0 = bone dry, 1 = saturated).
+    init(moistureIndex index: Double) {
+        switch index {
+        case let x where x > 0.80: self = .veryWet
+        case let x where x > 0.60: self = .wet
+        case let x where x >= 0.25: self = .heroDirt
+        case let x where x >= 0.10: self = .dry
+        default: self = .veryDry
+        }
+    }
+
     /// Higher is wetter; used to compare conditions.
     var wetness: Int {
         switch self {
@@ -91,15 +102,26 @@ struct RainForecast: Codable, Sendable {
 
 // MARK: - Daily Data
 
-struct DailyWeatherData: Codable, Sendable {
+struct DailyWeatherData: Codable, Sendable, Equatable {
     let date: Date
     let amount: Double   // precipitation in mm
     let et0: Double      // FAO Penman-Monteith reference ET in mm/day
+    /// A forecast day (after today) rather than observed data.
+    let isForecast: Bool
 
-    init(date: Date, amount: Double, et0: Double = 0) {
+    init(date: Date, amount: Double, et0: Double = 0, isForecast: Bool = false) {
         self.date = date
         self.amount = amount
         self.et0 = et0
+        self.isForecast = isForecast
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        date = try c.decode(Date.self, forKey: .date)
+        amount = try c.decode(Double.self, forKey: .amount)
+        et0 = try c.decodeIfPresent(Double.self, forKey: .et0) ?? 0
+        isForecast = try c.decodeIfPresent(Bool.self, forKey: .isForecast) ?? false
     }
 }
 
@@ -111,7 +133,8 @@ struct RainfallSummary: Sendable {
     let last3Days: Double
     let last7Days: Double
     let daysSinceLastRain: Int?
-    let dailyHistory: [DailyWeatherData]   // sorted newest-first
+    let dailyHistory: [DailyWeatherData]   // observed days, sorted newest-first
+    let upcoming: [DailyWeatherData]       // forecast days after today, oldest-first
 
     private static let mmPerInch = 25.4
     private static let heroDirtBufferDays = 3.0
@@ -122,7 +145,8 @@ struct RainfallSummary: Sendable {
         last3Days: Double,
         last7Days: Double,
         daysSinceLastRain: Int?,
-        dailyHistory: [DailyWeatherData] = []
+        dailyHistory: [DailyWeatherData] = [],
+        upcoming: [DailyWeatherData] = []
     ) {
         self.last1Day = last1Day
         self.last2Days = last2Days
@@ -130,10 +154,14 @@ struct RainfallSummary: Sendable {
         self.last7Days = last7Days
         self.daysSinceLastRain = daysSinceLastRain
         self.dailyHistory = dailyHistory
+        self.upcoming = upcoming
     }
 
+    /// Builds a summary from daily data. Days flagged `isForecast` become
+    /// `upcoming`; everything else is observed history.
     init(daily: [DailyWeatherData]) {
-        let sorted = daily.sorted { $0.date > $1.date }
+        let sorted = daily.filter { !$0.isForecast }.sorted { $0.date > $1.date }
+        upcoming = daily.filter(\.isForecast).sorted { $0.date < $1.date }
 
         last1Day = sorted.prefix(1).reduce(0) { $0 + $1.amount }
         last2Days = sorted.prefix(2).reduce(0) { $0 + $1.amount }
@@ -171,14 +199,7 @@ struct RainfallSummary: Sendable {
         }
 
         let index = moisture / resolvedSoil.fieldCapacity
-        var condition: DirtCondition
-        switch index {
-        case let x where x > 0.80: condition = .veryWet
-        case let x where x > 0.60: condition = .wet
-        case let x where x >= 0.25: condition = .heroDirt
-        case let x where x >= 0.10: condition = .dry
-        default: condition = .veryDry
-        }
+        var condition = DirtCondition(moistureIndex: index)
 
         // The daily water balance can't tell that rain is falling right now:
         // after a dry spell a soaking day only brings the bucket to "Hero
