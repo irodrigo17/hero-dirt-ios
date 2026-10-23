@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Hero Dirt</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,9 +26,9 @@
 	<string>Hero Dirt can use your location to center the map.</string>
 	<key>UILaunchScreen</key>
 	<dict>
-		<key>BackgroundColor</key>
+		<key>UIColorName</key>
 		<string>LaunchBackground</string>
-		<key>ImageName</key>
+		<key>UIImageName</key>
 		<string>LaunchImage</string>
 	</dict>
 	<key>UISupportedInterfaceOrientations</key>

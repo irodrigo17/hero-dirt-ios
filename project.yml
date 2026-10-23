@@ -18,6 +18,7 @@ targets:
     info:
       path: HeroDirt/Info.plist
       properties:
+        CFBundleDisplayName: Hero Dirt
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
@@ -27,8 +28,8 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UILaunchScreen:
-          BackgroundColor: LaunchBackground
-          ImageName: LaunchImage
+          UIColorName: LaunchBackground
+          UIImageName: LaunchImage
     entitlements:
       path: HeroDirt/HeroDirt.entitlements
       properties:
