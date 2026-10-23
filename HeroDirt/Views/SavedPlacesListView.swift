@@ -3,7 +3,6 @@ import SwiftUI
 
 struct SavedPlacesListView: View {
     @Environment(PlaceStore.self) private var placeStore
-    @Environment(MapItemCache.self) private var mapItemCache
     @Environment(\.weather) private var weather
     var onSelectPlace: (Place) -> Void = { _ in }
     var selectedDetent: PresentationDetent
@@ -51,7 +50,6 @@ struct SavedPlacesListView: View {
                     } label: {
                         PlaceRow(
                             place: place,
-                            category: mapItemCache.items[place.id]?.pointOfInterestCategory,
                             rainfall: conditions.rainfall[place.id],
                             isLoading: conditions.loading.contains(place.id),
                             error: conditions.errors[place.id]
@@ -85,7 +83,6 @@ struct SavedPlacesListView: View {
 
 private struct PlaceRow: View {
     let place: Place
-    let category: MKPointOfInterestCategory?
     let rainfall: RainfallSummary?
     let isLoading: Bool
     let error: String?
@@ -97,7 +94,6 @@ private struct PlaceRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                POICategoryIcon(category: category, size: 28)
                 Text(place.name)
                     .font(.headline)
                     .lineLimit(1)

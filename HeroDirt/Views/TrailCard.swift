@@ -74,7 +74,6 @@ extension RainfallSummary {
 /// A row in "My Trails": condition, when it'll be ridable, and the week ahead.
 struct TrailCard: View {
     let place: Place
-    let category: MKPointOfInterestCategory?
     let rainfall: RainfallSummary?
     let isLoading: Bool
     let error: String?
@@ -84,7 +83,6 @@ struct TrailCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                POICategoryIcon(category: category, size: 30)
                 Text(place.name)
                     .font(.headline)
                     .lineLimit(2)
@@ -128,9 +126,9 @@ struct TrailCard: View {
 
 #Preview("Trail cards") {
     List {
-        TrailCard(place: SampleData.places[0], category: .park, rainfall: SampleData.heroDirt, isLoading: false, error: nil)
-        TrailCard(place: SampleData.places[1], category: .nationalPark, rainfall: SampleData.muddy, isLoading: false, error: nil)
-        TrailCard(place: SampleData.places[2], category: nil, rainfall: nil, isLoading: true, error: nil)
+        TrailCard(place: SampleData.places[0], rainfall: SampleData.heroDirt, isLoading: false, error: nil)
+        TrailCard(place: SampleData.places[1], rainfall: SampleData.muddy, isLoading: false, error: nil)
+        TrailCard(place: SampleData.places[2], rainfall: nil, isLoading: true, error: nil)
     }
     .listStyle(.plain)
 }
