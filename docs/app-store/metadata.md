@@ -32,6 +32,11 @@ Copy-paste values for App Store Connect. Character limits in brackets.
 >
 > Save the trails you ride and see at a glance how each one is doing: Soaked, Muddy, Hero Dirt, Dry, or Dusty. Hero Dirt combines recent rainfall, how fast the ground is drying out, and the type of soil at each spot to estimate trail conditions — and tells you why.
 >
+> WHEN WILL IT BE RIDABLE?
+> • Every saved trail shows its condition today and for each of the next 7 days
+> • One line tells you what to do: "Hero dirt by Saturday", "Rain tomorrow, ride today", "Muddy all week"
+> • A wetness chart shows the last two weeks and the week ahead, with the hero dirt zone marked
+>
 > TRAIL CONDITIONS AT A GLANCE
 > • Condition, last rain, and rainfall for today, 2, 3, and 7 days for every saved trail
 > • A clear explanation: how wet the ground is, what the dirt is like, and how fast it's drying
@@ -43,7 +48,8 @@ Copy-paste values for App Store Connect. Character limits in brackets.
 >
 > FIND AND SAVE TRAILS
 > • Search for parks, preserves, and trailheads, tap a spot on the map, or drop a pin anywhere
-> • Rename places and get driving directions in Apple Maps
+> • Reorder your trails, rename them, and get driving directions in Apple Maps
+> • Map pins are colored by trail condition
 >
 > TUNED TO YOUR TRAILS
 > • Soil type comes from global soil maps, so sandy trails dry faster than clay
@@ -99,7 +105,17 @@ If you later forward telemetry to a backend (e.g. TelemetryDeck), update this to
 
 ## Screenshots
 
-Required: **6.9" iPhone** (1320 × 2868 portrait). App Store Connect scales these down for smaller iPhones, so 6.5"/6.1" sets are optional. The app is iPhone-only, so no iPad screenshots are needed. Files: `docs/app-store/screenshots/`.
+Required: **6.9" iPhone** (1320 × 2868 portrait). App Store Connect scales these down for smaller iPhones, so 6.5"/6.1" sets are optional. The app is iPhone-only, so no iPad screenshots are needed.
+
+Upload in this order (`docs/app-store/screenshots/`):
+
+1. `iphone-6.9-01.png` — "Know when your trails are ridable" (My Trails list)
+2. `iphone-6.9-02.png` — "Hero dirt? Go ride." (trail details)
+3. `iphone-6.9-03.png` — "Plan the week ahead" (outlook + wetness chart)
+4. `iphone-6.9-04.png` — "See where it rained" (rain map)
+5. `iphone-6.9-05.png` — "Made for riders, day or night" (dark mode)
+
+Raw captures are in `raw/` (iPhone 17 Pro Max simulator, `-useFakeServices` sample data, status bar 9:41); `frame.py` adds the captions and background.
 
 ## Checklist before submitting
 
