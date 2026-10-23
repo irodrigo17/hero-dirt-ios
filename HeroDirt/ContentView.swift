@@ -25,6 +25,10 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .onAppear {
+            // Screenshots/UI tests: always start on the trails list.
+            if ProcessInfo.processInfo.arguments.contains("-startInList") { mode = .list }
+        }
         // Conditions are shared by the list and the map pins.
         .task(id: placeStore.places.map(\.id)) {
             conditions.backfillSoil(placeStore.places, soil: soil, store: placeStore)

@@ -9,12 +9,15 @@ struct TrailsHomeView: View {
     var onShowMap: () -> Void = {}
 
     @Environment(PlaceStore.self) private var placeStore
-    @Environment(MapItemCache.self) private var mapItemCache
     @Environment(PlaceConditionsModel.self) private var conditions
     @Environment(\.weather) private var weather
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var selection: TrailSelection?
+    /// Keep the trails list visible next to the details whenever the window
+    /// is wide enough (unfolded iPhone Duo held tall included); otherwise
+    /// SwiftUI would hide it behind a sidebar button in taller windows.
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var searchResults: [MKMapItem] = []
@@ -29,9 +32,9 @@ struct TrailsHomeView: View {
     }
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             list
-                .navigationSplitViewColumnWidth(min: 320, ideal: 380, max: 460)
+                .navigationSplitViewColumnWidth(min: 300, ideal: 360, max: 440)
                 .navigationTitle("My Trails")
                 .searchable(
                     text: $searchText,
@@ -76,6 +79,7 @@ struct TrailsHomeView: View {
                 detail
             }
         }
+        .navigationSplitViewStyle(.balanced)
         .onAppear(perform: selectFirstIfSideBySide)
         .onChange(of: horizontalSizeClass) { _, _ in selectFirstIfSideBySide() }
     }
@@ -103,7 +107,6 @@ struct TrailsHomeView: View {
                     NavigationLink(value: TrailSelection.saved(place.id)) {
                         TrailCard(
                             place: place,
-                            category: mapItemCache.items[place.id]?.pointOfInterestCategory,
                             rainfall: conditions.rainfall[place.id],
                             isLoading: conditions.loading.contains(place.id),
                             error: conditions.errors[place.id]
