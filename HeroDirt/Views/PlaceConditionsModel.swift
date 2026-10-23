@@ -52,6 +52,25 @@ final class PlaceConditionsModel {
         }
     }
 
+    /// The soil used for a place's estimate: the user's override, then the
+    /// stored SoilGrids lookup (nil means estimated loam).
+    static func soil(for place: Place) -> SoilData? {
+        place.soilOverride?.asSoilData ?? place.soil
+    }
+
+    func condition(for place: Place) -> DirtCondition? {
+        rainfall[place.id]?.dirtCondition(soil: Self.soil(for: place))
+    }
+
+    /// Current conditions for every place that has data, by place id.
+    func conditions(for places: [Place]) -> [UUID: DirtCondition] {
+        var result: [UUID: DirtCondition] = [:]
+        for place in places {
+            if let condition = condition(for: place) { result[place.id] = condition }
+        }
+        return result
+    }
+
     /// Pull to refresh: drop cached data and load everything again.
     func refresh(_ places: [Place], weather: any WeatherProviding) async {
         for place in places {

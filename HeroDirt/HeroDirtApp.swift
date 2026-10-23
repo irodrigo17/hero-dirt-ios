@@ -14,6 +14,7 @@ struct HeroDirtApp: App {
 
     @State private var placeStore = useFakeServices ? SampleData.placeStore() : PlaceStore()
     @State private var mapItemCache = MapItemCache()
+    @State private var conditions = PlaceConditionsModel()
     @AppStorage(RainUnitPreference.storageKey) private var unitPreference = RainUnitPreference.automatic
     private let locationManager = CLLocationManager()
 
@@ -26,6 +27,7 @@ struct HeroDirtApp: App {
             ContentView()
                 .environment(placeStore)
                 .environment(mapItemCache)
+                .environment(conditions)
                 .environment(\.rainUnit, unitPreference.resolved())
                 .environment(\.weather, Self.weather)
                 .environment(\.soil, Self.soil)

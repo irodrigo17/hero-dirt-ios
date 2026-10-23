@@ -4,6 +4,7 @@ import SwiftUI
 struct MapView: View {
     @Environment(PlaceStore.self) private var placeStore
     @Environment(MapItemCache.self) private var mapItemCache
+    @Environment(PlaceConditionsModel.self) private var conditions
 
     @State private var model = MapModel()
     @State private var gridService = RainfallGridService()
@@ -87,6 +88,7 @@ struct MapView: View {
         UIKitMapView(
             places: placeStore.places,
             mapItems: mapItemCache.items,
+            conditions: conditions.conditions(for: placeStore.places),
             newPinCoordinate: model.droppedPin?.coordinate,
             newPinTitle: model.droppedPin?.name,
             selectedSearchResult: model.searchResult,

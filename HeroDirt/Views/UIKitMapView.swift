@@ -96,6 +96,8 @@ struct UIKitMapView: UIViewRepresentable {
     let places: [Place]
     /// Map items for saved places (category icon and tint), by place id.
     var mapItems: [UUID: MKMapItem] = [:]
+    /// Current trail condition per saved place; tints its pin.
+    var conditions: [UUID: DirtCondition] = [:]
     let newPinCoordinate: CLLocationCoordinate2D?
     let newPinTitle: String?
     let selectedSearchResult: MKMapItem?
@@ -149,6 +151,7 @@ struct UIKitMapView: UIViewRepresentable {
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let c = context.coordinator
         c.mapItems = mapItems
+        c.conditions = conditions
         c.callbacks = (onRegionChanged, onRegionWillChange, onLongPress, onAnnotationSelected, onFeatureTapped, onTap, onUserLocationAvailable)
         c.updateAnnotations(on: mapView, view: self)
         c.updateSelection(on: mapView, selectedAnnotation: selectedAnnotation)
@@ -186,6 +189,21 @@ struct UIKitMapView: UIViewRepresentable {
         private var didFireInitialUserLocation = false
         var lastCommandID: UUID?
         var mapItems: [UUID: MKMapItem] = [:]
+        var conditions: [UUID: DirtCondition] = [:]
+
+        /// Saved place pins are tinted by trail condition (falling back to
+        /// the place category's color while conditions load) and keep the
+        /// category glyph.
+        fileprivate func style(_ view: MKMarkerAnnotationView, for place: Place) {
+            let category = mapItems[place.id]?.pointOfInterestCategory
+            if let condition = conditions[place.id] {
+                view.markerTintColor = UIColor(condition.color)
+            } else {
+                view.markerTintColor = UIColor(category?.iconColor ?? .orange)
+            }
+            view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
+            view.accessibilityValue = conditions[place.id]?.label
+        }
 
         fileprivate let rainfallOverlay = RainfallImageOverlay()
         private weak var rainfallRenderer: RainfallImageRenderer?
@@ -276,9 +294,7 @@ struct UIKitMapView: UIViewRepresentable {
                     ann.title = place.name
                 }
                 if let annView = mapView.view(for: ann) as? MKMarkerAnnotationView {
-                    let category = mapItems[ann.place.id]?.pointOfInterestCategory
-                    annView.markerTintColor = UIColor(category?.iconColor ?? .orange)
-                    annView.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
+                    style(annView, for: ann.place)
                 }
             }
         }
@@ -416,9 +432,7 @@ struct UIKitMapView: UIViewRepresentable {
                 let view = mapView.dequeueReusableAnnotationView(
                     withIdentifier: "place", for: ann
                 ) as! MKMarkerAnnotationView
-                let category = mapItems[ann.place.id]?.pointOfInterestCategory
-                view.markerTintColor = UIColor(category?.iconColor ?? .orange)
-                view.glyphImage = UIImage(systemName: category?.sfSymbol ?? "mappin")
+                style(view, for: ann.place)
                 view.canShowCallout = false
                 view.animatesWhenAdded = true
                 view.displayPriority = .required

@@ -5,11 +5,10 @@ struct SavedPlacesListView: View {
     @Environment(PlaceStore.self) private var placeStore
     @Environment(MapItemCache.self) private var mapItemCache
     @Environment(\.weather) private var weather
-    @Environment(\.soil) private var soil
     var onSelectPlace: (Place) -> Void = { _ in }
     var selectedDetent: PresentationDetent
 
-    @State private var conditions = PlaceConditionsModel()
+    @Environment(PlaceConditionsModel.self) private var conditions
     @State private var renamingPlace: Place?
     @State private var editingName = ""
 
@@ -77,10 +76,6 @@ struct SavedPlacesListView: View {
             .listStyle(.plain)
             .refreshable {
                 await conditions.refresh(placeStore.places, weather: weather)
-            }
-            .task(id: placeStore.places.map(\.id)) {
-                conditions.backfillSoil(placeStore.places, soil: soil, store: placeStore)
-                await conditions.load(placeStore.places, weather: weather)
             }
         }
     }

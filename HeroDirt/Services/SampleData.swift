@@ -87,6 +87,7 @@ extension View {
         self
             .environment(store ?? SampleData.placeStore())
             .environment(MapItemCache())
+            .environment(PlaceConditionsModel())
             .environment(\.weather, FakeWeatherProvider())
             .environment(\.soil, FakeSoilProvider())
     }
