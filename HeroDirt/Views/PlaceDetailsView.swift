@@ -99,12 +99,21 @@ struct PlaceDetailsView: View {
                             .buttonStyle(.bordered)
                         }
                     } else if let summary = rainfallSummary {
+                        let result = summary.dirtConditionResult(soil: soilData)
                         DirtConditionCardView(
-                            result: summary.dirtConditionResult(soil: soilData),
+                            result: result,
                             onCustomize: savedPlace != nil
                                 ? { showSoilOverrideSheet = true } : nil,
                             isOverridden: savedPlace?.soilOverride != nil
                         )
+                        let strip = summary.strip(soil: soilData)
+                        if strip.count > 1 {
+                            OutlookCardView(current: result.condition, days: strip)
+                        }
+                        let timeline = summary.timeline(soil: soilData)
+                        if !timeline.isEmpty {
+                            ConditionTrendView(timeline: timeline)
+                        }
                         RainfallCardView(summary: summary)
                         if let forecast = rainForecast {
                             RainForecastCardView(forecast: forecast)
