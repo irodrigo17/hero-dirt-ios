@@ -163,9 +163,20 @@ struct TrailsHomeView: View {
         } description: {
             Text("Search for the trails and parks you ride, or find them on the map, and save them to see when they're ridable.")
         } actions: {
-            Button("Find Trails") { isSearching = true }
-                .buttonStyle(.borderedProminent)
-            Button("Open Map", action: onShowMap)
+            // Same size and font for both; Find Trails is the filled primary.
+            Button { isSearching = true } label: {
+                Text("Find Trails").frame(minWidth: 160)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .font(.body.weight(.semibold))
+
+            Button(action: onShowMap) {
+                Text("Open Map").frame(minWidth: 160)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
+            .font(.body.weight(.semibold))
         }
         .listRowSeparator(.hidden)
     }
