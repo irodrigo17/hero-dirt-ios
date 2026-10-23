@@ -35,6 +35,11 @@ struct PlaceDetailsView: View {
     @State private var showingRenameAlert = false
     @State private var showSoilOverrideSheet = false
     @State private var editingName = ""
+    /// The load runs in its own task rather than the view's `.task`, which
+    /// SwiftUI can cancel while the view is being pushed or rebuilt (that
+    /// left the screen stuck loading or blank).
+    @State private var loadTask: Task<Void, Never>?
+    @State private var loadedKey: LoadKey?
     private var savedPlace: Place? {
         if let placeID,
             let place = placeStore.places.first(where: { $0.id == placeID })
@@ -66,7 +71,7 @@ struct PlaceDetailsView: View {
         }
         .presentationDetents([.medium, .large])
         .task(id: loadKey) {
-            await loadData()
+            startLoading()
         }
         .sheet(isPresented: $showSoilOverrideSheet) {
             if let place = savedPlace {
@@ -94,6 +99,15 @@ struct PlaceDetailsView: View {
                             Text(errorMessage)
                         } actions: {
                             Button("Try Again") {
+                                Task { await reload() }
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    } else if rainfallSummary == nil {
+                        ContentUnavailableView {
+                            Label("No conditions yet", systemImage: "cloud.rain")
+                        } actions: {
+                            Button("Load Conditions") {
                                 Task { await reload() }
                             }
                             .buttonStyle(.bordered)
@@ -223,6 +237,18 @@ struct PlaceDetailsView: View {
 
     // MARK: - Data Loading
 
+    private func startLoading() {
+        if loadedKey == loadKey, loadTask != nil || rainfallSummary != nil || errorMessage != nil {
+            return
+        }
+        loadedKey = loadKey
+        loadTask?.cancel()
+        loadTask = Task {
+            await loadData()
+            loadTask = nil
+        }
+    }
+
     private func loadData() async {
         placeName = "Loading…"
         rainfallSummary = nil
@@ -267,6 +293,10 @@ struct PlaceDetailsView: View {
         onNameResolved?(placeName)
         guard !Task.isCancelled else { return }
         await fetchWeatherAndSoil()
+        // A cancelled load (the view disappeared, or a newer load started)
+        // must not end the loading state with no data: that left a blank
+        // screen. The load that is still running finishes it.
+        guard !Task.isCancelled else { return }
         isLoading = false
     }
 
@@ -303,7 +333,7 @@ struct PlaceDetailsView: View {
                 Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
             }
         } catch {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, !PlaceConditionsModel.isCancellation(error) else { return }
             errorMessage = PlaceConditionsModel.friendlyMessage(for: error, includeRetryHint: false)
         }
 
