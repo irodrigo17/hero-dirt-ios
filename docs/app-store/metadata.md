@@ -105,17 +105,37 @@ If you later forward telemetry to a backend (e.g. TelemetryDeck), update this to
 
 ## Screenshots
 
-Required: **6.9" iPhone** (1320 × 2868 portrait). App Store Connect scales these down for smaller iPhones, so 6.5"/6.1" sets are optional. The app is iPhone-only, so no iPad screenshots are needed.
+Required for iPhone: at least one **iPhone with Dynamic Island (medium display)** set; App Store Connect scales sets down for other sizes. Optional iPhone Duo sets add the "optimized for iPhone Duo" badge (and are required from April 2027 for apps built with the iOS 27.1 SDK). The app is iPhone-only, so no iPad screenshots. All PNG, opaque, captioned; upload each folder in file order.
 
-Upload in this order (`docs/app-store/screenshots/`):
+| App Store Connect slot | Size (px) | Folder (`docs/app-store/screenshots/`) |
+|---|---|---|
+| iPhone with Dynamic Island, medium (required) | 1206 × 2622 | `iphone-6.3/` (5) |
+| iPhone with Dynamic Island, large | 1320 × 2868 | `iphone-6.9/` (5) |
+| iPhone Duo, outer display | 1398 × 2034 | `iphone-duo-outer/` (4) |
+| iPhone Duo, inner display portrait | 2007 × 2853 | `iphone-duo-inner-portrait/` (1) |
+| iPhone Duo, inner display landscape | 2853 × 2007 | `iphone-duo-inner-landscape/` (2) |
 
-1. `iphone-6.9-01.png` — "Know when your trails are ridable" (My Trails list)
-2. `iphone-6.9-02.png` — "Hero dirt? Go ride." (trail details)
-3. `iphone-6.9-03.png` — "Plan the week ahead" (outlook + wetness chart)
-4. `iphone-6.9-04.png` — "See where it rained" (rain map)
-5. `iphone-6.9-05.png` — "Made for riders, day or night" (dark mode)
+iPhone order: 1. Know when your trails are ridable (My Trails) · 2. Hero dirt? Go ride. (details) · 3. Plan the week ahead (outlook + wetness chart) · 4. See where it rained (rain map) · 5. Made for riders, day or night (dark mode).
 
-Raw captures are in `raw/` (iPhone 17 Pro Max simulator, `-useFakeServices` sample data, status bar 9:41); `frame.py` adds the captions and background.
+Regenerate: build the app onto the simulators (iPhone 17 Pro, iPhone 17 Pro Max, iPhone Duo), then
+`AI_AGENT=... /usr/bin/python3 screenshots/capture.py <p17|pm|duo> screenshots/raw` (runs the app with `-useFakeServices -startInList`, status bar 9:41) and
+`/usr/bin/python3 screenshots/frame.py screenshots/raw screenshots`.
+
+## Creative assets (iOS 27 product page header + search results)
+
+Opaque PNGs in `docs/app-store/creative/`, with the icon, name and tagline inside Apple's "art safe area" (measured from Apple's templates); the strata background bleeds to every edge so any crop looks intentional.
+
+| Slot | File | Size |
+|---|---|---|
+| Product page **Header** | `header-21x9-3840x1646.png` (or the universal file) | 3840 × 1646 |
+| **Search Results** | `search-results-3x2-3840x2560.png` (icon + name + two real trail cards) | 3840 × 2560 |
+| Either slot (universal 16:9) | `universal-16x9-5244x2950.png` | 5244 × 2950 |
+
+Use the Preview button in App Store Connect to check crops on different devices. Regenerate with `/usr/bin/python3 creative/make_creative_assets.py icon/Icon-1024-AppStore.png screenshots/raw/pm-1-list.png creative`.
+
+## App icon
+
+Xcode builds the icon from the asset catalog (`AppIcon` 1024 with dark and tinted variants). Every size is also exported in `docs/app-store/icon/` (`Icon-1024-AppStore.png` is the App Store icon).
 
 ## Checklist before submitting
 
