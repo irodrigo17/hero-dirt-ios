@@ -26,18 +26,21 @@ struct MapView: View {
                     Divider()
                         .ignoresSafeArea()
                 }
-                map
-                    .overlay(alignment: .bottomTrailing) {
-                        if model.isSplit {
-                            floatingMapControls
-                                .padding(.trailing, 16)
-                                .padding(.bottom, 24)
-                                .transition(.opacity.combined(with: .scale(scale: 0.9)))
-                        }
-                    }
+                // Always inside a NavigationStack (even when its toolbar is
+                // hidden) so the map's structural identity is stable.
+                NavigationStack {
+                    map
+                        .toolbar { mapToolbar }
+                        .toolbar(.hidden, for: .navigationBar)
+                        .toolbar(model.isSplit ? .visible : .hidden, for: .bottomBar)
+                }
             }
             .onAppear { model.applyLayout(split: split, places: placeStore.places, animated: false) }
             .onChange(of: split) { _, newValue in
+                // Popovers/sheets anchored to the split-layout toolbar go away
+                // with it.
+                showingRainMapFromMap = false
+                showingAboutFromMap = false
                 model.applyLayout(split: newValue, places: placeStore.places, animated: true)
             }
         }
@@ -151,41 +154,37 @@ struct MapView: View {
         .animation(.easeInOut(duration: 0.25), value: gridService.errorMessage)
     }
 
-    /// Map actions for the split layout, in the bottom-trailing corner for
-    /// easy thumb reach.
-    private var floatingMapControls: some View {
+    /// Map actions for the split layout as a native toolbar: a bottom bar on
+    /// regular iPhones, the system vertical bar on iPhone Duo. (In the
+    /// stacked layout they live in the bottom sheet's toolbar instead.)
+    @ToolbarContentBuilder
+    private var mapToolbar: some ToolbarContent {
         @Bindable var model = model
-        return VStack(spacing: 12) {
-            // Same size, icon weight and glass as the capsule below.
-            Button {
-                showingAboutFromMap = true
-            } label: {
-                Image(systemName: "info.circle")
-                    .font(.title3)
-                    .foregroundStyle(Color.primary)
-                    .frame(width: 48, height: 48)
+        if model.isSplit {
+            ToolbarSpacer(.flexible, placement: .bottomBar)
+            ToolbarItem(placement: .bottomBar) {
+                Button {
+                    showingAboutFromMap = true
+                } label: {
+                    Label("About Hero Dirt", systemImage: "info.circle")
+                }
+                .sheet(isPresented: $showingAboutFromMap) {
+                    AboutView()
+                }
             }
-            .buttonStyle(.plain)
-            .glassEffect(.regular.interactive(), in: Circle())
-            .accessibilityLabel("About Hero Dirt")
-
-            VStack(spacing: 0) {
+            ToolbarSpacer(.fixed, placement: .bottomBar)
+            ToolbarItemGroup(placement: .bottomBar) {
                 Button {
                     showingRainMapFromMap = true
                 } label: {
-                    ZStack {
-                        if gridService.isLoading {
-                            ProgressView().controlSize(.small)
-                        }
-                        Image(systemName: model.overlayVisible ? "cloud.rain.fill" : "cloud.rain")
-                            .opacity(gridService.isLoading ? 0 : 1)
+                    if gridService.isLoading {
+                        ProgressView()
+                    } else {
+                        Label("Rain map", systemImage: model.overlayVisible ? "cloud.rain.fill" : "cloud.rain")
                     }
-                    .font(.title3)
-                    .foregroundStyle(model.overlayVisible ? Color.blue : Color.primary)
-                    .frame(width: 48, height: 48)
                 }
-                .accessibilityLabel("Rain map")
-                .popover(isPresented: $showingRainMapFromMap, arrowEdge: .trailing) {
+                .tint(model.overlayVisible ? .blue : nil)
+                .popover(isPresented: $showingRainMapFromMap) {
                     RainfallOverlaySheet(
                         isVisible: $model.overlayVisible,
                         timeframe: $model.overlayTimeframe,
@@ -196,23 +195,10 @@ struct MapView: View {
                     .presentationCompactAdaptation(.popover)
                 }
 
-                Divider().frame(width: 32)
-
-                Button {
-                    model.centerOnUser()
-                } label: {
-                    Image(systemName: "location.fill")
-                        .font(.title3)
-                        .foregroundStyle(Color.primary)
-                        .frame(width: 48, height: 48)
+                Button(action: model.centerOnUser) {
+                    Label("Center map on your location", systemImage: "location.fill")
                 }
-                .accessibilityLabel("Center map on your location")
             }
-            .buttonStyle(.plain)
-            .glassEffect(.regular.interactive(), in: Capsule())
-        }
-        .sheet(isPresented: $showingAboutFromMap) {
-            AboutView()
         }
     }
 
