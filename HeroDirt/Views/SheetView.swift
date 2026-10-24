@@ -33,11 +33,11 @@ struct SheetView: View {
                 onSelectSearchResult: onSelectSearchResult,
                 onIsSearchingChanged: onSearchFocusChanged
             )
-            .navigationTitle("Saved places")
+            .navigationTitle("My Trails")
             .searchable(
                 text: $searchText,
                 placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Search trails, parks, places"
+                prompt: "Find trails, parks, places"
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -36,8 +36,8 @@ struct SavedPlacesListView: View {
     private var content: some View {
         if placeStore.places.isEmpty {
             ContentUnavailableView(
-                "No saved spots yet",
-                systemImage: "star",
+                "No trails yet",
+                systemImage: "bicycle",
                 description: Text(
                     "Search for a trail or park, tap a spot on the map, or long-press to drop a pin. Then tap Save to keep an eye on it here."
                 )
@@ -48,12 +48,17 @@ struct SavedPlacesListView: View {
                     Button {
                         onSelectPlace(place)
                     } label: {
-                        PlaceRow(
-                            place: place,
-                            rainfall: conditions.rainfall[place.id],
-                            isLoading: conditions.loading.contains(place.id),
-                            error: conditions.errors[place.id]
-                        )
+                        HStack(spacing: 8) {
+                            TrailCard(
+                                place: place,
+                                rainfall: conditions.rainfall[place.id],
+                                isLoading: conditions.loading.contains(place.id),
+                                error: conditions.errors[place.id]
+                            )
+                            Image(systemName: "chevron.forward")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -79,82 +84,10 @@ struct SavedPlacesListView: View {
     }
 }
 
-// MARK: - Place Row
-
-private struct PlaceRow: View {
-    let place: Place
-    let rainfall: RainfallSummary?
-    let isLoading: Bool
-    let error: String?
-
-    private var effectiveSoil: SoilData? {
-        place.soilOverride?.asSoilData ?? place.soil
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Text(place.name)
-                    .font(.headline)
-                    .lineLimit(1)
-                Spacer()
-                Image(systemName: "chevron.forward")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-            }
-
-            if let error {
-                Label(error, systemImage: "exclamationmark.triangle")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            } else if let rainfall, !isLoading {
-                let condition = rainfall.dirtCondition(soil: effectiveSoil)
-                // Drop the short description when the row is narrow (e.g. the
-                // landscape sidebar) instead of truncating everything.
-                ViewThatFits(in: .horizontal) {
-                    statusLine(condition: condition, rainfall: rainfall, showDescription: true)
-                    statusLine(condition: condition, rainfall: rainfall, showDescription: false)
-                }
-                RainTilesRow(tiles: rainfall.pastTiles, style: .compact)
-            } else {
-                PlaceRowSkeleton()
-            }
-        }
-        .padding(.vertical, 6)
-        .animation(.easeInOut(duration: 0.25), value: rainfall == nil)
-    }
-
-    private func statusLine(
-        condition: DirtCondition,
-        rainfall: RainfallSummary,
-        showDescription: Bool
-    ) -> some View {
-        HStack(spacing: 8) {
-            ConditionBadge(condition: condition)
-            if showDescription {
-                Text(condition.shortDescription)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .fixedSize()
-            }
-            Spacer(minLength: 4)
-            Label(rainfall.lastRainText, systemImage: "cloud.rain")
-                .labelStyle(.titleAndIcon)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .labelIconToTitleSpacing(3)
-                .lineLimit(1)
-                .fixedSize()
-                .accessibilityLabel("Last rain \(rainfall.lastRainText)")
-        }
-    }
-}
-
 #Preview("Saved places") {
     NavigationStack {
         SavedPlacesListView(selectedDetent: .large)
-            .navigationTitle("Saved places")
+            .navigationTitle("My Trails")
             .navigationBarTitleDisplayMode(.inline)
     }
     .previewEnvironment()

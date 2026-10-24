@@ -1,6 +1,25 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testMapUsesTrailCards() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        app.buttons["Show map"].tap()
+        XCTAssertTrue(app.navigationBars["My Trails"].waitForExistence(timeout: 10))
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 10))
+        XCTAssertTrue(trail.label.contains("Today:"))
+        XCTAssertTrue(trail.label.contains("last rain"))
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "Map sheet trail cards"
+        shot.lifetime = .keepAlways
+        add(shot)
+        trail.tap()
+        XCTAssertTrue(app.buttons["Trail Options"].waitForExistence(timeout: 10))
+    }
+
     func testSavingFromInlineActionRow() {
         continueAfterFailure = false
         let app = XCUIApplication()
