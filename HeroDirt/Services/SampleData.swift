@@ -37,7 +37,16 @@ enum SampleData {
     /// Last rain a week ago: firm and fast.
     static let dry = RainfallSummary(daily: days([0, 0, 0, 0, 0, 0, 8] + dryMonth, forecast: [0, 0, 0, 0, 0, 0, 0], et0: 4))
 
-    static let forecast = RainForecast(next1Day: 0, next2Days: 2.5, next3Days: 6, next7Days: 11)
+    static let forecast = RainForecast(
+        next1Day: 0, next2Days: 2.5, next3Days: 6, next7Days: 11,
+        daily: [0.0, 2.5, 3.5, 0, 0, 4, 1, 0, 0, 2].enumerated().map { index, amount in
+            DailyRainForecast(
+                date: Calendar.current.date(byAdding: .day, value: index, to: Calendar.current.startOfDay(for: Date()))!,
+                amount: amount,
+                precipitationChance: amount > 0 ? 0.7 : 0.1
+            )
+        }
+    )
 
     static let loam = SoilData(sandFraction: 0.4, clayFraction: 0.2)
 

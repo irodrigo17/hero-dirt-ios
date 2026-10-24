@@ -98,6 +98,14 @@ struct RainForecast: Codable, Sendable {
     let next2Days: Double
     let next3Days: Double
     let next7Days: Double
+    var daily: [DailyRainForecast]? = nil
+}
+
+struct DailyRainForecast: Codable, Sendable, Equatable, Identifiable {
+    let date: Date
+    let amount: Double
+    let precipitationChance: Double?
+    var id: Date { date }
 }
 
 // MARK: - Daily Data

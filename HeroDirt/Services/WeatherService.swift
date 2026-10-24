@@ -394,7 +394,7 @@ enum WeatherService {
         async throws -> RainForecast
     {
         let key = WeatherCache.key(latitude: latitude, longitude: longitude)
-        if let cached = await cache.getForecast(key) { return cached }
+        if let cached = await cache.getForecast(key), cached.daily != nil { return cached }
 
         let location = CLLocation(latitude: latitude, longitude: longitude)
         let daily = try await WeatherKit.WeatherService.shared.weather(
@@ -402,18 +402,22 @@ enum WeatherService {
             including: .daily
         )
 
-        let amounts = daily.forecast.prefix(7).map {
-            $0.precipitationAmountByType.rainfall.converted(to: .millimeters)
-                .value
+        let days = daily.forecast.map {
+            DailyRainForecast(
+                date: $0.date,
+                amount: $0.precipitationAmountByType.rainfall.converted(to: .millimeters).value,
+                precipitationChance: $0.precipitationChance
+            )
         }
 
-        func sum(_ n: Int) -> Double { amounts.prefix(n).reduce(0, +) }
+        func sum(_ n: Int) -> Double { days.prefix(n).reduce(0) { $0 + $1.amount } }
 
         let result = RainForecast(
             next1Day: sum(1),
             next2Days: sum(2),
             next3Days: sum(3),
-            next7Days: sum(7)
+            next7Days: sum(7),
+            daily: days
         )
         await cache.setForecast(key, result)
         return result

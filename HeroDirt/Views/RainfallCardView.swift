@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RainfallCardView: View {
     let summary: RainfallSummary
+    @State private var showingCalendar = false
 
     var body: some View {
         CardContainer {
@@ -22,6 +23,15 @@ struct RainfallCardView: View {
             }
             .font(.subheadline)
             .accessibilityElement(children: .combine)
+            if !summary.dailyHistory.isEmpty {
+                Button { showingCalendar = true } label: {
+                    Label("Rain Calendar", systemImage: "calendar")
+                }
+                .font(.subheadline)
+            }
+        }
+        .sheet(isPresented: $showingCalendar) {
+            RainHistoryCalendarView(days: summary.dailyHistory)
         }
     }
 }

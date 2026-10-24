@@ -1,6 +1,42 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testRainCalendarAndDailyForecast() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 10))
+        trail.tap()
+        let calendar = app.buttons["Rain Calendar"]
+        for _ in 0..<8 where !calendar.isHittable { app.swipeUp() }
+        XCTAssertTrue(calendar.isHittable)
+        calendar.tap()
+        XCTAssertTrue(app.navigationBars["Rain Calendar"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Next month"].isEnabled)
+        let month = app.staticTexts["Rain calendar month"].label
+        app.buttons["Previous month"].tap()
+        XCTAssertNotEqual(app.staticTexts["Rain calendar month"].label, month)
+        app.buttons["Next month"].tap()
+        XCTAssertEqual(app.staticTexts["Rain calendar month"].label, month)
+        let history = XCTAttachment(screenshot: app.screenshot())
+        history.name = "Observed rain calendar"
+        history.lifetime = .keepAlways
+        add(history)
+        app.buttons["Done"].tap()
+        let forecast = app.buttons["Daily Rain Forecast"]
+        for _ in 0..<5 where !forecast.isHittable { app.swipeUp() }
+        XCTAssertTrue(forecast.isHittable)
+        forecast.tap()
+        XCTAssertTrue(app.navigationBars["Rain Forecast"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Today"].exists)
+        let daily = XCTAttachment(screenshot: app.screenshot())
+        daily.name = "Daily rain forecast"
+        daily.lifetime = .keepAlways
+        add(daily)
+    }
+
     func testReorderTrails() {
         continueAfterFailure = false
         let app = XCUIApplication()
