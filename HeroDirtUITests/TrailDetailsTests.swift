@@ -1,6 +1,40 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testNativeSearchInputInListAndMap() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        var field = app.searchFields.firstMatch
+        if !field.isHittable { app.swipeDown() }
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("Rancho")
+        XCTAssertEqual(field.value as? String, "Rancho")
+        let main = XCTAttachment(screenshot: app.screenshot())
+        main.name = "Native list search"
+        main.lifetime = .keepAlways
+        add(main)
+        XCTAssertTrue(app.buttons["Dictate"].exists)
+        if app.buttons["Cancel"].exists {
+            app.buttons["Cancel"].tap()
+        } else {
+            app.buttons["Close"].tap()
+        }
+        app.buttons["Show map"].tap()
+        field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        field.typeText("Arastradero")
+        XCTAssertEqual(field.value as? String, "Arastradero")
+        XCTAssertTrue(app.buttons["Dictate"].exists)
+        let map = XCTAttachment(screenshot: app.screenshot())
+        map.name = "Native map search"
+        map.lifetime = .keepAlways
+        add(map)
+    }
+
     func testEmailFeedbackAtBottomOfAbout() {
         continueAfterFailure = false
         let app = XCUIApplication()

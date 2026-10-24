@@ -15,6 +15,7 @@ A native iOS app that helps mountain bikers and trail runners decide if conditio
 - **Rain forecast** — Shows predicted precipitation for the next 1, 2, 3, and 7 days via Apple WeatherKit.
 - **iCloud sync** — Saved places sync across devices via CloudKit.
 - **Place search** — `UISearchController`-powered search using `MKLocalSearch` with outdoor place prioritization (parks, forests, trails, campgrounds). Results are biased toward the current map viewport.
+- **Voice input** — Search fields support the system keyboard's Dictation microphone when Dictation is enabled in iOS keyboard settings. No app-specific audio permissions are needed.
 - **Tap-to-inspect** — Tap anywhere on the map to see rainfall history, forecast, and dirt condition for that location.
 - **Saved places** — Save locations with custom names. Each saved place shows as a marker on the map.
 
