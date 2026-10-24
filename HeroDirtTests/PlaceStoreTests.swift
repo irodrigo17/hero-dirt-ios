@@ -15,6 +15,19 @@ struct PlaceStoreTests {
         try? FileManager.default.removeItem(at: url)
     }
 
+    @Test func reorderedPlacesSurviveReload() {
+        let url = makeTempURL()
+        defer { cleanup(url) }
+        let store = PlaceStore(fileURL: url)
+        for index in 0..<3 {
+            store.addPlace(Place(name: "Trail \(index)", latitude: Double(index), longitude: 0))
+        }
+        store.movePlaces(from: IndexSet(integer: 0), to: 3)
+        #expect(store.places.map(\.name) == ["Trail 1", "Trail 2", "Trail 0"])
+        let reloaded = PlaceStore(fileURL: url)
+        #expect(reloaded.places.map(\.id) == store.places.map(\.id))
+    }
+
     // MARK: - CRUD
 
     @Test func addPlaceIncreasesCount() {

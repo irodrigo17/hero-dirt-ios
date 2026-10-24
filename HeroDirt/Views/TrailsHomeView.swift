@@ -23,6 +23,7 @@ struct TrailsHomeView: View {
     @State private var searchResults: [MKMapItem] = []
     @State private var searchTask: Task<Void, Never>?
     @State private var showingAbout = false
+    @State private var editMode: EditMode = .inactive
     @State private var renamingPlace: Place?
     @State private var editingName = ""
 
@@ -53,6 +54,11 @@ struct TrailsHomeView: View {
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
+                        if placeStore.places.count > 1 && !isSearching {
+                            EditButton()
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button(action: onShowMap) {
                             Label("Map", systemImage: "map")
                         }
@@ -79,7 +85,14 @@ struct TrailsHomeView: View {
                 detail
             }
         }
+        .environment(\.editMode, $editMode)
         .navigationSplitViewStyle(.balanced)
+        .onChange(of: isSearching) { _, searching in
+            if searching { editMode = .inactive }
+        }
+        .onChange(of: placeStore.places.count) { _, count in
+            if count < 2 { editMode = .inactive }
+        }
         .onAppear(perform: selectFirstIfSideBySide)
         .onChange(of: horizontalSizeClass) { _, _ in selectFirstIfSideBySide() }
     }

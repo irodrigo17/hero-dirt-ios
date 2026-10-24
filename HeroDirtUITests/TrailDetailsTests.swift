@@ -1,6 +1,35 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testReorderTrails() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        let edit = app.buttons["Edit"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 10))
+        edit.tap()
+        let handles = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Reorder"))
+        XCTAssertTrue(handles.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(handles.count, 2)
+        let first = handles.element(boundBy: 0)
+        let second = handles.element(boundBy: 1)
+        first.press(forDuration: 0.5, thenDragTo: second)
+        app.buttons["Done"].tap()
+        let rancho = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        let arastradero = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Arastradero Preserve")).firstMatch
+        XCTAssertLessThan(arastradero.frame.minY, rancho.frame.minY)
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "Reordered trails"
+        shot.lifetime = .keepAlways
+        add(shot)
+        app.buttons["Show map"].tap()
+        XCTAssertTrue(app.navigationBars["My Trails"].waitForExistence(timeout: 10))
+        let mapRancho = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        let mapArastradero = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Arastradero Preserve")).firstMatch
+        XCTAssertLessThan(mapArastradero.frame.minY, mapRancho.frame.minY)
+    }
+
     func testMapUsesTrailCards() {
         continueAfterFailure = false
         let app = XCUIApplication()
