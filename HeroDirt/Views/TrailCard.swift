@@ -11,6 +11,7 @@ struct ConditionStrip: View {
     enum Style { case compact, large }
 
     @Environment(\.rainUnit) private var unit
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: style == .compact ? 4 : 6) {
@@ -29,7 +30,7 @@ struct ConditionStrip: View {
                             if style == .large {
                                 Image(systemName: day.condition.icon)
                                     .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(colorScheme == .dark ? Color.black.opacity(0.75) : .white)
                             }
                         }
                     if style == .large {
