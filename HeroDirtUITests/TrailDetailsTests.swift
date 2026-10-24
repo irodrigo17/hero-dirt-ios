@@ -1,6 +1,22 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testEmailFeedbackAtBottomOfAbout() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        app.buttons["About Hero Dirt"].tap()
+        let email = app.buttons["Email Feedback"]
+        for _ in 0..<5 where !email.isHittable { app.swipeUp() }
+        XCTAssertTrue(email.isHittable)
+        XCTAssertTrue(app.staticTexts["No GitHub account? Send feedback to irodrigo17@gmail.com."].exists)
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "Email feedback"
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     func testRainCalendarAndDailyForecast() {
         continueAfterFailure = false
         let app = XCUIApplication()

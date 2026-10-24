@@ -4,6 +4,7 @@ import SwiftUI
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @State private var showingEmailUnavailable = false
     @State private var iCloudStatus: CKAccountStatus?
     @AppStorage(RainUnitPreference.storageKey) private var unitPreference = RainUnitPreference.automatic
 
@@ -101,6 +102,18 @@ struct AboutView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.top, 8)
                 }
+                Section {
+                    Button {
+                        Telemetry.signal(.feedbackOpened, ["kind": "email"])
+                        openURL(Self.feedbackEmailURL) { accepted in
+                            if !accepted { showingEmailUnavailable = true }
+                        }
+                    } label: {
+                        Label("Email Feedback", systemImage: "envelope")
+                    }
+                } footer: {
+                    Text("No GitHub account? Send feedback to \(Self.feedbackEmailAddress).")
+                }
             }
             .navigationTitle("About")
             .navigationBarTitleDisplayMode(.inline)
@@ -108,6 +121,12 @@ struct AboutView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .alert("Email isn't available", isPresented: $showingEmailUnavailable) {
+                Button("Copy Email Address") { UIPasteboard.general.string = Self.feedbackEmailAddress }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Set up an email app, or send your feedback to \(Self.feedbackEmailAddress).")
             }
             .task {
                 iCloudStatus = await withCheckedContinuation { continuation in
@@ -120,6 +139,19 @@ struct AboutView: View {
     }
 
     // MARK: - Feedback
+
+    static let feedbackEmailAddress = "irodrigo17@gmail.com"
+
+    static var feedbackEmailURL: URL {
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.path = feedbackEmailAddress
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: "Hero Dirt Feedback"),
+            URLQueryItem(name: "body", value: "What would you like to share?\n\n\n---\n" + AppInfo.diagnosticsSummary)
+        ]
+        return components.url!
+    }
 
     private enum FeedbackKind {
         case bug, idea

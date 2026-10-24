@@ -5,6 +5,15 @@ import Testing
 
 struct SharedUtilitiesTests {
 
+    @MainActor
+    @Test func feedbackEmailUsesRequestedRecipient() throws {
+        let components = try #require(URLComponents(url: AboutView.feedbackEmailURL, resolvingAgainstBaseURL: false))
+        #expect(components.scheme == "mailto")
+        #expect(components.path == "irodrigo17@gmail.com")
+        #expect(components.queryItems?.first(where: { $0.name == "subject" })?.value == "Hero Dirt Feedback")
+        #expect(components.queryItems?.first(where: { $0.name == "body" })?.value?.contains(AppInfo.diagnosticsSummary) == true)
+    }
+
     // MARK: - Double.formatMillimeters
 
     @Test func formatSingleDigit() {
