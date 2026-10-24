@@ -26,6 +26,7 @@ struct TrailsHomeView: View {
     @State private var isSearchLoading = false
     @State private var searchError: String?
     @State private var searchTask: Task<Void, Never>?
+    @State private var activeSearch: MKLocalSearch?
     @State private var showingAbout = false
     @State private var editMode: EditMode = .inactive
     @State private var renamingPlace: Place?
@@ -97,6 +98,8 @@ struct TrailsHomeView: View {
                 editMode = .inactive
             } else {
                 searchTask?.cancel()
+                activeSearch?.cancel()
+                activeSearch = nil
                 isSearchLoading = false
                 searchResults = []
                 searchError = nil
@@ -105,7 +108,11 @@ struct TrailsHomeView: View {
         .onChange(of: placeStore.places.count) { _, count in
             if count < 2 { editMode = .inactive }
         }
-        .onDisappear { searchTask?.cancel() }
+        .onDisappear {
+            searchTask?.cancel()
+            activeSearch?.cancel()
+            activeSearch = nil
+        }
         .onAppear {
             if incomingTrail != nil { openSharedTrail() } else { selectFirstIfSideBySide() }
         }
@@ -255,6 +262,8 @@ struct TrailsHomeView: View {
 
     private func scheduleSearch(_ query: String, debounce: Bool = true) {
         searchTask?.cancel()
+        activeSearch?.cancel()
+        activeSearch = nil
         searchError = nil
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
@@ -274,13 +283,17 @@ struct TrailsHomeView: View {
                 request.region = region
             }
             do {
-                let items = try await MKLocalSearch(request: request).start().mapItems
+                let operation = MKLocalSearch(request: request)
+                activeSearch = operation
+                let items = try await operation.start().mapItems
                 guard !Task.isCancelled else { return }
+                activeSearch = nil
                 searchResults = items
                 isSearchLoading = false
                 Telemetry.signal(.searchPerformed, ["results": "\(items.count)"])
             } catch {
                 guard !Task.isCancelled else { return }
+                activeSearch = nil
                 searchResults = []
                 isSearchLoading = false
                 searchError = "Search is unavailable right now. Please try again."

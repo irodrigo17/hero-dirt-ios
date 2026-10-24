@@ -23,6 +23,7 @@ struct SheetView: View {
     @State private var isSearchLoading = false
     @State private var searchError: String?
     @State private var searchTask: Task<Void, Never>?
+    @State private var activeSearch: MKLocalSearch?
     @State private var showingAbout = false
     @State private var showingOverlayControls = false
 
@@ -39,6 +40,8 @@ struct SheetView: View {
                 onIsSearchingChanged: { active in
                     if !active {
                         searchTask?.cancel()
+                        activeSearch?.cancel()
+                        activeSearch = nil
                         isSearchLoading = false
                         searchResults = []
                         searchError = nil
@@ -73,15 +76,23 @@ struct SheetView: View {
             }
             .onSubmit(of: .search) {
                 searchTask?.cancel()
+                activeSearch?.cancel()
+                activeSearch = nil
                 guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
                 isSearchLoading = true
                 searchError = nil
                 searchTask = Task { await runSearch(query: searchText) }
             }
         }
-        .onDisappear { searchTask?.cancel() }
+        .onDisappear {
+            searchTask?.cancel()
+            activeSearch?.cancel()
+            activeSearch = nil
+        }
         .onChange(of: searchText) { _, newValue in
             searchTask?.cancel()
+            activeSearch?.cancel()
+            activeSearch = nil
             searchError = nil
             guard !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 searchResults = []
@@ -144,13 +155,17 @@ struct SheetView: View {
         }
         request.resultTypes = [.pointOfInterest, .physicalFeature]
         do {
-            let response = try await MKLocalSearch(request: request).start()
+            let operation = MKLocalSearch(request: request)
+            activeSearch = operation
+            let response = try await operation.start()
             guard !Task.isCancelled else { return }
+            activeSearch = nil
             searchResults = response.mapItems
             isSearchLoading = false
             Telemetry.signal(.searchPerformed, ["results": "\(response.mapItems.count)"])
         } catch {
             guard !Task.isCancelled else { return }
+            activeSearch = nil
             searchResults = []
             isSearchLoading = false
             searchError = "Search is unavailable right now. Please try again."
