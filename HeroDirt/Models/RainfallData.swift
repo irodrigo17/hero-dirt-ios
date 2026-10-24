@@ -52,11 +52,11 @@ enum DirtCondition {
 
     var color: Color {
         switch self {
-        case .veryWet: return .indigo
-        case .wet: return .blue
-        case .heroDirt: return .green
-        case .dry: return .orange
-        case .veryDry: return .red
+        case .veryWet: return ConditionPalette.soaked
+        case .wet: return ConditionPalette.muddy
+        case .heroDirt: return ConditionPalette.hero
+        case .dry: return ConditionPalette.dry
+        case .veryDry: return ConditionPalette.dusty
         }
     }
 

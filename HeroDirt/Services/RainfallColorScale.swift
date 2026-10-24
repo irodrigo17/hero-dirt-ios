@@ -18,21 +18,21 @@ enum RainfallColorScale {
         Stop(threshold: 0, color: .clear, label: "0", inchLabel: "0"),
         Stop(
             threshold: 0.1,
-            color: Color(.sRGB, red: 0.6, green: 0.9, blue: 0.6, opacity: 1),
+            color: Color(.sRGB, red: 0.60, green: 0.75, blue: 0.62, opacity: 1),
             label: "0.1",
             inchLabel: "0"
         ),
-        Stop(threshold: 1, color: .green, label: "1", inchLabel: ".04"),
-        Stop(threshold: 5, color: .yellow, label: "5", inchLabel: ".2"),
-        Stop(threshold: 10, color: .orange, label: "10", inchLabel: ".4"),
-        Stop(threshold: 25, color: .red, label: "25", inchLabel: "1"),
+        Stop(threshold: 1, color: Color(.sRGB, red: 0.36, green: 0.59, blue: 0.43, opacity: 1), label: "1", inchLabel: ".04"),
+        Stop(threshold: 5, color: Color(.sRGB, red: 0.78, green: 0.70, blue: 0.40, opacity: 1), label: "5", inchLabel: ".2"),
+        Stop(threshold: 10, color: Color(.sRGB, red: 0.76, green: 0.53, blue: 0.30, opacity: 1), label: "10", inchLabel: ".4"),
+        Stop(threshold: 25, color: Color(.sRGB, red: 0.69, green: 0.35, blue: 0.32, opacity: 1), label: "25", inchLabel: "1"),
         Stop(
             threshold: 50,
-            color: Color(.sRGB, red: 0.8, green: 0.2, blue: 0.8, opacity: 1),
+            color: Color(.sRGB, red: 0.58, green: 0.39, blue: 0.57, opacity: 1),
             label: "50",
             inchLabel: "2"
         ),
-        Stop(threshold: 100, color: .purple, label: "100+", inchLabel: "4+"),
+        Stop(threshold: 100, color: Color(.sRGB, red: 0.43, green: 0.35, blue: 0.57, opacity: 1), label: "100+", inchLabel: "4+"),
     ]
 
     // Pre-computed RGBA components for each stop (avoids repeated UIColor conversions)
