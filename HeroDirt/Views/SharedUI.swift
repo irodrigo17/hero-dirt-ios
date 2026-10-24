@@ -34,13 +34,13 @@ extension View {
     }
 }
 
-/// Softer condition colors, with lighter variants that stay legible on dark cards.
+/// A middle ground between the original vivid palette and the softened colors.
 enum ConditionPalette {
-    static let soaked = adaptive(light: (0.38, 0.34, 0.61), dark: (0.66, 0.62, 0.86))
-    static let muddy = adaptive(light: (0.23, 0.45, 0.64), dark: (0.55, 0.73, 0.90))
-    static let hero = adaptive(light: (0.25, 0.49, 0.37), dark: (0.48, 0.74, 0.59))
-    static let dry = adaptive(light: (0.65, 0.43, 0.19), dark: (0.87, 0.68, 0.40))
-    static let dusty = adaptive(light: (0.65, 0.34, 0.27), dark: (0.91, 0.59, 0.48))
+    static let soaked = adaptive(light: (0.33, 0.31, 0.68), dark: (0.52, 0.49, 0.88))
+    static let muddy = adaptive(light: (0.12, 0.46, 0.82), dark: (0.31, 0.66, 0.95))
+    static let hero = adaptive(light: (0.23, 0.64, 0.36), dark: (0.33, 0.78, 0.47))
+    static let dry = adaptive(light: (0.83, 0.51, 0.10), dark: (0.94, 0.69, 0.20))
+    static let dusty = adaptive(light: (0.83, 0.29, 0.23), dark: (0.96, 0.47, 0.38))
 
     private static func adaptive(light: (Double, Double, Double), dark: (Double, Double, Double)) -> Color {
         Color(uiColor: UIColor { traits in

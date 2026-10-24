@@ -18,21 +18,21 @@ enum RainfallColorScale {
         Stop(threshold: 0, color: .clear, label: "0", inchLabel: "0"),
         Stop(
             threshold: 0.1,
-            color: Color(.sRGB, red: 0.60, green: 0.75, blue: 0.62, opacity: 1),
+            color: Color(.sRGB, red: 0.60, green: 0.83, blue: 0.61, opacity: 1),
             label: "0.1",
             inchLabel: "0"
         ),
-        Stop(threshold: 1, color: Color(.sRGB, red: 0.36, green: 0.59, blue: 0.43, opacity: 1), label: "1", inchLabel: ".04"),
-        Stop(threshold: 5, color: Color(.sRGB, red: 0.78, green: 0.70, blue: 0.40, opacity: 1), label: "5", inchLabel: ".2"),
-        Stop(threshold: 10, color: Color(.sRGB, red: 0.76, green: 0.53, blue: 0.30, opacity: 1), label: "10", inchLabel: ".4"),
-        Stop(threshold: 25, color: Color(.sRGB, red: 0.69, green: 0.35, blue: 0.32, opacity: 1), label: "25", inchLabel: "1"),
+        Stop(threshold: 1, color: Color(.sRGB, red: 0.28, green: 0.69, blue: 0.39, opacity: 1), label: "1", inchLabel: ".04"),
+        Stop(threshold: 5, color: Color(.sRGB, red: 0.89, green: 0.75, blue: 0.20, opacity: 1), label: "5", inchLabel: ".2"),
+        Stop(threshold: 10, color: Color(.sRGB, red: 0.88, green: 0.56, blue: 0.15, opacity: 1), label: "10", inchLabel: ".4"),
+        Stop(threshold: 25, color: Color(.sRGB, red: 0.85, green: 0.29, blue: 0.25, opacity: 1), label: "25", inchLabel: "1"),
         Stop(
             threshold: 50,
-            color: Color(.sRGB, red: 0.58, green: 0.39, blue: 0.57, opacity: 1),
+            color: Color(.sRGB, red: 0.69, green: 0.30, blue: 0.69, opacity: 1),
             label: "50",
             inchLabel: "2"
         ),
-        Stop(threshold: 100, color: Color(.sRGB, red: 0.43, green: 0.35, blue: 0.57, opacity: 1), label: "100+", inchLabel: "4+"),
+        Stop(threshold: 100, color: Color(.sRGB, red: 0.56, green: 0.34, blue: 0.72, opacity: 1), label: "100+", inchLabel: "4+"),
     ]
 
     // Pre-computed RGBA components for each stop (avoids repeated UIColor conversions)
