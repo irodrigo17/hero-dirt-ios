@@ -57,6 +57,15 @@ struct PlaceDetailsView: View {
         mapItem ?? savedPlace.flatMap { mapItemCache.items[$0.id] }
     }
 
+    /// Only offer web links supplied by Apple Places, not arbitrary URL schemes.
+    private var websiteURL: URL? {
+        guard let url = effectiveMapItem?.url,
+              let scheme = url.scheme?.lowercased(),
+              ["https", "http"].contains(scheme),
+              url.host != nil else { return nil }
+        return url
+    }
+
     var body: some View {
         Group {
             if style == .pushed {
@@ -142,23 +151,30 @@ struct PlaceDetailsView: View {
             )
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    if savedPlace != nil {
+                    if savedPlace != nil || websiteURL != nil {
                         Menu {
-                            Button {
-                                editingName = placeName
-                                showingRenameAlert = true
-                            } label: {
-                                Label("Rename", systemImage: "pencil")
+                            if let websiteURL {
+                                Link(destination: websiteURL) {
+                                    Label("Website", systemImage: "safari")
+                                }
                             }
-                            Button {
-                                showSoilOverrideSheet = true
-                            } label: {
-                                Label("Trail Settings", systemImage: "slider.horizontal.3")
-                            }
-                            Button(role: .destructive) {
-                                showingDeleteConfirmation = true
-                            } label: {
-                                Label("Delete Trail", systemImage: "trash")
+                            if savedPlace != nil {
+                                Button {
+                                    editingName = placeName
+                                    showingRenameAlert = true
+                                } label: {
+                                    Label("Rename", systemImage: "pencil")
+                                }
+                                Button {
+                                    showSoilOverrideSheet = true
+                                } label: {
+                                    Label("Trail Settings", systemImage: "slider.horizontal.3")
+                                }
+                                Button(role: .destructive) {
+                                    showingDeleteConfirmation = true
+                                } label: {
+                                    Label("Delete Trail", systemImage: "trash")
+                                }
                             }
                         } label: {
                             Label("Trail Options", systemImage: "ellipsis")

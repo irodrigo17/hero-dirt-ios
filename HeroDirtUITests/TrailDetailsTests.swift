@@ -1,6 +1,39 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testWebsiteOpensBrowser() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 15))
+        trail.tap()
+        let options = app.buttons["Trail Options"]
+        XCTAssertTrue(options.waitForExistence(timeout: 15))
+        options.tap()
+        let website = app.buttons["Website"]
+        XCTAssertTrue(website.waitForExistence(timeout: 3))
+        website.tap()
+        let safari = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+        XCTAssertTrue(safari.wait(for: .runningForeground, timeout: 10))
+    }
+
+    func testTrailWithoutWebsite() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Arastradero Preserve")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 15))
+        trail.tap()
+        let options = app.buttons["Trail Options"]
+        XCTAssertTrue(options.waitForExistence(timeout: 15))
+        options.tap()
+        XCTAssertTrue(app.buttons["Rename"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Website"].exists)
+    }
+
     func testSavedTrailOptions() {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -12,9 +45,11 @@ final class TrailDetailsTests: XCTestCase {
         trail.tap()
         let options = app.buttons["Trail Options"]
         XCTAssertTrue(options.waitForExistence(timeout: 15))
+        XCTAssertFalse(app.navigationBars.staticTexts["Park"].exists)
         XCTAssertFalse(app.buttons["Saved"].exists)
         XCTAssertFalse(app.buttons["Save"].exists)
         options.tap()
+        XCTAssertTrue(app.buttons["Website"].waitForExistence(timeout: 3))
         app.buttons["Rename"].tap()
         let name = app.alerts.textFields.firstMatch
         XCTAssertTrue(name.waitForExistence(timeout: 3))

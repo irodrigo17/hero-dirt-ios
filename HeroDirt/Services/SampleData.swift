@@ -1,4 +1,5 @@
 import Foundation
+import MapKit
 import SwiftUI
 
 // Canned data and fake services for SwiftUI previews, UI tests and unit
@@ -54,6 +55,18 @@ enum SampleData {
         place(4, "Demo Forest", 37.0965, -121.9620),
         place(5, "China Camp", 38.0010, -122.4730),
     ]
+
+    /// A place with a category and website, plus places without websites,
+    /// so previews and UI tests can cover both detail-menu states offline.
+    @MainActor
+    static func mapItemCache() -> MapItemCache {
+        let place = places[0]
+        let item = MKMapItem(location: CLLocation(latitude: place.latitude, longitude: place.longitude), address: nil)
+        item.name = place.name
+        item.pointOfInterestCategory = .park
+        item.url = URL(string: "https://example.com/trail")
+        return MapItemCache(items: [place.id: item])
+    }
 
     /// Which sample weather each sample place gets (for previews/screenshots).
     static func summary(latitude: Double, longitude: Double) -> RainfallSummary {
@@ -113,7 +126,7 @@ extension View {
     func previewEnvironment(store: PlaceStore? = nil) -> some View {
         self
             .environment(store ?? SampleData.placeStore())
-            .environment(MapItemCache())
+            .environment(SampleData.mapItemCache())
             .environment(PlaceConditionsModel())
             .environment(\.weather, FakeWeatherProvider())
             .environment(\.soil, FakeSoilProvider())

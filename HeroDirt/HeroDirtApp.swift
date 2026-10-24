@@ -13,7 +13,7 @@ struct HeroDirtApp: App {
         useFakeServices ? FakeSoilProvider() : LiveSoilProvider()
 
     @State private var placeStore = useFakeServices ? SampleData.placeStore() : PlaceStore()
-    @State private var mapItemCache = MapItemCache()
+    @State private var mapItemCache = useFakeServices ? SampleData.mapItemCache() : MapItemCache()
     @State private var conditions = PlaceConditionsModel()
     @AppStorage(RainUnitPreference.storageKey) private var unitPreference = RainUnitPreference.automatic
     private let locationManager = CLLocationManager()

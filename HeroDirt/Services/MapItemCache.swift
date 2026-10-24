@@ -10,6 +10,10 @@ final class MapItemCache {
     private(set) var items: [UUID: MKMapItem] = [:]
     @ObservationIgnored private var inFlight: [UUID: Task<MKMapItem?, Never>] = [:]
 
+    init(items: [UUID: MKMapItem] = [:]) {
+        self.items = items
+    }
+
     @discardableResult
     func fetch(for place: Place) async -> MKMapItem? {
         if let cached = items[place.id] { return cached }
