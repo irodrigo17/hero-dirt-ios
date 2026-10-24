@@ -9,6 +9,7 @@ final class TrailDetailsTests: XCTestCase {
         var field = app.searchFields.firstMatch
         if !field.isHittable { app.swipeDown() }
         XCTAssertTrue(field.waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(field.frame.minY, app.frame.height / 2)
         field.tap()
         field.typeText("Rancho")
         XCTAssertEqual(field.value as? String, "Rancho")
@@ -17,11 +18,7 @@ final class TrailDetailsTests: XCTestCase {
         main.lifetime = .keepAlways
         add(main)
         XCTAssertTrue(app.buttons["Dictate"].exists)
-        if app.buttons["Cancel"].exists {
-            app.buttons["Cancel"].tap()
-        } else {
-            app.buttons["Close"].tap()
-        }
+        app.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "Close", "close"])).firstMatch.tap()
         app.buttons["Show map"].tap()
         field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 10))

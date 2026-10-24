@@ -21,6 +21,8 @@ struct TrailsHomeView: View {
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var searchResults: [MKMapItem] = []
+    @State private var isSearchLoading = false
+    @State private var searchError: String?
     @State private var searchTask: Task<Void, Never>?
     @State private var showingAbout = false
     @State private var editMode: EditMode = .inactive
@@ -40,12 +42,13 @@ struct TrailsHomeView: View {
                 .searchable(
                     text: $searchText,
                     isPresented: $isSearching,
-                    placement: .navigationBarDrawer(displayMode: .automatic),
+                    placement: .automatic,
                     prompt: "Find trails, parks, places"
                 )
                 .onChange(of: searchText) { _, query in scheduleSearch(query) }
                 .onSubmit(of: .search) { scheduleSearch(searchText, debounce: false) }
                 .toolbar {
+                    DefaultToolbarItem(kind: .search, placement: .bottomBar)
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
                             showingAbout = true
@@ -54,8 +57,8 @@ struct TrailsHomeView: View {
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        if placeStore.places.count > 1 && !isSearching {
-                            EditButton()
+                        if placeStore.places.count > 1 {
+                            EditButton().disabled(isSearching)
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
@@ -88,11 +91,19 @@ struct TrailsHomeView: View {
         .environment(\.editMode, $editMode)
         .navigationSplitViewStyle(.balanced)
         .onChange(of: isSearching) { _, searching in
-            if searching { editMode = .inactive }
+            if searching {
+                editMode = .inactive
+            } else {
+                searchTask?.cancel()
+                isSearchLoading = false
+                searchResults = []
+                searchError = nil
+            }
         }
         .onChange(of: placeStore.places.count) { _, count in
             if count < 2 { editMode = .inactive }
         }
+        .onDisappear { searchTask?.cancel() }
         .onAppear(perform: selectFirstIfSideBySide)
         .onChange(of: horizontalSizeClass) { _, _ in selectFirstIfSideBySide() }
     }
@@ -111,7 +122,7 @@ struct TrailsHomeView: View {
     @ViewBuilder
     private var list: some View {
         List(selection: $selection) {
-            if isSearching && !searchText.isEmpty {
+            if isSearching {
                 searchSection
             } else if placeStore.places.isEmpty {
                 emptyState
@@ -148,9 +159,10 @@ struct TrailsHomeView: View {
     @ViewBuilder
     private var searchSection: some View {
         if searchResults.isEmpty {
-            ContentUnavailableView.search(text: searchText)
+            SearchStatusView(query: searchText, isLoading: isSearchLoading, error: searchError)
                 .listRowSeparator(.hidden)
         } else {
+            if isSearchLoading { ProgressView("Searching…").listRowSeparator(.hidden) }
             ForEach(searchResults, id: \.self) { item in
                 NavigationLink(value: TrailSelection.result(item)) {
                     HStack(spacing: 10) {
@@ -169,6 +181,7 @@ struct TrailsHomeView: View {
                         }
                     }
                 }
+                .disabled(isSearchLoading)
             }
         }
     }
@@ -229,10 +242,13 @@ struct TrailsHomeView: View {
 
     private func scheduleSearch(_ query: String, debounce: Bool = true) {
         searchTask?.cancel()
-        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+        searchError = nil
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
+            isSearchLoading = false
             return
         }
+        isSearchLoading = true
         searchTask = Task {
             if debounce {
                 try? await Task.sleep(for: .milliseconds(350))
@@ -244,10 +260,18 @@ struct TrailsHomeView: View {
             if let region = searchRegion {
                 request.region = region
             }
-            let items = (try? await MKLocalSearch(request: request).start().mapItems) ?? []
-            guard !Task.isCancelled else { return }
-            searchResults = items
-            Telemetry.signal(.searchPerformed, ["results": "\(items.count)"])
+            do {
+                let items = try await MKLocalSearch(request: request).start().mapItems
+                guard !Task.isCancelled else { return }
+                searchResults = items
+                isSearchLoading = false
+                Telemetry.signal(.searchPerformed, ["results": "\(items.count)"])
+            } catch {
+                guard !Task.isCancelled else { return }
+                searchResults = []
+                isSearchLoading = false
+                searchError = "Search is unavailable right now. Please try again."
+            }
         }
     }
 

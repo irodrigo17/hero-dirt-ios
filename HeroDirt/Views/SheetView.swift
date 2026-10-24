@@ -20,6 +20,8 @@ struct SheetView: View {
 
     @State private var searchText = ""
     @State private var searchResults: [MKMapItem] = []
+    @State private var isSearchLoading = false
+    @State private var searchError: String?
     @State private var searchTask: Task<Void, Never>?
     @State private var showingAbout = false
     @State private var showingOverlayControls = false
@@ -28,10 +30,21 @@ struct SheetView: View {
         NavigationStack {
             SearchableContent(
                 searchResults: searchResults,
+                query: searchText,
+                isLoading: isSearchLoading,
+                error: searchError,
                 selectedDetent: selectedDetent,
                 onSelectPlace: onSelectPlace,
                 onSelectSearchResult: onSelectSearchResult,
-                onIsSearchingChanged: onSearchFocusChanged
+                onIsSearchingChanged: { active in
+                    if !active {
+                        searchTask?.cancel()
+                        isSearchLoading = false
+                        searchResults = []
+                        searchError = nil
+                    }
+                    onSearchFocusChanged(active)
+                }
             )
             .navigationTitle("My Trails")
             .searchable(
@@ -60,16 +73,22 @@ struct SheetView: View {
             }
             .onSubmit(of: .search) {
                 searchTask?.cancel()
-                guard !searchText.isEmpty else { return }
+                guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                isSearchLoading = true
+                searchError = nil
                 searchTask = Task { await runSearch(query: searchText) }
             }
         }
+        .onDisappear { searchTask?.cancel() }
         .onChange(of: searchText) { _, newValue in
             searchTask?.cancel()
-            guard !newValue.isEmpty else {
+            searchError = nil
+            guard !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 searchResults = []
+                isSearchLoading = false
                 return
             }
+            isSearchLoading = true
             searchTask = Task {
                 try? await Task.sleep(for: .milliseconds(400))
                 guard !Task.isCancelled else { return }
@@ -128,16 +147,22 @@ struct SheetView: View {
             let response = try await MKLocalSearch(request: request).start()
             guard !Task.isCancelled else { return }
             searchResults = response.mapItems
+            isSearchLoading = false
             Telemetry.signal(.searchPerformed, ["results": "\(response.mapItems.count)"])
         } catch {
             guard !Task.isCancelled else { return }
             searchResults = []
+            isSearchLoading = false
+            searchError = "Search is unavailable right now. Please try again."
         }
     }
 }
 
 private struct SearchableContent: View {
     let searchResults: [MKMapItem]
+    let query: String
+    let isLoading: Bool
+    let error: String?
     let selectedDetent: PresentationDetent
     var onSelectPlace: (Place) -> Void
     var onSelectSearchResult: (MKMapItem) -> Void
@@ -151,6 +176,9 @@ private struct SearchableContent: View {
             if isSearching {
                 SearchResultsView(
                     searchResults: searchResults,
+                    query: query,
+                    isLoading: isLoading,
+                    error: error,
                     onSelectResult: { item in
                         dismissSearch()
                         onSelectSearchResult(item)
