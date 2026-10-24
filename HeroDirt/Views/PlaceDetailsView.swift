@@ -150,37 +150,6 @@ struct PlaceDetailsView: View {
                 Text(placeName)
             )
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if savedPlace != nil || websiteURL != nil {
-                        Menu {
-                            if let websiteURL {
-                                Link(destination: websiteURL) {
-                                    Label("Website", systemImage: "safari")
-                                }
-                            }
-                            if savedPlace != nil {
-                                Button {
-                                    editingName = placeName
-                                    showingRenameAlert = true
-                                } label: {
-                                    Label("Rename", systemImage: "pencil")
-                                }
-                                Button {
-                                    showSoilOverrideSheet = true
-                                } label: {
-                                    Label("Trail Settings", systemImage: "slider.horizontal.3")
-                                }
-                                Button(role: .destructive) {
-                                    showingDeleteConfirmation = true
-                                } label: {
-                                    Label("Delete Trail", systemImage: "trash")
-                                }
-                            }
-                        } label: {
-                            Label("Trail Options", systemImage: "ellipsis")
-                        }
-                    }
-                }
                 switch style {
                 case .pushed:
                     ToolbarItem(placement: .topBarTrailing) { EmptyView() }
@@ -252,7 +221,7 @@ struct PlaceDetailsView: View {
     // MARK: - Action Bar
 
     private var actionBar: some View {
-        HStack(spacing: 12) {
+        VStack(spacing: 12) {
             if savedPlace == nil {
                 SheetActionButton(
                     icon: "star",
@@ -262,14 +231,51 @@ struct PlaceDetailsView: View {
                     action: savePlace
                 )
             }
-            SheetActionButton(
-                icon: "car.fill",
-                label: "Directions",
-                isPrimary: false,
-                isDisabled: isLoading,
-                action: openInMaps
-            )
+            HStack(spacing: 12) {
+                SheetActionButton(
+                    icon: "car.fill",
+                    label: "Directions",
+                    isPrimary: false,
+                    isDisabled: isLoading,
+                    action: openDirections
+                )
+                moreMenu
+            }
         }
+    }
+
+    private var moreMenu: some View {
+        Menu {
+            Button(action: openInMaps) {
+                Label("Open in Maps", systemImage: "map")
+            }
+            if let websiteURL {
+                Link(destination: websiteURL) {
+                    Label("Website", systemImage: "safari")
+                }
+            }
+            if savedPlace != nil {
+                Button {
+                    editingName = placeName
+                    showingRenameAlert = true
+                } label: {
+                    Label("Rename", systemImage: "pencil")
+                }
+                Button {
+                    showSoilOverrideSheet = true
+                } label: {
+                    Label("Trail Settings", systemImage: "slider.horizontal.3")
+                }
+                Button(role: .destructive) {
+                    showingDeleteConfirmation = true
+                } label: {
+                    Label("Delete Trail", systemImage: "trash")
+                }
+            }
+        } label: {
+            SheetActionLabel(icon: "ellipsis", label: "More", isPrimary: false)
+        }
+        .accessibilityIdentifier("Trail Options")
     }
 
     // MARK: - Data Loading
@@ -430,11 +436,18 @@ struct PlaceDetailsView: View {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
-    private func openInMaps() {
+    private func openDirections() {
         Telemetry.signal(.directionsOpened)
-        let options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
+        openMapItem(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+    }
+
+    private func openInMaps() {
+        openMapItem(launchOptions: nil)
+    }
+
+    private func openMapItem(launchOptions: [String: Any]?) {
         if let item = effectiveMapItem {
-            item.openInMaps(launchOptions: options)
+            item.openInMaps(launchOptions: launchOptions)
         } else {
             let item = MKMapItem(
                 location: CLLocation(
@@ -444,7 +457,7 @@ struct PlaceDetailsView: View {
                 address: nil
             )
             item.name = placeName
-            item.openInMaps(launchOptions: options)
+            item.openInMaps(launchOptions: launchOptions)
         }
     }
 }
@@ -460,22 +473,33 @@ private struct SheetActionButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 5) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                Text(label)
-                    .font(.caption)
-                    .fontWeight(.medium)
-            }
-            .foregroundStyle(isPrimary ? .white : .blue)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(
-                isPrimary ? Color.blue : Color.blue.opacity(0.1),
-                in: RoundedRectangle(cornerRadius: .cornerLarge)
-            )
+            SheetActionLabel(icon: icon, label: label, isPrimary: isPrimary)
         }
         .disabled(isDisabled)
+    }
+}
+
+private struct SheetActionLabel: View {
+    let icon: String
+    let label: String
+    let isPrimary: Bool
+
+    var body: some View {
+        VStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .frame(height: 24)
+            Text(label)
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .foregroundStyle(isPrimary ? .white : .blue)
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .padding(.vertical, 8)
+        .background(
+            isPrimary ? Color.blue : Color.blue.opacity(0.1),
+            in: RoundedRectangle(cornerRadius: .cornerLarge)
+        )
     }
 }
 

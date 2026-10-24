@@ -45,6 +45,12 @@ final class TrailDetailsTests: XCTestCase {
         trail.tap()
         let options = app.buttons["Trail Options"]
         XCTAssertTrue(options.waitForExistence(timeout: 15))
+        let directions = app.buttons["Directions"]
+        XCTAssertTrue(directions.waitForExistence(timeout: 5))
+        XCTAssertEqual(options.label, "More")
+        XCTAssertEqual(directions.frame.minY, options.frame.minY, accuracy: 2)
+        XCTAssertEqual(directions.frame.width, options.frame.width, accuracy: 2)
+        XCTAssertFalse(app.navigationBars.buttons["Trail Options"].exists)
         XCTAssertFalse(app.navigationBars.staticTexts["Park"].exists)
         XCTAssertFalse(app.buttons["Saved"].exists)
         XCTAssertFalse(app.buttons["Save"].exists)
