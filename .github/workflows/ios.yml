@@ -2,37 +2,81 @@ name: iOS starter workflow
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "codex/dev" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build and Test default scheme using any available iPhone simulator
+    name: Build and test HeroDirt
     runs-on: macos-26
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Set Default Scheme
+
+      - name: Select an available iPhone simulator
         run: |
-          scheme_list=$(xcodebuild -list -json | tr -d "\n")
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo $default | cat >default
-          echo Using default scheme: $default
-      - name: Build
-        env:
-          scheme: ${{ 'default' }}
+          xcodebuild -version
+          xcrun simctl list devices available --json > "$RUNNER_TEMP/simulators.json"
+          python3 - <<'PY'
+          import json
+          import os
+
+          with open(os.path.join(os.environ["RUNNER_TEMP"], "simulators.json")) as source:
+              runtimes = json.load(source)["devices"]
+          candidates = []
+          for runtime, devices in runtimes.items():
+              if ".iOS-" not in runtime:
+                  continue
+              version = tuple(int(part) for part in runtime.split(".iOS-", 1)[1].split("-"))
+              if version < (26, 0):
+                  continue
+              for device in devices:
+                  if device["isAvailable"] and device["name"].startswith("iPhone"):
+                      candidates.append((version, device["name"] == "iPhone 17 Pro", device["name"], device["udid"]))
+          if not candidates:
+              raise SystemExit("No available iPhone simulator with iOS 26 or later")
+          version, _, name, udid = max(candidates)
+          print(f"Using {name}, iOS {'.'.join(map(str, version))} ({udid})")
+          with open(os.environ["GITHUB_ENV"], "a") as environment:
+              environment.write(f"SIMULATOR_UDID={udid}\n")
+          PY
+
+      - name: Build for testing
         run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild build-for-testing -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "generic/platform=iOS Simulator"
+          set -o pipefail
+          # Ad-hoc signing preserves iCloud entitlements without a signing certificate.
+          xcodebuild build-for-testing \
+            -project HeroDirt.xcodeproj -scheme HeroDirt \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/HeroDirtBuild" \
+            CODE_SIGN_IDENTITY=- \
+            2>&1 | tee "$RUNNER_TEMP/build.log"
+
       - name: Test
-        env:
-          scheme: ${{ 'default' }}
         run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild test-without-building -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -destination "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4.1"
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project HeroDirt.xcodeproj -scheme HeroDirt \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/HeroDirtBuild" \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/HeroDirtTests.xcresult" \
+            2>&1 | tee "$RUNNER_TEMP/test.log"
+
+      - name: Upload build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-and-test-results
+          path: |
+            ${{ runner.temp }}/build.log
+            ${{ runner.temp }}/test.log
+            ${{ runner.temp }}/HeroDirtTests.xcresult
+          if-no-files-found: ignore

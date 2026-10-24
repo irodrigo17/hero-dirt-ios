@@ -20,11 +20,17 @@ extension View {
     /// where that column would eat a third of an already narrow pane.
     @ViewBuilder
     func verticalBarDisabled(_ disabled: Bool) -> some View {
+        // Xcode 26's SwiftUI SDK has no declaration for this modifier.
+        // A runtime availability check alone cannot hide it from that compiler.
+        #if compiler(>=6.4)
         if #available(iOS 27.1, *) {
             toolbarVerticalBehavior(disabled ? .disabled : .automatic)
         } else {
             self
         }
+        #else
+        self
+        #endif
     }
 }
 
