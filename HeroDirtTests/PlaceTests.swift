@@ -8,6 +8,40 @@ import SwiftUI
 
 struct PlaceTests {
 
+    private final class ThreadCheckedMapItem: MKMapItem {
+        override var url: URL? {
+            get {
+                #expect(!Thread.isMainThread, "Lazy MapKit website lookup must not block menu rendering")
+                return URL(string: "https://example.com/trail")
+            }
+            set {}
+        }
+    }
+
+    @MainActor
+    @Test func websiteLookupRunsOffMainThread() async {
+        let item = ThreadCheckedMapItem(location: CLLocation(latitude: 37, longitude: -122), address: nil)
+        #expect(await PlaceWebsite.url(for: item)?.host == "example.com")
+    }
+
+    @MainActor
+    @Test(arguments: ["https://example.com/trail", "http://example.com/trail"])
+    func preparesPlaceWebsite(_ value: String) async throws {
+        let item = MKMapItem(location: CLLocation(latitude: 37, longitude: -122), address: nil)
+        let url = try #require(URL(string: value))
+        item.url = url
+        #expect(await PlaceWebsite.url(for: item)?.absoluteString == value)
+    }
+
+    @MainActor
+    @Test(arguments: ["file:///tmp/trail", "javascript:alert(1)", "herodirt://trail", "https:/trail"])
+    func rejectsNonWebsitePlaceURLs(_ value: String) async throws {
+        let item = MKMapItem(location: CLLocation(latitude: 37, longitude: -122), address: nil)
+        let url = try #require(URL(string: value))
+        item.url = url
+        #expect(await PlaceWebsite.url(for: item) == nil)
+    }
+
     @MainActor
     @Test func sharingCardRendersAnExportableImage() throws {
         let renderer = ImageRenderer(content: TrailSharingCard(

@@ -35,7 +35,7 @@ struct LiveDrivingTimeProvider: DrivingTimeProviding {
 enum DrivingLocationRequest {
     static func location(
         timeout: Duration = .seconds(15),
-        receive: @escaping @Sendable () async -> CLLocation? = firstLocation
+        receive: @escaping @Sendable () async -> CLLocation? = { await firstLocation() }
     ) async -> CLLocation? {
         guard !Task.isCancelled else { return nil }
         return await withTaskGroup(of: CLLocation?.self) { group in

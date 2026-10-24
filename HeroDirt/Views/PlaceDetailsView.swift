@@ -31,6 +31,8 @@ struct PlaceDetailsView: View {
 
     @State private var sharePayload: TrailSharePayload?
     @State private var shareError = false
+    @State private var websiteURL: URL?
+    @State private var websiteTask: Task<Void, Never>?
     @State private var drivingSeconds: TimeInterval?
     @State private var drivingTimeTask: Task<Void, Never>?
     @State private var drivingTimeKey: LoadKey?
@@ -65,15 +67,6 @@ struct PlaceDetailsView: View {
         mapItem ?? savedPlace.flatMap { mapItemCache.items[$0.id] }
     }
 
-    /// Only offer web links supplied by Apple Places, not arbitrary URL schemes.
-    private var websiteURL: URL? {
-        guard let url = effectiveMapItem?.url,
-              let scheme = url.scheme?.lowercased(),
-              ["https", "http"].contains(scheme),
-              url.host != nil else { return nil }
-        return url
-    }
-
     var body: some View {
         Group {
             if style == .pushed {
@@ -89,6 +82,9 @@ struct PlaceDetailsView: View {
         .task(id: DrivingTimeLoadKey(place: loadKey, isActive: scenePhase == .active)) {
             guard scenePhase == .active else { return }
             startDrivingTimeLoad()
+        }
+        .onChange(of: effectiveMapItem.map(ObjectIdentifier.init), initial: true) { _, _ in
+            prepareWebsite(for: effectiveMapItem)
         }
         .sheet(item: $sharePayload) { payload in
             TrailShareSheet(payload: payload)
@@ -230,6 +226,20 @@ struct PlaceDetailsView: View {
     private struct DrivingTimeLoadKey: Hashable {
         let place: LoadKey
         let isActive: Bool
+    }
+
+    private func prepareWebsite(for item: MKMapItem?) {
+        websiteTask?.cancel()
+        websiteURL = nil
+        guard let item else { return }
+        // Keep preparation independent of SwiftUI task cancellation during a push.
+        // Menu construction only reads the prepared URL, never lazy MapKit data.
+        websiteTask = Task {
+            let url = await PlaceWebsite.url(for: item)
+            guard !Task.isCancelled else { return }
+            websiteURL = url
+            websiteTask = nil
+        }
     }
 
     private func refreshDrivingTime() async {

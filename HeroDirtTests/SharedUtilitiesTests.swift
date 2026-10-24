@@ -5,11 +5,12 @@ import Testing
 @testable import HeroDirt
 
 struct SharedUtilitiesTests {
+    private static func isMainThread() -> Bool { Thread.isMainThread }
 
     @MainActor
     @Test func drivingLocationWorkRunsOffMainThread() async {
         let location = await DrivingLocationRequest.location {
-            #expect(!Thread.isMainThread)
+            #expect(!Self.isMainThread())
             return CLLocation(latitude: 37, longitude: -122)
         }
         #expect(location?.coordinate.latitude == 37)

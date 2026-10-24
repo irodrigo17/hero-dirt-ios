@@ -2,6 +2,19 @@ import Foundation
 import MapKit
 import Observation
 
+/// Read-only MapKit metadata can lazily decode GeoServices place data. Prepare
+/// it on the cooperative executor, outside SwiftUI body/menu construction.
+enum PlaceWebsite {
+    nonisolated static func url(for item: MKMapItem) async -> URL? {
+        guard !Task.isCancelled,
+              let url = item.url,
+              let scheme = url.scheme?.lowercased(),
+              ["https", "http"].contains(scheme),
+              let host = url.host, !host.isEmpty else { return nil }
+        return url
+    }
+}
+
 /// MapKit place details (category, address) for saved places, fetched by
 /// their stored map item identifier.
 @MainActor
