@@ -7,12 +7,11 @@ protocol DrivingTimeProviding: Sendable {
 
 struct LiveDrivingTimeProvider: DrivingTimeProviding {
     func travelTime(to destination: CLLocationCoordinate2D) async -> TimeInterval? {
-        guard let location = await DrivingLocationRequest().location(), !Task.isCancelled else { return nil }
+        guard let location = await DrivingLocationRequest.location(), !Task.isCancelled else { return nil }
         return await travelTime(from: location, to: destination)
     }
 
-    @MainActor
-    func travelTime(from location: CLLocation, to destination: CLLocationCoordinate2D) async -> TimeInterval? {
+    nonisolated func travelTime(from location: CLLocation, to destination: CLLocationCoordinate2D) async -> TimeInterval? {
         let request = MKDirections.Request()
         request.source = MKMapItem(location: location, address: nil)
         request.destination = MKMapItem(
@@ -29,75 +28,44 @@ struct LiveDrivingTimeProvider: DrivingTimeProviding {
     }
 }
 
-/// One location fix per estimate; stop listening on success, denial, timeout,
-/// or cancellation rather than keeping GPS running on the details screen.
-@MainActor
-private final class DrivingLocationRequest: NSObject, @preconcurrency CLLocationManagerDelegate {
-    private let manager = CLLocationManager()
-    private var continuation: CheckedContinuation<CLLocation?, Never>?
-    private var timeout: Task<Void, Never>?
-
-    func location() async -> CLLocation? {
+/// Read one fresh fix on the cooperative executor. CLLocationManager's
+/// synchronous authorization/location getters can wait on locationd; never
+/// perform those reads on the UI actor during the detail transition.
+/// Ending iteration (or cancelling it after 15 seconds) stops the updates.
+enum DrivingLocationRequest {
+    static func location(
+        timeout: Duration = .seconds(15),
+        receive: @escaping @Sendable () async -> CLLocation? = firstLocation
+    ) async -> CLLocation? {
         guard !Task.isCancelled else { return nil }
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-        return await withTaskCancellationHandler {
-            await withCheckedContinuation { continuation in
-                self.continuation = continuation
-                timeout = Task {
-                    try? await Task.sleep(for: .seconds(15))
-                    guard !Task.isCancelled else { return }
-                    finish(nil)
+        return await withTaskGroup(of: CLLocation?.self) { group in
+            group.addTask { await receive() }
+            group.addTask {
+                try? await Task.sleep(for: timeout)
+                return nil
+            }
+            let location = await group.next() ?? nil
+            group.cancelAll()
+            return Task.isCancelled ? nil : location
+        }
+    }
+
+    private static func firstLocation() async -> CLLocation? {
+        do {
+            for try await update in CLLocationUpdate.liveUpdates() {
+                guard !Task.isCancelled else { return nil }
+                if update.authorizationDenied || update.authorizationDeniedGlobally || update.authorizationRestricted {
+                    return nil
                 }
-                requestIfAuthorized()
+                if let location = update.location, location.horizontalAccuracy >= 0,
+                   abs(location.timestamp.timeIntervalSinceNow) < 60 {
+                    return location
+                }
             }
-        } onCancel: {
-            Task { @MainActor in self.finish(nil) }
+        } catch {
+            return nil
         }
-    }
-
-    private func requestIfAuthorized() {
-        guard continuation != nil else { return }
-        switch manager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
-            if let location = manager.location,
-               location.horizontalAccuracy >= 0,
-               abs(location.timestamp.timeIntervalSinceNow) < 60 {
-                finish(location)
-            } else {
-                manager.requestLocation()
-            }
-        case .notDetermined:
-            manager.requestWhenInUseAuthorization()
-        case .denied, .restricted:
-            finish(nil)
-        @unknown default:
-            finish(nil)
-        }
-    }
-
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        requestIfAuthorized()
-    }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last, location.horizontalAccuracy >= 0,
-              abs(location.timestamp.timeIntervalSinceNow) < 60 else { return }
-        finish(location)
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        finish(nil)
-    }
-
-    private func finish(_ location: CLLocation?) {
-        timeout?.cancel()
-        timeout = nil
-        manager.stopUpdatingLocation()
-        manager.delegate = nil
-        let pending = continuation
-        continuation = nil
-        pending?.resume(returning: location)
+        return nil
     }
 }
 

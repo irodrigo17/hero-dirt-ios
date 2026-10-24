@@ -1,9 +1,46 @@
+import CoreLocation
 import Foundation
 import Testing
 
 @testable import HeroDirt
 
 struct SharedUtilitiesTests {
+
+    @MainActor
+    @Test func drivingLocationWorkRunsOffMainThread() async {
+        let location = await DrivingLocationRequest.location {
+            #expect(!Thread.isMainThread)
+            return CLLocation(latitude: 37, longitude: -122)
+        }
+        #expect(location?.coordinate.latitude == 37)
+    }
+
+    @Test func drivingLocationTimeoutCancelsPendingFix() async {
+        let result = await DrivingLocationRequest.location(timeout: .milliseconds(10)) {
+            do { try await Task.sleep(for: .seconds(30)) }
+            catch { return nil }
+            Issue.record("Location request should have been cancelled by timeout")
+            return CLLocation(latitude: 37, longitude: -122)
+        }
+        #expect(result == nil)
+    }
+
+    @Test func drivingLocationCancellationReturnsWithoutWaitingForTimeout() async {
+        let (started, continuation) = AsyncStream<Void>.makeStream()
+        let task = Task {
+            await DrivingLocationRequest.location {
+                continuation.yield()
+                do { try await Task.sleep(for: .seconds(30)) }
+                catch { return nil }
+                Issue.record("Location request should have been cancelled")
+                return CLLocation(latitude: 37, longitude: -122)
+            }
+        }
+        var iterator = started.makeAsyncIterator()
+        await iterator.next()
+        task.cancel()
+        #expect(await task.value == nil)
+    }
 
     @MainActor
     @Test func feedbackEmailUsesRequestedRecipient() throws {
