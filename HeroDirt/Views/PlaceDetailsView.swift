@@ -57,11 +57,6 @@ struct PlaceDetailsView: View {
         mapItem ?? savedPlace.flatMap { mapItemCache.items[$0.id] }
     }
 
-    private var subtitle: String? {
-        effectiveMapItem?.pointOfInterestCategory?.displayName
-            ?? effectiveMapItem?.addressRepresentations?.cityWithContext
-    }
-
     var body: some View {
         Group {
             if style == .pushed {
@@ -144,9 +139,6 @@ struct PlaceDetailsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle(
                 Text(placeName)
-            )
-            .navigationSubtitle(
-                Text(subtitle ?? "")
             )
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
