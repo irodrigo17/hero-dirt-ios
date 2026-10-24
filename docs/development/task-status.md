@@ -15,7 +15,7 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 | Tone down bright colors | Softer condition and rain-map colors, with adaptive light/dark condition colors. No condition thresholds or meanings changed. |
 | Main search at bottom | Native iOS bottom-toolbar search, with the standard keyboard and Dictation. |
 | Voice search | Uses existing system keyboard Dictation; no custom audio recorder, speech engine, or app-specific audio permissions. The Dictate control is verified in main and map search keyboards; speech itself needs a physical-device check. |
-| Share trail and condition image | More → Share Trail presents a native share sheet with an exportable image, text, an installed-app deep link and an Apple Maps fallback. See [sharing implementation and remaining setup](trail-sharing.md). An HTTPS universal link with automatic App Store fallback still requires a real public listing and owned domain. |
+| Share trail and condition image | More → Share Trail presents a native share sheet with an exportable image, text, an installed-app deep link, Apple Maps alternative, and App Store link using Apple ID `6770195112`. See [sharing implementation and remaining setup](trail-sharing.md). An HTTPS universal link with automatic App Store fallback still requires an owned domain; the listing must be public for recipients to use it. |
 | Driving ETA | Car button shows driving time when available, falls back to Directions, and still opens driving navigation. |
 | Open in Apple Maps / Weather | Open in Maps is under More. Apple Weather remains deferred as agreed because location-specific link behavior is unverified and the app is not bundled with the iOS simulator. A generic launcher that may display the wrong location has not been added. |
 | Place website | Website under More when Apple Places provides an HTTP(S) URL. |
@@ -26,7 +26,7 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 ## Remaining external setup and decisions
 
 - Approve a supported MTB data source and obtain appropriate API access before implementing recommendations. Current plan prioritizes access certainty and genuine rating/popularity signals.
-- Supply the real App Store URL and controlled HTTPS host to finish install fallback/universal links. Apple's public bundle-ID lookup returned no listing during this work; no guessed URL is shipped.
+- Choose a controlled HTTPS host to finish install fallback/universal links. The developer-supplied App Store URL is configured; public listing availability remains unverified.
 - Verify a location-specific Apple Weather opening mechanism on a physical iPhone before adding its dedicated button.
 - Decide whether the observed calendar should load older months on demand; the current implementation intentionally labels its available history rather than presenting missing dates as dry weather.
 

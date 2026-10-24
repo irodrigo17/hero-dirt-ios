@@ -3,6 +3,9 @@ import Foundation
 
 /// Share links carry a destination, never a private saved-place identifier.
 struct SharedTrail: Identifiable {
+    /// Assigned in App Store Connect; the listing becomes usable when Apple makes it public.
+    static let appStoreURL = URL(string: "https://apps.apple.com/app/id6770195112")!
+
     let id = UUID()
     let name: String
     let latitude: Double
@@ -60,6 +63,6 @@ struct SharedTrail: Identifiable {
     }
 
     func message(condition: String) -> String {
-        "\(name) — \(condition)\nTrail conditions estimated by Hero Dirt.\n\nView location: \(mapsURL.absoluteString)\nOpen in Hero Dirt: \(appURL.absoluteString)"
+        "\(name) — \(condition)\nTrail conditions estimated by Hero Dirt.\n\nView location: \(mapsURL.absoluteString)\nOpen in Hero Dirt: \(appURL.absoluteString)\nGet Hero Dirt: \(Self.appStoreURL.absoluteString)"
     }
 }

@@ -6,15 +6,16 @@ Implemented locally:
 - The image includes the destination name, estimated conditions, outlook, recent rain, and sharing time.
 - `herodirt://trail?lat=...&lon=...&name=...` opens the destination in an installed Hero Dirt app. Opening a link does not automatically save it.
 - An accompanying `https://maps.apple.com/` link lets a recipient view the destination without installing Hero Dirt.
+- Shared text also includes [Get Hero Dirt](https://apps.apple.com/app/id6770195112), using the Apple ID supplied by the developer. This URL can ship before release; recipients can use the listing once it is public, including an approved pre-order listing.
 - Link parsing rejects missing, duplicate, non-finite, and out-of-range coordinates. Names and query values are encoded with URLComponents.
 
 The app does not send a message itself. The person sharing chooses a destination and completes the action in the system share sheet.
 
 ## Remaining: one HTTPS link with installation fallback
 
-A custom scheme cannot take an uninstalled app to the App Store. This needs a real public App Store URL and a controlled HTTPS host for a landing page/universal links. Apple's public lookup for `com.herodirt.app` returned no listing on October 24, 2026; no ID or hosted URL has been guessed.
+A custom scheme cannot take an uninstalled app to the App Store automatically. The App Store URL is now configured as `https://apps.apple.com/app/id6770195112`. A controlled HTTPS host for a landing page/universal links is still needed. Listing availability has not been verified; an absent public lookup result does not prevent assigning or configuring the app's Apple ID before release.
 
-After those are available:
+After a host is available:
 
 1. Choose the owned HTTPS route, for example `/trail` on the selected domain; validate and URL-encode the destination payload.
 2. Host the Apple App Site Association file with the actual app identifier, and add the corresponding Associated Domains entitlement.

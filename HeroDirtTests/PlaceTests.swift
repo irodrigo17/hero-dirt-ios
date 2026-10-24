@@ -35,6 +35,10 @@ struct PlaceTests {
         #expect(maps.scheme == "https")
         #expect(maps.host == "maps.apple.com")
         #expect(maps.queryItems?.first(where: { $0.name == "q" })?.value == original.name)
+        let message = original.message(condition: "Hero Dirt")
+        #expect(message.contains(original.appURL.absoluteString))
+        #expect(message.contains(original.mapsURL.absoluteString))
+        #expect(message.contains("Get Hero Dirt: https://apps.apple.com/app/id6770195112"))
     }
 
     @Test(arguments: [
