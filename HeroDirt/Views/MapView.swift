@@ -223,7 +223,9 @@ struct MapView: View {
                 placeDetails(for: selection, onClose: model.closeDetails, style: .sidebar)
                     .background(Color(.systemGroupedBackground).ignoresSafeArea())
                     .transition(.move(edge: .leading).combined(with: .opacity))
-                    .id(selection.identity)
+                    // A dropped pin becoming saved keeps its detail view,
+                    // including the Save-button removal animation.
+                    .id(selection.coordinate(in: placeStore.places).map { "\($0.latitude),\($0.longitude)" })
                     .zIndex(1)
             }
         }

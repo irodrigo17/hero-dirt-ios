@@ -1,10 +1,44 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testSavingFromInlineActionRow() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        app.buttons["Show map"].tap()
+        let map = app.maps.firstMatch
+        XCTAssertTrue(map.waitForExistence(timeout: 10))
+        map.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.2)).press(forDuration: 1)
+        let save = app.buttons["Save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 15))
+        let directions = app.buttons["Driving Directions"]
+        let more = app.buttons["Trail Options"]
+        XCTAssertEqual(save.frame.minY, directions.frame.minY, accuracy: 2)
+        XCTAssertEqual(save.frame.width, directions.frame.width, accuracy: 2)
+        XCTAssertEqual(save.frame.width, more.frame.width, accuracy: 2)
+        let before = XCTAttachment(screenshot: app.screenshot())
+        before.name = "Before saving"
+        before.lifetime = .keepAlways
+        add(before)
+        let ready = expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: save)
+        wait(for: [ready], timeout: 30)
+        save.tap()
+        XCTAssertTrue(save.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(directions.exists)
+        XCTAssertTrue(more.exists)
+        XCTAssertEqual(directions.frame.width, more.frame.width, accuracy: 2)
+        let after = XCTAttachment(screenshot: app.screenshot())
+        after.name = "After saving"
+        after.lifetime = .keepAlways
+        add(after)
+    }
+
     /// Exercise production startup too: fake services bypass iCloud setup.
     func testNormalLaunch() {
         continueAfterFailure = false
         let app = XCUIApplication()
+        app.launchArguments = ["-startInList"]
         app.launch()
         XCTAssertTrue(app.navigationBars["My Trails"].waitForExistence(timeout: 15))
         app.buttons["About Hero Dirt"].tap()
@@ -19,7 +53,7 @@ final class TrailDetailsTests: XCTestCase {
     func testDrivingETAOpensMaps() {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-useFakeServices"]
+        app.launchArguments = ["-useFakeServices", "-startInList"]
         app.launch()
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
         XCTAssertTrue(trail.waitForExistence(timeout: 15))
@@ -34,7 +68,7 @@ final class TrailDetailsTests: XCTestCase {
     func testDrivingETAFallback() {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-useFakeServices", "-noDrivingETA"]
+        app.launchArguments = ["-useFakeServices", "-noDrivingETA", "-startInList"]
         app.launch()
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
         XCTAssertTrue(trail.waitForExistence(timeout: 15))
@@ -51,7 +85,7 @@ final class TrailDetailsTests: XCTestCase {
     func testWebsiteOpensBrowser() {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-useFakeServices"]
+        app.launchArguments = ["-useFakeServices", "-startInList"]
         app.launch()
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
         XCTAssertTrue(trail.waitForExistence(timeout: 15))
@@ -69,7 +103,7 @@ final class TrailDetailsTests: XCTestCase {
     func testTrailWithoutWebsite() {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-useFakeServices"]
+        app.launchArguments = ["-useFakeServices", "-startInList"]
         app.launch()
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Arastradero Preserve")).firstMatch
         XCTAssertTrue(trail.waitForExistence(timeout: 15))
@@ -84,7 +118,7 @@ final class TrailDetailsTests: XCTestCase {
     func testSavedTrailOptions() {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-useFakeServices"]
+        app.launchArguments = ["-useFakeServices", "-startInList"]
         app.launch()
         app.buttons["Allow While Using App"].tapIfPresent()
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch

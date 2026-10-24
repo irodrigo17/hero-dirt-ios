@@ -225,24 +225,24 @@ struct PlaceDetailsView: View {
         drivingSeconds = seconds
     }
 
+    // Saving changes the place ID, but not the location or its conditions.
+    // Keep that transition from restarting the load and flashing skeletons.
     private struct LoadKey: Hashable {
         let latitude: Double
         let longitude: Double
-        let placeID: UUID?
     }
 
     private var loadKey: LoadKey {
         LoadKey(
             latitude: coordinate.latitude,
-            longitude: coordinate.longitude,
-            placeID: placeID
+            longitude: coordinate.longitude
         )
     }
 
     // MARK: - Action Bar
 
     private var actionBar: some View {
-        VStack(spacing: 12) {
+        HStack(spacing: 12) {
             if savedPlace == nil {
                 SheetActionButton(
                     icon: "star",
@@ -251,21 +251,21 @@ struct PlaceDetailsView: View {
                     isDisabled: isLoading,
                     action: savePlace
                 )
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
-            HStack(spacing: 12) {
-                SheetActionButton(
-                    icon: "car.fill",
-                    label: DrivingTimeLabel.text(for: drivingSeconds),
-                    isPrimary: false,
-                    isDisabled: isLoading,
-                    action: openDirections
-                )
-                .accessibilityIdentifier("Driving Directions")
-                .accessibilityLabel(drivingSeconds == nil ? "Directions" : "Driving time: \(DrivingTimeLabel.text(for: drivingSeconds))")
-                .accessibilityHint("Opens driving directions in Apple Maps")
-                moreMenu
-            }
+            SheetActionButton(
+                icon: "car.fill",
+                label: DrivingTimeLabel.text(for: drivingSeconds),
+                isPrimary: false,
+                isDisabled: isLoading,
+                action: openDirections
+            )
+            .accessibilityIdentifier("Driving Directions")
+            .accessibilityLabel(drivingSeconds == nil ? "Directions" : "Driving time: \(DrivingTimeLabel.text(for: drivingSeconds))")
+            .accessibilityHint("Opens driving directions in Apple Maps")
+            moreMenu
         }
+        .animation(.smooth(duration: 0.3), value: savedPlace != nil)
     }
 
     private var moreMenu: some View {
