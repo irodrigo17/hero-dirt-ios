@@ -131,8 +131,13 @@ struct FakeSoilProvider: SoilProviding {
 
 struct FakeDrivingTimeProvider: DrivingTimeProviding {
     var seconds: TimeInterval? = 25 * 60
+    var delay: Duration = .zero
 
-    func travelTime(to destination: CLLocationCoordinate2D) async -> TimeInterval? { seconds }
+    func travelTime(to destination: CLLocationCoordinate2D) async -> TimeInterval? {
+        do { try await Task.sleep(for: delay) }
+        catch { return nil }
+        return seconds
+    }
 }
 
 extension View {

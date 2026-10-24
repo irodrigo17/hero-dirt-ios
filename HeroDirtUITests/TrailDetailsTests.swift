@@ -223,14 +223,18 @@ final class TrailDetailsTests: XCTestCase {
     func testDrivingETAOpensMaps() {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launchArguments = ["-useFakeServices", "-slowDrivingETA", "-startInList"]
         app.launch()
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
         XCTAssertTrue(trail.waitForExistence(timeout: 15))
         trail.tap()
         let directions = app.buttons["Driving Directions"]
         XCTAssertTrue(directions.waitForExistence(timeout: 15))
-        XCTAssertTrue(directions.label.contains("25"))
+        // Wait for an asynchronous estimate on first open, without pulling to refresh.
+        let estimate = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label CONTAINS %@", "25"), object: directions
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [estimate], timeout: 15), .completed)
         directions.tap()
         XCTAssertTrue(XCUIApplication(bundleIdentifier: "com.apple.Maps").wait(for: .runningForeground, timeout: 10))
     }

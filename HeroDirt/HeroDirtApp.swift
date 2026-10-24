@@ -10,7 +10,10 @@ struct HeroDirtApp: App {
     private static let weather: any WeatherProviding =
         useFakeServices ? FakeWeatherProvider() : LiveWeatherProvider()
     private static let drivingTime: any DrivingTimeProviding = useFakeServices
-        ? FakeDrivingTimeProvider(seconds: ProcessInfo.processInfo.arguments.contains("-noDrivingETA") ? nil : 25 * 60)
+        ? FakeDrivingTimeProvider(
+            seconds: ProcessInfo.processInfo.arguments.contains("-noDrivingETA") ? nil : 25 * 60,
+            delay: ProcessInfo.processInfo.arguments.contains("-slowDrivingETA") ? .seconds(3) : .zero
+        )
         : LiveDrivingTimeProvider()
     private static let soil: any SoilProviding =
         useFakeServices ? FakeSoilProvider() : LiveSoilProvider()

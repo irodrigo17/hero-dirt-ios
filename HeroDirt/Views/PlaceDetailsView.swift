@@ -32,6 +32,8 @@ struct PlaceDetailsView: View {
     @State private var sharePayload: TrailSharePayload?
     @State private var shareError = false
     @State private var drivingSeconds: TimeInterval?
+    @State private var drivingTimeTask: Task<Void, Never>?
+    @State private var drivingTimeKey: LoadKey?
     @State private var placeName = "Loading…"
     @State private var rainfallSummary: RainfallSummary?
     @State private var rainForecast: RainForecast?
@@ -86,7 +88,7 @@ struct PlaceDetailsView: View {
         }
         .task(id: DrivingTimeLoadKey(place: loadKey, isActive: scenePhase == .active)) {
             guard scenePhase == .active else { return }
-            await refreshDrivingTime()
+            startDrivingTimeLoad()
         }
         .sheet(item: $sharePayload) { payload in
             TrailShareSheet(payload: payload)
@@ -231,10 +233,29 @@ struct PlaceDetailsView: View {
     }
 
     private func refreshDrivingTime() async {
+        await startDrivingTimeLoad(forceRefresh: true).value
+    }
+
+    /// Keep the request alive across navigation updates and the inactive phase
+    /// caused by a location permission prompt, just like the conditions load.
+    @discardableResult
+    private func startDrivingTimeLoad(forceRefresh: Bool = false) -> Task<Void, Never> {
+        if !forceRefresh, drivingTimeKey == loadKey {
+            if let drivingTimeTask { return drivingTimeTask }
+            if drivingSeconds != nil { return Task {} }
+        }
+        drivingTimeTask?.cancel()
+        drivingTimeKey = loadKey
         drivingSeconds = nil
-        let seconds = await drivingTime.travelTime(to: coordinate)
-        guard !Task.isCancelled else { return }
-        drivingSeconds = seconds
+        let destination = coordinate
+        let task = Task {
+            let seconds = await drivingTime.travelTime(to: destination)
+            guard !Task.isCancelled else { return }
+            drivingSeconds = seconds
+            drivingTimeTask = nil
+        }
+        drivingTimeTask = task
+        return task
     }
 
     // Saving changes the place ID, but not the location or its conditions.
