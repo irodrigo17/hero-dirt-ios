@@ -1,6 +1,21 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    /// Exercise production startup too: fake services bypass iCloud setup.
+    func testNormalLaunch() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.navigationBars["My Trails"].waitForExistence(timeout: 15))
+        app.buttons["About Hero Dirt"].tap()
+        XCTAssertTrue(app.navigationBars["About"].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.navigationBars["My Trails"].waitForExistence(timeout: 5))
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     func testDrivingETAOpensMaps() {
         continueAfterFailure = false
         let app = XCUIApplication()

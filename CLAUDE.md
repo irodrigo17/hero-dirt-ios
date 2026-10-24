@@ -9,6 +9,10 @@ xcodebuild -scheme HeroDirt -destination 'platform=iOS Simulator,name=iPhone 17 
 
 Always run `xcodegen generate` after adding, removing, or moving Swift source files.
 
+Keep normal code signing enabled for simulator builds. `CODE_SIGNING_ALLOWED=NO`
+omits the iCloud entitlements and causes normal startup to crash in CloudKit.
+Verify a normal launch without `-useFakeServices` as well as fake-service UI tests.
+
 ## XcodeBuildMCP
 
 Use the `xcodebuildmcp-cli` skill before calling any XcodeBuildMCP tools.
