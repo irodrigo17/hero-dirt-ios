@@ -12,6 +12,8 @@ final class TrailDetailsTests: XCTestCase {
         trail.tap()
         let options = app.buttons["Trail Options"]
         XCTAssertTrue(options.waitForExistence(timeout: 15))
+        XCTAssertFalse(app.buttons["Saved"].exists)
+        XCTAssertFalse(app.buttons["Save"].exists)
         options.tap()
         app.buttons["Rename"].tap()
         let name = app.alerts.textFields.firstMatch
@@ -36,6 +38,13 @@ final class TrailDetailsTests: XCTestCase {
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.lifetime = .keepAlways
         add(shot)
+        options.tap()
+        app.buttons["Delete Trail"].tap()
+        let confirmation = app.sheets["Delete this trail?"]
+        XCTAssertTrue(confirmation.waitForExistence(timeout: 3))
+        confirmation.buttons["Delete Trail"].tap()
+        XCTAssertTrue(app.navigationBars["My Trails"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Test Trail")).firstMatch.exists)
     }
 }
 

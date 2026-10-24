@@ -245,13 +245,15 @@ struct PlaceDetailsView: View {
 
     private var actionBar: some View {
         HStack(spacing: 12) {
-            SheetActionButton(
-                icon: savedPlace != nil ? "star.fill" : "star",
-                label: savedPlace != nil ? "Saved" : "Save",
-                isPrimary: true,
-                isDisabled: isLoading,
-                action: toggleSaved
-            )
+            if savedPlace == nil {
+                SheetActionButton(
+                    icon: "star",
+                    label: "Save",
+                    isPrimary: true,
+                    isDisabled: isLoading,
+                    action: savePlace
+                )
+            }
             SheetActionButton(
                 icon: "car.fill",
                 label: "Directions",
@@ -394,31 +396,26 @@ struct PlaceDetailsView: View {
         String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude)
     }
 
-    private func toggleSaved() {
-        if let existing = savedPlace {
-            placeStore.removePlace(existing)
-            onUnsaved?(existing)
-            Telemetry.signal(.placeRemoved)
+    private func savePlace() {
+        guard savedPlace == nil else { return }
+        let newPlace = Place(
+            name: placeName,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            mapItemId: mapItem?.identifier
+        )
+        placeStore.addPlace(newPlace)
+        onSaved?(newPlace)
+        Telemetry.signal(.placeSaved)
+        // Keep the soil with the place so it never needs another lookup.
+        if let soilData, !soilData.isEstimated {
+            placeStore.updateSoil(soilData, for: newPlace.id)
         } else {
-            let newPlace = Place(
-                name: placeName,
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude,
-                mapItemId: mapItem?.identifier
-            )
-            placeStore.addPlace(newPlace)
-            onSaved?(newPlace)
-            Telemetry.signal(.placeSaved)
-            // Keep the soil with the place so it never needs another lookup.
-            if let soilData, !soilData.isEstimated {
-                placeStore.updateSoil(soilData, for: newPlace.id)
-            } else {
-                Task {
-                    if let result = await soil.soil(
-                        latitude: newPlace.latitude, longitude: newPlace.longitude
-                    ) {
-                        placeStore.updateSoil(result, for: newPlace.id)
-                    }
+            Task {
+                if let result = await soil.soil(
+                    latitude: newPlace.latitude, longitude: newPlace.longitude
+                ) {
+                    placeStore.updateSoil(result, for: newPlace.id)
                 }
             }
         }
