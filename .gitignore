@@ -27,3 +27,6 @@ xcuserdata/
 
 # macOS
 .DS_Store
+
+# Local App Store review drafts and recordings
+/docs/app-store/review-response/
