@@ -2,10 +2,53 @@ import CoreLocation
 import Foundation
 import MapKit
 import Testing
+import SwiftUI
 
 @testable import HeroDirt
 
 struct PlaceTests {
+
+    @MainActor
+    @Test func sharingCardRendersAnExportableImage() throws {
+        let renderer = ImageRenderer(content: TrailSharingCard(
+            name: "Rancho San Antonio", summary: SampleData.heroDirt, soil: SampleData.loam,
+            sharedAt: Date(timeIntervalSince1970: 1792843200)
+        ).environment(\.rainUnit, .millimeters))
+        renderer.scale = 2
+        let image = try #require(renderer.uiImage)
+        #expect(image.size.width == 420)
+        #expect(image.size.height > 300)
+        let png = try #require(image.pngData())
+        #expect(png.count > 1000)
+        let path = FileManager.default.temporaryDirectory.appending(path: "trail-share-snapshot.png")
+        try png.write(to: path)
+        print("Share image snapshot: \(path.path)")
+    }
+
+    @Test func sharedTrailLinksRoundTripNamesAndCoordinates() throws {
+        let original = SharedTrail(name: "Ridge & Creek / North #1", coordinate: CLLocationCoordinate2D(latitude: 37.3326, longitude: -122.0882))
+        let decoded = try #require(SharedTrail(url: original.appURL))
+        #expect(decoded.name == original.name)
+        #expect(decoded.latitude == original.latitude)
+        #expect(decoded.longitude == original.longitude)
+        let maps = try #require(URLComponents(url: original.mapsURL, resolvingAgainstBaseURL: false))
+        #expect(maps.scheme == "https")
+        #expect(maps.host == "maps.apple.com")
+        #expect(maps.queryItems?.first(where: { $0.name == "q" })?.value == original.name)
+    }
+
+    @Test(arguments: [
+        "herodirt://trail?lat=91&lon=0",
+        "herodirt://trail?lat=0&lon=-181",
+        "herodirt://trail?lat=nan&lon=0",
+        "herodirt://trail?lat=0&lon=inf",
+        "herodirt://trail?lat=1&lat=2&lon=0",
+        "herodirt://trail?lat=1",
+        "https://example.com/trail?lat=1&lon=2",
+        "herodirt://other?lat=1&lon=2"
+    ]) func invalidSharedTrailIsRejected(_ value: String) {
+        #expect(SharedTrail(url: URL(string: value)!) == nil)
+    }
 
     @Test func codableRoundTrip() throws {
         let original = Place(

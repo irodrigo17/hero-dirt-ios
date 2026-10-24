@@ -2,9 +2,13 @@
 
 _Last updated: October 2026_
 
-Hero Dirt doesn't collect, sell, or share your personal data. There are no accounts, ads, or third-party analytics.
+The developer does not collect or sell your personal data. There are no accounts, ads, or third-party analytics.
 
-**Location.** If you allow it, your location is used on your device to center the map. It is not stored or sent to the developer.
+**Location.** If you allow it, your location is used to center the map and calculate driving estimates. For driving estimates, the starting location and selected destination are sent to Apple Maps. Your location is not stored or sent to the developer.
+
+**Place search.** Search text and the relevant map region are sent to Apple Maps to find matching places. Native keyboard Dictation follows your iOS settings; Hero Dirt does not implement its own audio recording.
+
+**Sharing.** When you choose Share Trail, a condition image and links containing the selected trail's name and coordinates are passed to the iOS share sheet. You choose where to send them. Private saved-place identifiers are not included, and Hero Dirt does not upload the image to a developer server.
 
 **Saved places.** The places you save are stored on your device and in your own iCloud account (iCloud key-value storage) so they sync across your devices. The developer can't access your iCloud data.
 

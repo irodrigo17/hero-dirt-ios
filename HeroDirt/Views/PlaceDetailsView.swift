@@ -6,6 +6,7 @@ struct PlaceDetailsView: View {
     @Environment(MapItemCache.self) private var mapItemCache
     @Environment(\.weather) private var weather
     @Environment(\.soil) private var soil
+    @Environment(\.rainUnit) private var rainUnit
     @Environment(\.drivingTime) private var drivingTime
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
@@ -28,6 +29,8 @@ struct PlaceDetailsView: View {
         case pushed
     }
 
+    @State private var sharePayload: TrailSharePayload?
+    @State private var shareError = false
     @State private var drivingSeconds: TimeInterval?
     @State private var placeName = "Loading…"
     @State private var rainfallSummary: RainfallSummary?
@@ -84,6 +87,15 @@ struct PlaceDetailsView: View {
         .task(id: DrivingTimeLoadKey(place: loadKey, isActive: scenePhase == .active)) {
             guard scenePhase == .active else { return }
             await refreshDrivingTime()
+        }
+        .sheet(item: $sharePayload) { payload in
+            TrailShareSheet(payload: payload)
+                .presentationDetents([.medium, .large])
+        }
+        .alert("Couldn't create share image", isPresented: $shareError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Please try sharing this trail again.")
         }
         .sheet(isPresented: $showSoilOverrideSheet) {
             if let place = savedPlace {
@@ -270,6 +282,10 @@ struct PlaceDetailsView: View {
 
     private var moreMenu: some View {
         Menu {
+            Button(action: shareTrail) {
+                Label("Share Trail", systemImage: "square.and.arrow.up")
+            }
+            .disabled(rainfallSummary == nil || isLoading)
             Button(action: openInMaps) {
                 Label("Open in Maps", systemImage: "map")
             }
@@ -458,6 +474,17 @@ struct PlaceDetailsView: View {
             }
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    private func shareTrail() {
+        guard let summary = rainfallSummary else { return }
+        let renderer = ImageRenderer(content: TrailSharingCard(
+            name: placeName, summary: summary, soil: soilData, sharedAt: .now
+        ).environment(\.rainUnit, rainUnit))
+        renderer.scale = 3
+        guard let image = renderer.uiImage else { shareError = true; return }
+        let trail = SharedTrail(name: placeName, coordinate: coordinate)
+        sharePayload = TrailSharePayload(image: image, text: trail.message(condition: summary.dirtCondition(soil: soilData).label))
     }
 
     private func openDirections() {

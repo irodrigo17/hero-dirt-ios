@@ -12,18 +12,24 @@ struct ContentView: View {
     @Environment(\.weather) private var weather
     @Environment(\.soil) private var soil
 
+    @State private var incomingTrail: SharedTrail?
     @AppStorage("homeMode") private var mode: HomeMode = .list
 
     var body: some View {
         ZStack {
             switch mode {
             case .list:
-                TrailsHomeView(onShowMap: { switchTo(.map) })
+                TrailsHomeView(onShowMap: { switchTo(.map) }, incomingTrail: incomingTrail)
                     .transition(.opacity)
             case .map:
                 MapView(onShowList: { switchTo(.list) })
                     .transition(.opacity)
             }
+        }
+        .onOpenURL { url in
+            guard let trail = SharedTrail(url: url) else { return }
+            incomingTrail = trail
+            switchTo(.list)
         }
         .onAppear {
             // Screenshots/UI tests: always start on the trails list.

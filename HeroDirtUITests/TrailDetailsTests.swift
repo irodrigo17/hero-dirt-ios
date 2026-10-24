@@ -1,6 +1,45 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testSharedTrailLinkOpensFromMap() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        app.buttons["Show map"].tap()
+        XCTAssertTrue(app.maps.firstMatch.waitForExistence(timeout: 10))
+        app.open(URL(string: "herodirt://trail?lat=37.8765&lon=-122.6543&name=Deep%20Link%20Ridge")!)
+        XCTAssertTrue(app.navigationBars["Deep Link Ridge"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].exists)
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "Shared destination opened from map"
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
+    func testTrailShareSheet() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 10))
+        trail.tap()
+        app.buttons["Trail Options"].tap()
+        let share = app.buttons["Share Trail"]
+        XCTAssertTrue(share.waitForExistence(timeout: 5))
+        share.tap()
+        let copy = app.descendants(matching: .any).matching(identifier: "Copy").firstMatch
+        if !copy.waitForExistence(timeout: 8) { print(app.debugDescription) }
+        XCTAssertTrue(copy.exists)
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "Native trail share sheet"
+        shot.lifetime = .keepAlways
+        add(shot)
+        app.buttons.matching(NSPredicate(format: "label IN %@", ["Close", "close", "Cancel"])).firstMatch.tap()
+        XCTAssertTrue(app.buttons["Trail Options"].waitForExistence(timeout: 5))
+    }
+
     func testNativeSearchInputInListAndMap() {
         continueAfterFailure = false
         let app = XCUIApplication()

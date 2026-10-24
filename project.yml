@@ -22,6 +22,10 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: com.herodirt.app.trail
+            CFBundleURLSchemes:
+              - herodirt
         NSLocationWhenInUseUsageDescription: "Hero Dirt can use your location to center the map."
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

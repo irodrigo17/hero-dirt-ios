@@ -7,12 +7,14 @@ import SwiftUI
 /// selected trail's details on the right.
 struct TrailsHomeView: View {
     var onShowMap: () -> Void = {}
+    var incomingTrail: SharedTrail?
 
     @Environment(PlaceStore.self) private var placeStore
     @Environment(PlaceConditionsModel.self) private var conditions
     @Environment(\.weather) private var weather
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
+    @State private var preferredCompactColumn = NavigationSplitViewColumn.sidebar
     @State private var selection: TrailSelection?
     /// Keep the trails list visible next to the details whenever the window
     /// is wide enough (unfolded iPhone Duo held tall included); otherwise
@@ -35,7 +37,7 @@ struct TrailsHomeView: View {
     }
 
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
+        NavigationSplitView(columnVisibility: $columnVisibility, preferredCompactColumn: $preferredCompactColumn) {
             list
                 .navigationSplitViewColumnWidth(min: 300, ideal: 360, max: 440)
                 .navigationTitle("My Trails")
@@ -104,8 +106,19 @@ struct TrailsHomeView: View {
             if count < 2 { editMode = .inactive }
         }
         .onDisappear { searchTask?.cancel() }
-        .onAppear(perform: selectFirstIfSideBySide)
+        .onAppear {
+            if incomingTrail != nil { openSharedTrail() } else { selectFirstIfSideBySide() }
+        }
+        .onChange(of: incomingTrail?.id) { _, _ in openSharedTrail() }
         .onChange(of: horizontalSizeClass) { _, _ in selectFirstIfSideBySide() }
+    }
+
+    private func openSharedTrail() {
+        guard let incomingTrail else { return }
+        let item = MKMapItem(location: CLLocation(latitude: incomingTrail.latitude, longitude: incomingTrail.longitude), address: nil)
+        item.name = incomingTrail.name
+        selection = .result(item)
+        preferredCompactColumn = .detail
     }
 
     /// With the list and details side by side, show the first trail instead
