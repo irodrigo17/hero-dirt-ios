@@ -120,6 +120,12 @@ struct FakeSoilProvider: SoilProviding {
     func soil(latitude: Double, longitude: Double) async -> SoilData? { result }
 }
 
+struct FakeDrivingTimeProvider: DrivingTimeProviding {
+    var seconds: TimeInterval? = 25 * 60
+
+    func travelTime(to destination: CLLocationCoordinate2D) async -> TimeInterval? { seconds }
+}
+
 extension View {
     /// Previews: fake services plus a sample place store.
     @MainActor
@@ -128,6 +134,7 @@ extension View {
             .environment(store ?? SampleData.placeStore())
             .environment(SampleData.mapItemCache())
             .environment(PlaceConditionsModel())
+            .environment(\.drivingTime, FakeDrivingTimeProvider())
             .environment(\.weather, FakeWeatherProvider())
             .environment(\.soil, FakeSoilProvider())
     }

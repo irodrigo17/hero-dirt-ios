@@ -34,6 +34,7 @@
 		4F791DA34EE8D09EAE68CEE0 /* MapModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E580AC42AF14BB33D580EF9A /* MapModelTests.swift */; };
 		54BE1C102E3F2C6D9FBF995B /* RainfallOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49C37481A6448709D5937CF2 /* RainfallOverlay.swift */; };
 		55AC77C2DDD5AA06B22548D8 /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1CFA39D09D62F93F2E0A69 /* Telemetry.swift */; };
+		56CD5EB1C39E33CBABF246FA /* DrivingTimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4911D8F066A56A05677912 /* DrivingTimeService.swift */; };
 		58419135D0DD4D289E2CFE26 /* PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C6E0BABF8E70A0502E1DD2 /* PlaceTests.swift */; };
 		69145AFD0B0F8FBADC14C612 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86D55421595648BAF851BFD8 /* WeatherService.swift */; };
 		6B13905283B321B3540924B8 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D3E5B9A3AECAD3BF81D6F9 /* AboutView.swift */; };
@@ -142,6 +143,7 @@
 		C26DDC85050E71FC10DBCB56 /* OutlookViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookViews.swift; sourceTree = "<group>"; };
 		C2B49147DC7C28BA54BEA8CC /* RainfallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallData.swift; sourceTree = "<group>"; };
 		C5520BC6A9E9BD0B14F62814 /* RainUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainUnit.swift; sourceTree = "<group>"; };
+		CB4911D8F066A56A05677912 /* DrivingTimeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrivingTimeService.swift; sourceTree = "<group>"; };
 		CC823CBF337B12811F2E90E8 /* HeroDirtUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HeroDirtUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCB98AAFFB6A20C03C3B3DCB /* PlaceConditionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModel.swift; sourceTree = "<group>"; };
 		CF607CDDF5532789D59CA6AA /* POICategoryIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = POICategoryIcon.swift; sourceTree = "<group>"; };
@@ -236,6 +238,7 @@
 		82AD055064B80AE78D55E8D6 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				CB4911D8F066A56A05677912 /* DrivingTimeService.swift */,
 				49E6F6768545D13720077183 /* MapItemCache.swift */,
 				0A6212CF0607C8E212CC4494 /* PlaceStore.swift */,
 				42AB1952A8FB042C8696E091 /* Providers.swift */,
@@ -436,6 +439,7 @@
 				0D409DD5C74BE55F179D36EE /* CardHeader.swift in Sources */,
 				85E09D7443AA6433753D63A0 /* ContentView.swift in Sources */,
 				84649145A445B95107CCEB3D /* DirtConditionCardView.swift in Sources */,
+				56CD5EB1C39E33CBABF246FA /* DrivingTimeService.swift in Sources */,
 				6E4E2A432DE4C227C4C32854 /* HeroDirtApp.swift in Sources */,
 				C11B532A7C1451259475A046 /* MKPointOfInterestCategory+Display.swift in Sources */,
 				CF45E5999A9B97E6D8779986 /* MapItemCache.swift in Sources */,

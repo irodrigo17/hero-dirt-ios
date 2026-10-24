@@ -6,6 +6,8 @@ struct PlaceDetailsView: View {
     @Environment(MapItemCache.self) private var mapItemCache
     @Environment(\.weather) private var weather
     @Environment(\.soil) private var soil
+    @Environment(\.drivingTime) private var drivingTime
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
     let coordinate: CLLocationCoordinate2D
@@ -26,6 +28,7 @@ struct PlaceDetailsView: View {
         case pushed
     }
 
+    @State private var drivingSeconds: TimeInterval?
     @State private var placeName = "Loading…"
     @State private var rainfallSummary: RainfallSummary?
     @State private var rainForecast: RainForecast?
@@ -77,6 +80,10 @@ struct PlaceDetailsView: View {
         .presentationDetents([.medium, .large])
         .task(id: loadKey) {
             startLoading()
+        }
+        .task(id: DrivingTimeLoadKey(place: loadKey, isActive: scenePhase == .active)) {
+            guard scenePhase == .active else { return }
+            await refreshDrivingTime()
         }
         .sheet(isPresented: $showSoilOverrideSheet) {
             if let place = savedPlace {
@@ -143,7 +150,9 @@ struct PlaceDetailsView: View {
                 .animation(.easeInOut(duration: 0.25), value: isLoading)
             }
             .refreshable {
+                async let estimate: () = refreshDrivingTime()
                 await refreshData()
+                await estimate
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle(
@@ -204,6 +213,18 @@ struct PlaceDetailsView: View {
             }
     }
 
+    private struct DrivingTimeLoadKey: Hashable {
+        let place: LoadKey
+        let isActive: Bool
+    }
+
+    private func refreshDrivingTime() async {
+        drivingSeconds = nil
+        let seconds = await drivingTime.travelTime(to: coordinate)
+        guard !Task.isCancelled else { return }
+        drivingSeconds = seconds
+    }
+
     private struct LoadKey: Hashable {
         let latitude: Double
         let longitude: Double
@@ -234,11 +255,14 @@ struct PlaceDetailsView: View {
             HStack(spacing: 12) {
                 SheetActionButton(
                     icon: "car.fill",
-                    label: "Directions",
+                    label: DrivingTimeLabel.text(for: drivingSeconds),
                     isPrimary: false,
                     isDisabled: isLoading,
                     action: openDirections
                 )
+                .accessibilityIdentifier("Driving Directions")
+                .accessibilityLabel(drivingSeconds == nil ? "Directions" : "Driving time: \(DrivingTimeLabel.text(for: drivingSeconds))")
+                .accessibilityHint("Opens driving directions in Apple Maps")
                 moreMenu
             }
         }

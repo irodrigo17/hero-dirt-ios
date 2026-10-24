@@ -9,6 +9,9 @@ struct HeroDirtApp: App {
 
     private static let weather: any WeatherProviding =
         useFakeServices ? FakeWeatherProvider() : LiveWeatherProvider()
+    private static let drivingTime: any DrivingTimeProviding = useFakeServices
+        ? FakeDrivingTimeProvider(seconds: ProcessInfo.processInfo.arguments.contains("-noDrivingETA") ? nil : 25 * 60)
+        : LiveDrivingTimeProvider()
     private static let soil: any SoilProviding =
         useFakeServices ? FakeSoilProvider() : LiveSoilProvider()
 
@@ -31,6 +34,7 @@ struct HeroDirtApp: App {
                 .environment(\.rainUnit, unitPreference.resolved())
                 .environment(\.weather, Self.weather)
                 .environment(\.soil, Self.soil)
+                .environment(\.drivingTime, Self.drivingTime)
                 .onAppear {
                     locationManager.requestWhenInUseAuthorization()
                 }

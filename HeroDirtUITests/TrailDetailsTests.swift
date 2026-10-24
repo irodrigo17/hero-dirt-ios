@@ -1,6 +1,38 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testDrivingETAOpensMaps() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 15))
+        trail.tap()
+        let directions = app.buttons["Driving Directions"]
+        XCTAssertTrue(directions.waitForExistence(timeout: 15))
+        XCTAssertTrue(directions.label.contains("25"))
+        directions.tap()
+        XCTAssertTrue(XCUIApplication(bundleIdentifier: "com.apple.Maps").wait(for: .runningForeground, timeout: 10))
+    }
+
+    func testDrivingETAFallback() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-noDrivingETA"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 15))
+        trail.tap()
+        let directions = app.buttons["Driving Directions"]
+        XCTAssertTrue(directions.waitForExistence(timeout: 15))
+        XCTAssertEqual(directions.label, "Directions")
+        XCTAssertTrue(directions.isEnabled)
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     func testWebsiteOpensBrowser() {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -45,8 +77,10 @@ final class TrailDetailsTests: XCTestCase {
         trail.tap()
         let options = app.buttons["Trail Options"]
         XCTAssertTrue(options.waitForExistence(timeout: 15))
-        let directions = app.buttons["Directions"]
+        let directions = app.buttons["Driving Directions"]
         XCTAssertTrue(directions.waitForExistence(timeout: 5))
+        XCTAssertTrue(directions.label.contains("25"))
+        XCTAssertFalse(directions.label == "Directions")
         XCTAssertEqual(options.label, "More")
         XCTAssertEqual(directions.frame.minY, options.frame.minY, accuracy: 2)
         XCTAssertEqual(directions.frame.width, options.frame.width, accuracy: 2)
