@@ -33,6 +33,7 @@ struct PlaceDetailsView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showingRenameAlert = false
+    @State private var showingDeleteConfirmation = false
     @State private var showSoilOverrideSheet = false
     @State private var editingName = ""
     /// The load runs in its own task rather than the view's `.task`, which
@@ -148,6 +149,30 @@ struct PlaceDetailsView: View {
                 Text(subtitle ?? "")
             )
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    if savedPlace != nil {
+                        Menu {
+                            Button {
+                                editingName = placeName
+                                showingRenameAlert = true
+                            } label: {
+                                Label("Rename", systemImage: "pencil")
+                            }
+                            Button {
+                                showSoilOverrideSheet = true
+                            } label: {
+                                Label("Trail Settings", systemImage: "slider.horizontal.3")
+                            }
+                            Button(role: .destructive) {
+                                showingDeleteConfirmation = true
+                            } label: {
+                                Label("Delete Trail", systemImage: "trash")
+                            }
+                        } label: {
+                            Label("Trail Options", systemImage: "ellipsis")
+                        }
+                    }
+                }
                 switch style {
                 case .pushed:
                     ToolbarItem(placement: .topBarTrailing) { EmptyView() }
@@ -174,6 +199,17 @@ struct PlaceDetailsView: View {
                         .accessibilityLabel("Close")
                     }
                 }
+            }
+            .confirmationDialog("Delete this trail?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete Trail", role: .destructive) {
+                    guard let existing = savedPlace else { return }
+                    placeStore.removePlace(existing)
+                    onUnsaved?(existing)
+                    Telemetry.signal(.placeRemoved)
+                    if let onClose { onClose() } else { dismiss() }
+                }
+            } message: {
+                Text("This removes \(placeName) from your saved trails on all your devices.")
             }
             .alert("Rename", isPresented: $showingRenameAlert) {
                 TextField("Name", text: $editingName)
@@ -223,15 +259,6 @@ struct PlaceDetailsView: View {
                 isDisabled: isLoading,
                 action: openInMaps
             )
-            SheetActionButton(
-                icon: "pencil",
-                label: "Rename",
-                isPrimary: false,
-                isDisabled: isLoading
-            ) {
-                editingName = placeName
-                showingRenameAlert = true
-            }
         }
     }
 
