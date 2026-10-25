@@ -149,7 +149,13 @@ struct TrailsHomeView: View {
 
     @ViewBuilder
     private var list: some View {
-        List(selection: $selection) {
+        List(selection: Binding(
+            get: { selection },
+            set: { next in
+                if next != nil, next != selection { NavigationPerformance.begin() }
+                selection = next
+            }
+        )) {
             if isSearching {
                 searchSection
             } else if placeStore.places.isEmpty {

@@ -55,6 +55,7 @@
 		85E09D7443AA6433753D63A0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */; };
 		8C56219361062A3512BDAB2E /* PlaceConditionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB98AAFFB6A20C03C3B3DCB /* PlaceConditionsModel.swift */; };
 		8DB143192B467F84659C90A5 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71FC78C560B808E90DA8900F /* SampleData.swift */; };
+		8F2E4D24A3263F93963C6FEE /* NavigationPerformance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44B5965A34AA261E2BE089E4 /* NavigationPerformance.swift */; };
 		937B717D130A91A86534C0CD /* Providers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42AB1952A8FB042C8696E091 /* Providers.swift */; };
 		9AF500AA1E25469CFEA18F10 /* TrailDetailsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964072470F1EDAB3AD24643F /* TrailDetailsTests.swift */; };
 		A45B7ADC2F5C4D53EF06C0C2 /* RainForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044979B915FE13B07F5D5364 /* RainForecastTests.swift */; };
@@ -115,6 +116,7 @@
 		3B982F32D46E040815D7DB30 /* PlaceConditionsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceConditionsModelTests.swift; sourceTree = "<group>"; };
 		42AB1952A8FB042C8696E091 /* Providers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Providers.swift; sourceTree = "<group>"; };
 		44692038F44E67135E0B38AB /* PlaceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceStoreTests.swift; sourceTree = "<group>"; };
+		44B5965A34AA261E2BE089E4 /* NavigationPerformance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationPerformance.swift; sourceTree = "<group>"; };
 		47E8CBDC6D3A1B8882B0F000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		48BE91E969F9A0834AD97F42 /* TrailsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailsHomeView.swift; sourceTree = "<group>"; };
 		49C37481A6448709D5937CF2 /* RainfallOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainfallOverlay.swift; sourceTree = "<group>"; };
@@ -261,6 +263,7 @@
 			children = (
 				CB4911D8F066A56A05677912 /* DrivingTimeService.swift */,
 				49E6F6768545D13720077183 /* MapItemCache.swift */,
+				44B5965A34AA261E2BE089E4 /* NavigationPerformance.swift */,
 				0A6212CF0607C8E212CC4494 /* PlaceStore.swift */,
 				42AB1952A8FB042C8696E091 /* Providers.swift */,
 				B63B1A69E04A92AFA2143E9D /* RainfallColorScale.swift */,
@@ -478,6 +481,7 @@
 				CF45E5999A9B97E6D8779986 /* MapItemCache.swift in Sources */,
 				0454F448F86EC92902CF412C /* MapModel.swift in Sources */,
 				6EC369FEE43F5D9B4250F2E4 /* MapView.swift in Sources */,
+				8F2E4D24A3263F93963C6FEE /* NavigationPerformance.swift in Sources */,
 				40D152F9D97DFE51A8CB41ED /* Outlook.swift in Sources */,
 				E30ED72365A7E075C6650403 /* OutlookViews.swift in Sources */,
 				0C2D605B6212E438F3B634FF /* POICategoryIcon.swift in Sources */,
