@@ -75,7 +75,7 @@ struct ConditionTrendView: View {
             .chartYAxis {
                 AxisMarks(values: [0, 50, 100]) { value in
                     AxisGridLine()
-                    AxisValueLabel {
+                    AxisValueLabel(anchor: .leading) {
                         if let v = value.as(Int.self) {
                             Text(v == 0 ? String(localized: "Dry") : v == 100 ? String(localized: "Soaked") : "")
                         }
@@ -97,7 +97,7 @@ struct ConditionTrendView: View {
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 2)) { value in
                     AxisGridLine()
-                    AxisValueLabel {
+                    AxisValueLabel(anchor: .leading) {
                         if let mm = value.as(Double.self) {
                             Text(unit.formatWithUnit(mm))
                         }
@@ -107,7 +107,7 @@ struct ConditionTrendView: View {
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day, count: 7)) { _ in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day(), anchor: .top)
                 }
             }
             .frame(height: 70)

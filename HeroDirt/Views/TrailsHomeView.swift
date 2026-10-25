@@ -32,8 +32,6 @@ struct TrailsHomeView: View {
     @State private var activeSearch: MKLocalSearch?
     @State private var showingAbout = false
     @State private var editMode: EditMode = .inactive
-    @State private var renamingPlace: Place?
-    @State private var editingName = ""
 
     enum TrailSelection: Hashable {
         case saved(UUID)
@@ -54,7 +52,6 @@ struct TrailsHomeView: View {
                 .onChange(of: searchText) { _, query in scheduleSearch(query) }
                 .onSubmit(of: .search) { scheduleSearch(searchText, debounce: false) }
                 .toolbar {
-                    DefaultToolbarItem(kind: .search, placement: .bottomBar)
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
                             showingAbout = true
@@ -75,20 +72,6 @@ struct TrailsHomeView: View {
                     }
                 }
                 .sheet(isPresented: $showingAbout) { AboutView() }
-                .alert(
-                    "Rename",
-                    isPresented: Binding(get: { renamingPlace != nil }, set: { if !$0 { renamingPlace = nil } })
-                ) {
-                    TextField("Name", text: $editingName)
-                    Button("Save") {
-                        let trimmed = editingName.trimmingCharacters(in: .whitespaces)
-                        if let place = renamingPlace, !trimmed.isEmpty {
-                            placeStore.renamePlace(place, to: trimmed)
-                        }
-                        renamingPlace = nil
-                    }
-                    Button("Cancel", role: .cancel) { renamingPlace = nil }
-                }
         } detail: {
             NavigationStack {
                 detail
@@ -183,11 +166,11 @@ struct TrailsHomeView: View {
                     }
                     .swipeActions(edge: .leading) {
                         Button {
-                            editingName = place.name
-                            renamingPlace = place
+                            DrivingDirections.open(to: place)
                         } label: {
-                            Label("Rename", systemImage: "pencil")
+                            Label("Directions", systemImage: "car.fill")
                         }
+                        .accessibilityHint("Opens driving directions in Apple Maps")
                         .tint(.blue)
                     }
                 }

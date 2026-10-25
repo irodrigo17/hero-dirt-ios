@@ -8,29 +8,7 @@ struct SavedPlacesListView: View {
     var selectedDetent: PresentationDetent
 
     @Environment(PlaceConditionsModel.self) private var conditions
-    @State private var renamingPlace: Place?
-    @State private var editingName = ""
-
-    var body: some View {
-        content
-            .alert(
-                "Rename",
-                isPresented: Binding(
-                    get: { renamingPlace != nil },
-                    set: { if !$0 { renamingPlace = nil } }
-                )
-            ) {
-                TextField("Name", text: $editingName)
-                Button("Save") {
-                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
-                    if let place = renamingPlace, !trimmed.isEmpty {
-                        placeStore.renamePlace(place, to: trimmed)
-                    }
-                    renamingPlace = nil
-                }
-                Button("Cancel", role: .cancel) { renamingPlace = nil }
-            }
-    }
+    var body: some View { content }
 
     @ViewBuilder
     private var content: some View {
@@ -64,11 +42,11 @@ struct SavedPlacesListView: View {
                     .buttonStyle(.plain)
                     .swipeActions(edge: .leading) {
                         Button {
-                            editingName = place.name
-                            renamingPlace = place
+                            DrivingDirections.open(to: place)
                         } label: {
-                            Label("Rename", systemImage: "pencil")
+                            Label("Directions", systemImage: "car.fill")
                         }
+                        .accessibilityHint("Opens driving directions in Apple Maps")
                         .tint(.blue)
                     }
                 }

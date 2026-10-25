@@ -315,6 +315,37 @@ final class TrailDetailsTests: XCTestCase {
         XCTAssertFalse(app.buttons["Website"].exists)
     }
 
+    func testSavedTrailSwipeDirectionsInListAndMap() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        let maps = XCUIApplication(bundleIdentifier: "com.apple.Maps")
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        for inMap in [false, true] {
+            if inMap { app.buttons["Show map"].tap() }
+            let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+            XCTAssertTrue(trail.waitForExistence(timeout: 10))
+            // Partial swipes reveal the standard actions without committing a full swipe.
+            trail.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5))
+                .press(forDuration: 0.05, thenDragTo: trail.coordinate(withNormalizedOffset: CGVector(dx: 0.45, dy: 0.5)))
+            XCTAssertTrue(app.buttons["Delete"].waitForExistence(timeout: 5))
+            trail.coordinate(withNormalizedOffset: CGVector(dx: 0.45, dy: 0.5))
+                .press(forDuration: 0.05, thenDragTo: trail.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5)))
+            trail.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5))
+                .press(forDuration: 0.05, thenDragTo: trail.coordinate(withNormalizedOffset: CGVector(dx: 0.55, dy: 0.5)))
+            let directions = app.buttons["Directions"]
+            XCTAssertTrue(directions.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.buttons["Rename"].exists)
+            let shot = XCTAttachment(screenshot: app.screenshot())
+            shot.name = inMap ? "Map row swipe directions" : "Main row swipe directions"
+            shot.lifetime = .keepAlways
+            add(shot)
+            directions.tap()
+            XCTAssertTrue(maps.wait(for: .runningForeground, timeout: 10))
+            app.activate()
+        }
+    }
+
     func testSavedTrailOptions() {
         continueAfterFailure = false
         let app = XCUIApplication()

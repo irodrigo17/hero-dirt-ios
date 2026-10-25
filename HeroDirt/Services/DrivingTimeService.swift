@@ -80,3 +80,15 @@ enum DrivingTimeLabel {
         return formatter.string(from: roundedSeconds) ?? String(localized: "Directions")
     }
 }
+
+/// Saved rows can open driving directions immediately, without fetching place
+/// metadata or loading the detail screen first.
+enum DrivingDirections {
+    @MainActor
+    static func open(to place: Place) {
+        let item = MKMapItem(location: CLLocation(latitude: place.latitude, longitude: place.longitude), address: nil)
+        item.name = place.name
+        Telemetry.signal(.directionsOpened)
+        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+    }
+}
