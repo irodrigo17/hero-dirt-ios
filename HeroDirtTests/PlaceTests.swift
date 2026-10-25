@@ -63,16 +63,67 @@ struct PlaceTests {
         let original = SharedTrail(name: "Ridge & Creek / North #1", coordinate: CLLocationCoordinate2D(latitude: 37.3326, longitude: -122.0882))
         let decoded = try #require(SharedTrail(url: original.appURL))
         #expect(decoded.name == original.name)
-        #expect(decoded.latitude == original.latitude)
-        #expect(decoded.longitude == original.longitude)
-        let maps = try #require(URLComponents(url: original.mapsURL, resolvingAgainstBaseURL: false))
-        #expect(maps.scheme == "https")
-        #expect(maps.host == "maps.apple.com")
-        #expect(maps.queryItems?.first(where: { $0.name == "q" })?.value == original.name)
+        #expect(decoded.destination == original.destination)
         let message = original.message(condition: "Hero Dirt")
         #expect(message.contains(original.appURL.absoluteString))
-        #expect(message.contains(original.mapsURL.absoluteString))
+        #expect(!message.contains("View location"))
+        #expect(!message.contains("maps.apple.com"))
         #expect(message.contains("Get Hero Dirt: https://apps.apple.com/app/id6770195112"))
+    }
+
+    @Test func sharingPrefersApplePlaceIDWithoutCoordinatesOrName() throws {
+        let original = SharedTrail(name: "My Custom Trail Name",
+                                   coordinate: CLLocationCoordinate2D(latitude: 37, longitude: -122),
+                                   mapItemID: "I1234567890")
+        let components = try #require(URLComponents(url: original.appURL, resolvingAgainstBaseURL: false))
+        #expect(components.queryItems == [URLQueryItem(name: "placeID", value: "I1234567890")])
+        let parsed = try #require(SharedTrail(url: original.appURL))
+        #expect(parsed.destination == .placeID("I1234567890"))
+        #expect(original.message(condition: "Hero Dirt").hasPrefix("My Custom Trail Name — Hero Dirt"))
+    }
+
+    @Test func blankPlaceIDFallsBackToCoordinates() throws {
+        let trail = SharedTrail(name: "Point on map", coordinate: CLLocationCoordinate2D(latitude: 37, longitude: -122), mapItemID: "")
+        #expect(trail.destination == .coordinates(latitude: 37, longitude: -122))
+        #expect(try #require(URLComponents(url: trail.appURL, resolvingAgainstBaseURL: false)).queryItems?.count == 3)
+    }
+
+    @MainActor
+    @Test func resolvesSharedApplePlaceIDBeforeOpeningDetails() async throws {
+        let trail = try #require(SharedTrail(url: URL(string: "herodirt://trail?placeID=I1234567890")!))
+        let resolver = LiveSharedTrailResolver(lookup: { identifier in
+            #expect(identifier == "I1234567890")
+            let item = MKMapItem(location: CLLocation(latitude: 37.5, longitude: -122.5), address: nil)
+            item.name = "Resolved Apple Place"
+            return item
+        })
+        let item = try await resolver.resolve(trail)
+        #expect(item.name == "Resolved Apple Place")
+        #expect(item.location.coordinate.latitude == 37.5)
+    }
+
+    @MainActor
+    @Test func coordinateShareResolvesWithoutPlaceLookup() async throws {
+        let trail = SharedTrail(name: "Dropped Pin", coordinate: CLLocationCoordinate2D(latitude: 37, longitude: -122))
+        let resolver = LiveSharedTrailResolver(lookup: { _ in
+            Issue.record("Coordinate fallback must not request an Apple place ID")
+            throw URLError(.resourceUnavailable)
+        })
+        let item = try await resolver.resolve(trail)
+        #expect(item.name == "Dropped Pin")
+        #expect(item.location.coordinate.latitude == 37)
+        #expect(item.location.coordinate.longitude == -122)
+    }
+
+    @Test func unresolvedPlaceIDReportsFailureWithoutInventingCoordinates() async throws {
+        let trail = try #require(SharedTrail(url: URL(string: "herodirt://trail?placeID=I1234567890")!))
+        let resolver = LiveSharedTrailResolver(lookup: { _ in throw URLError(.notConnectedToInternet) })
+        do {
+            _ = try await resolver.resolve(trail)
+            Issue.record("An unresolved ID must fail instead of opening a fabricated destination")
+        } catch {
+            #expect((error as? URLError)?.code == .notConnectedToInternet)
+        }
     }
 
     @Test(arguments: [
@@ -83,7 +134,12 @@ struct PlaceTests {
         "herodirt://trail?lat=1&lat=2&lon=0",
         "herodirt://trail?lat=1",
         "https://example.com/trail?lat=1&lon=2",
-        "herodirt://other?lat=1&lon=2"
+        "herodirt://other?lat=1&lon=2",
+        "herodirt://trail?placeID=",
+        "herodirt://trail?placeID=%20",
+        "herodirt://trail?placeID=I1234567890&placeID=I1234567890",
+        "herodirt://trail?placeID=I1234567890&lat=1&lon=2",
+        "herodirt://trail?placeID=I1234567890&name=Mixed"
     ]) func invalidSharedTrailIsRejected(_ value: String) {
         #expect(SharedTrail(url: URL(string: value)!) == nil)
     }

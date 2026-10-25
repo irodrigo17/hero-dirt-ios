@@ -4,10 +4,11 @@ Implemented locally:
 
 - More → Share Trail opens the native iOS share sheet with a rendered condition image and text.
 - The image includes the destination name, estimated conditions, outlook, recent rain, and sharing time.
-- `herodirt://trail?lat=...&lon=...&name=...` opens the destination in an installed Hero Dirt app. Opening a link does not automatically save it.
-- An accompanying `https://maps.apple.com/` link lets a recipient view the destination without installing Hero Dirt.
+- `herodirt://trail?placeID=...` shares only the Apple Maps place identifier when available. The receiving app resolves it asynchronously through MapKit before opening details, with a loading indicator and an error if lookup fails.
+- When no place identifier is available, the link uses `herodirt://trail?lat=...&lon=...&name=...`. Previously shared coordinate links remain supported. Opening either kind of link does not automatically save it.
+- Shared text no longer includes the separate “View location” / Apple Maps link.
 - Shared text also includes [Get Hero Dirt](https://apps.apple.com/app/id6770195112), using the Apple ID supplied by the developer. This URL can ship before release; recipients can use the listing once it is public, including an approved pre-order listing.
-- Link parsing rejects missing, duplicate, non-finite, and out-of-range coordinates. Names and query values are encoded with URLComponents.
+- Link parsing rejects empty/duplicate place IDs, mixed ID-and-coordinate payloads, and missing, duplicate, non-finite, or out-of-range coordinates. Names and query values are encoded with URLComponents.
 
 The app does not send a message itself. The person sharing chooses a destination and completes the action in the system share sheet.
 

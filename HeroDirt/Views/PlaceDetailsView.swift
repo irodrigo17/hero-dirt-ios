@@ -514,7 +514,10 @@ struct PlaceDetailsView: View {
         ).environment(\.rainUnit, rainUnit))
         renderer.scale = 3
         guard let image = renderer.uiImage else { shareError = true; return }
-        let trail = SharedTrail(name: placeName, coordinate: coordinate)
+        let trail = SharedTrail(
+            name: placeName, coordinate: coordinate,
+            mapItemID: savedPlace?.mapItemIdString ?? effectiveMapItem?.identifier?.rawValue
+        )
         sharePayload = TrailSharePayload(image: image, text: trail.message(condition: summary.dirtCondition(soil: soilData).label))
     }
 

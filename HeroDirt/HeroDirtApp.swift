@@ -15,6 +15,8 @@ struct HeroDirtApp: App {
             delay: ProcessInfo.processInfo.arguments.contains("-slowDrivingETA") ? .seconds(3) : .zero
         )
         : LiveDrivingTimeProvider()
+    private static let sharedTrailResolver: any SharedTrailResolving =
+        useFakeServices ? FakeSharedTrailResolver() : LiveSharedTrailResolver()
     private static let soil: any SoilProviding =
         useFakeServices ? FakeSoilProvider() : LiveSoilProvider()
 
@@ -35,6 +37,7 @@ struct HeroDirtApp: App {
                 .environment(mapItemCache)
                 .environment(conditions)
                 .environment(\.rainUnit, unitPreference.resolved())
+                .environment(\.sharedTrailResolver, Self.sharedTrailResolver)
                 .environment(\.weather, Self.weather)
                 .environment(\.soil, Self.soil)
                 .environment(\.drivingTime, Self.drivingTime)

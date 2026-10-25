@@ -54,6 +54,7 @@ extension SoilProviding {
 // MARK: - Environment
 
 extension EnvironmentValues {
+    @Entry var sharedTrailResolver: any SharedTrailResolving = LiveSharedTrailResolver()
     @Entry var weather: any WeatherProviding = LiveWeatherProvider()
     @Entry var drivingTime: any DrivingTimeProviding = LiveDrivingTimeProvider()
     @Entry var soil: any SoilProviding = LiveSoilProvider()

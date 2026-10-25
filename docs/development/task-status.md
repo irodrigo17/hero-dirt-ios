@@ -15,7 +15,7 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 | Tone down bright colors | Condition and rain-map colors adjusted roughly halfway between the original bright palette and the first muted version, with adaptive light/dark condition colors. No condition thresholds or meanings changed. |
 | Main search at bottom | Native iOS bottom-toolbar search, with the standard keyboard and Dictation. |
 | Voice search | Uses existing system keyboard Dictation; no custom audio recorder, speech engine, or app-specific audio permissions. The Dictate control is verified in main and map search keyboards; speech itself needs a physical-device check. |
-| Share trail and condition image | More → Share Trail presents a native share sheet with an exportable image, text, an installed-app deep link, Apple Maps alternative, and App Store link using Apple ID `6770195112`. See [sharing implementation and remaining setup](trail-sharing.md). An HTTPS universal link with automatic App Store fallback still requires an owned domain; the listing must be public for recipients to use it. |
+| Share trail and condition image | More → Share Trail presents a native share sheet with an exportable image, text, an installed-app deep link using an Apple Maps place ID when available (coordinates/name otherwise), and App Store link using Apple ID `6770195112`. See [sharing implementation and remaining setup](trail-sharing.md). An HTTPS universal link with automatic App Store fallback still requires an owned domain; the listing must be public for recipients to use it. |
 | Driving ETA | Car button shows driving time when available, falls back to Directions, and still opens driving navigation. |
 | Open in Apple Maps / Weather | Open in Maps is under More. Apple Weather remains deferred as agreed because location-specific link behavior is unverified and the app is not bundled with the iOS simulator. A generic launcher that may display the wrong location has not been added. |
 | Place website | Website under More when Apple Places provides an HTTP(S) URL. |
@@ -33,3 +33,5 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 ## Verification
 
 The combined changes passed 167 unit tests and 14 simulator UI tests on the iPhone 17 Pro / iOS 26.4 test simulator. Additional dark-mode detail checks and the share-image/parser tests passed after the final icon-contrast adjustment. Normal simulator code signing remained enabled. Native speech transcription and installed/uninstalled universal-link behavior are physical-device follow-ups, not claimed as simulator-verified.
+
+The place-ID sharing update passed 178 unit tests and five focused simulator UI checks (ID links, coordinate links, lookup failure/recovery, sharing, and normal startup). A separate live round-trip using Apple Park Visitor Center’s public place ID also passed; that network-dependent smoke check is not part of CI.

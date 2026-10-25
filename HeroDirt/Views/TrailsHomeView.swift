@@ -12,8 +12,11 @@ struct TrailsHomeView: View {
     @Environment(PlaceStore.self) private var placeStore
     @Environment(PlaceConditionsModel.self) private var conditions
     @Environment(\.weather) private var weather
+    @Environment(\.sharedTrailResolver) private var sharedTrailResolver
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
+    @State private var isOpeningSharedTrail = false
+    @State private var sharedTrailError = false
     @State private var preferredCompactColumn = NavigationSplitViewColumn.sidebar
     @State private var selection: TrailSelection?
     /// Keep the trails list visible next to the details whenever the window
@@ -114,18 +117,40 @@ struct TrailsHomeView: View {
             activeSearch = nil
         }
         .onAppear {
-            if incomingTrail != nil { openSharedTrail() } else { selectFirstIfSideBySide() }
+            if incomingTrail == nil { selectFirstIfSideBySide() }
         }
-        .onChange(of: incomingTrail?.id) { _, _ in openSharedTrail() }
+        .task(id: incomingTrail?.id) { await openSharedTrail() }
+        .overlay {
+            if isOpeningSharedTrail {
+                ProgressView("Opening trail…")
+                    .padding(20)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+            }
+        }
+        .alert("Couldn't Open Trail", isPresented: $sharedTrailError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Apple Maps couldn't retrieve this place. Check your connection and try opening the link again.")
+        }
         .onChange(of: horizontalSizeClass) { _, _ in selectFirstIfSideBySide() }
     }
 
-    private func openSharedTrail() {
+    private func openSharedTrail() async {
         guard let incomingTrail else { return }
-        let item = MKMapItem(location: CLLocation(latitude: incomingTrail.latitude, longitude: incomingTrail.longitude), address: nil)
-        item.name = incomingTrail.name
-        selection = .result(item)
-        preferredCompactColumn = .detail
+        isOpeningSharedTrail = true
+        sharedTrailError = false
+        defer {
+            if !Task.isCancelled { isOpeningSharedTrail = false }
+        }
+        do {
+            let item = try await sharedTrailResolver.resolve(incomingTrail)
+            guard !Task.isCancelled else { return }
+            selection = .result(item)
+            preferredCompactColumn = .detail
+        } catch {
+            guard !Task.isCancelled else { return }
+            sharedTrailError = true
+        }
     }
 
     /// With the list and details side by side, show the first trail instead

@@ -129,6 +129,17 @@ struct FakeSoilProvider: SoilProviding {
     func soil(latitude: Double, longitude: Double) async -> SoilData? { result }
 }
 
+struct FakeSharedTrailResolver: SharedTrailResolving {
+    func resolve(_ trail: SharedTrail) async throws -> MKMapItem {
+        try await LiveSharedTrailResolver(lookup: { identifier in
+            guard identifier == "I1234567890" else { throw URLError(.resourceUnavailable) }
+            let item = MKMapItem(location: CLLocation(latitude: 37.8765, longitude: -122.6543), address: nil)
+            item.name = "Shared Place ID Trail"
+            return item
+        }).resolve(trail)
+    }
+}
+
 struct FakeDrivingTimeProvider: DrivingTimeProviding {
     var seconds: TimeInterval? = 25 * 60
     var delay: Duration = .zero

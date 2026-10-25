@@ -17,6 +17,32 @@ final class TrailDetailsTests: XCTestCase {
         add(shot)
     }
 
+    func testSharedPlaceIDLinkResolvesFromMap() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        app.buttons["Show map"].tap()
+        XCTAssertTrue(app.maps.firstMatch.waitForExistence(timeout: 10))
+        app.open(URL(string: "herodirt://trail?placeID=I1234567890")!)
+        XCTAssertTrue(app.navigationBars["Shared Place ID Trail"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Save"].exists)
+    }
+
+    func testSharedPlaceIDFailureShowsError() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        app.open(URL(string: "herodirt://trail?placeID=I9876543210")!)
+        let error = app.alerts["Couldn't Open Trail"]
+        XCTAssertTrue(error.waitForExistence(timeout: 10))
+        error.buttons["OK"].tap()
+        XCTAssertTrue(app.navigationBars["My Trails"].exists)
+        app.open(URL(string: "herodirt://trail?placeID=I1234567890")!)
+        XCTAssertTrue(app.navigationBars["Shared Place ID Trail"].waitForExistence(timeout: 10))
+    }
+
     func testTrailShareSheet() {
         continueAfterFailure = false
         let app = XCUIApplication()
