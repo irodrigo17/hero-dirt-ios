@@ -514,15 +514,7 @@ struct PlaceDetailsView: View {
         ).environment(\.rainUnit, rainUnit))
         renderer.scale = 3
         guard let image = renderer.uiImage else { shareError = true; return }
-        let trail = SharedTrail(
-            name: placeName, coordinate: coordinate,
-            mapItemID: savedPlace?.mapItemIdString ?? effectiveMapItem?.identifier?.rawValue
-        )
-        let condition = summary.dirtCondition(soil: soilData).label
-        sharePayload = TrailSharePayload(
-            image: image, text: trail.message(condition: condition),
-            url: trail.appURL, title: "\(placeName) — \(condition)"
-        )
+        sharePayload = TrailSharePayload(image: image)
     }
 
     private func openDirections() {

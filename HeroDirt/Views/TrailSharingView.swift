@@ -1,88 +1,22 @@
-import LinkPresentation
 import SwiftUI
 import UIKit
 
 struct TrailSharePayload: Identifiable {
     let id = UUID()
     let image: UIImage
-    let text: String
-    let url: URL
-    let title: String
+
+    /// Send the image itself so it survives delivery, plus one download link.
+    var activityItems: [Any] { [image, SharedTrail.appStoreURL] }
 }
 
 struct TrailShareSheet: UIViewControllerRepresentable {
     let payload: TrailSharePayload
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: [
-            TrailShareItemSource(payload: payload, kind: .link),
-            TrailShareItemSource(payload: payload, kind: .image),
-            TrailShareItemSource(payload: payload, kind: .mailNote)
-        ], applicationActivities: nil)
+        UIActivityViewController(activityItems: payload.activityItems, applicationActivities: nil)
     }
 
     func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
-}
-
-/// Supply one rich link to Messages. Alternate representations retain image
-/// saving and the email fallback without adding extra Messages attachments.
-@MainActor
-// UIKit guarantees these delegate callbacks run on the main thread.
-final class TrailShareItemSource: NSObject, @preconcurrency UIActivityItemSource {
-    enum Kind { case link, image, mailNote }
-    let payload: TrailSharePayload
-    let kind: Kind
-    private let metadata: LPLinkMetadata?
-
-    init(payload: TrailSharePayload, kind: Kind) {
-        self.payload = payload
-        self.kind = kind
-        if kind == .link {
-            let metadata = LPLinkMetadata()
-            metadata.originalURL = payload.url
-            metadata.url = payload.url
-            metadata.title = payload.title
-            metadata.imageProvider = NSItemProvider(object: payload.image)
-            if let icon = UIImage(systemName: "mountain.2.fill") {
-                metadata.iconProvider = NSItemProvider(object: icon)
-            }
-            self.metadata = metadata
-        } else {
-            metadata = nil
-        }
-        super.init()
-    }
-
-    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
-        switch kind {
-        case .link: payload.url
-        case .image: payload.image
-        case .mailNote: payload.text
-        }
-    }
-
-    func activityViewController(_ activityViewController: UIActivityViewController,
-                                itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
-        switch kind {
-        case .link:
-            if let activityType, [.saveToCameraRoll, .mail, .print, .assignToContact].contains(activityType) { return nil }
-            return payload.url
-        case .image:
-            if let activityType, [.message, .copyToPasteboard, .airDrop, .addToReadingList].contains(activityType) { return nil }
-            return payload.image
-        case .mailNote:
-            return activityType == .mail ? payload.text : nil
-        }
-    }
-
-    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
-        metadata
-    }
-
-    func activityViewController(_ activityViewController: UIActivityViewController,
-                                subjectForActivityType activityType: UIActivity.ActivityType?) -> String {
-        payload.title
-    }
 }
 
 /// A native-rendered image that can be saved or shared without a backend.

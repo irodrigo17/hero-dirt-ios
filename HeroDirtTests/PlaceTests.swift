@@ -9,41 +9,15 @@ import SwiftUI
 struct PlaceTests {
 
     @MainActor
-    @Test func richShareProvidesOneMessagesLinkWithPreviewMetadata() throws {
-        let image = UIImage(systemName: "mountain.2.fill")!
-        let payload = TrailSharePayload(image: image, text: "Email fallback", url: URL(string: "herodirt://trail?placeID=I1234567890")!, title: "Test Trail — Hero Dirt")
-        let controller = UIActivityViewController(activityItems: [], applicationActivities: nil)
-        let link = TrailShareItemSource(payload: payload, kind: .link)
-        let imageItem = TrailShareItemSource(payload: payload, kind: .image)
-        let note = TrailShareItemSource(payload: payload, kind: .mailNote)
-        #expect(link.activityViewController(controller, itemForActivityType: .message) as? URL == payload.url)
-        #expect(imageItem.activityViewController(controller, itemForActivityType: .message) == nil)
-        #expect(note.activityViewController(controller, itemForActivityType: .message) == nil)
-        let metadata = try #require(link.activityViewControllerLinkMetadata(controller))
-        #expect(metadata.originalURL == payload.url)
-        #expect(metadata.url == payload.url)
-        #expect(metadata.title == payload.title)
-        #expect(metadata.imageProvider != nil)
-        #expect(metadata.iconProvider != nil)
-    }
-
-    @MainActor
-    @Test func richShareRetainsImageSavingAndEmailFallback() {
-        let image = UIImage(systemName: "mountain.2.fill")!
-        let payload = TrailSharePayload(image: image, text: "Email fallback", url: URL(string: "herodirt://trail?placeID=I1234567890")!, title: "Test Trail")
-        let controller = UIActivityViewController(activityItems: [], applicationActivities: nil)
-        let link = TrailShareItemSource(payload: payload, kind: .link)
-        let imageItem = TrailShareItemSource(payload: payload, kind: .image)
-        let note = TrailShareItemSource(payload: payload, kind: .mailNote)
-        #expect(imageItem.activityViewController(controller, itemForActivityType: nil) as? UIImage === image)
-        #expect(imageItem.activityViewController(controller, itemForActivityType: .copyToPasteboard) == nil)
-        #expect(link.activityViewController(controller, itemForActivityType: .saveToCameraRoll) == nil)
-        #expect(imageItem.activityViewController(controller, itemForActivityType: .saveToCameraRoll) as? UIImage === image)
-        #expect(note.activityViewController(controller, itemForActivityType: .saveToCameraRoll) == nil)
-        #expect(link.activityViewController(controller, itemForActivityType: .copyToPasteboard) as? URL == payload.url)
-        #expect(link.activityViewController(controller, itemForActivityType: .mail) == nil)
-        #expect(note.activityViewController(controller, itemForActivityType: .mail) as? String == payload.text)
-        #expect(imageItem.activityViewController(controller, itemForActivityType: .mail) as? UIImage === image)
+    @Test func shareContainsOnlyActualImageAndAppStoreDownloadURL() throws {
+        let image = try #require(UIImage(systemName: "mountain.2.fill"))
+        let items = TrailSharePayload(image: image).activityItems
+        #expect(items.count == 2)
+        #expect(items[0] as? UIImage === image)
+        let url = try #require(items[1] as? URL)
+        #expect(url.absoluteString == "https://apps.apple.com/app/id6770195112")
+        #expect(url.scheme == "https")
+        #expect(url.host == "apps.apple.com")
     }
 
     private final class ThreadCheckedMapItem: MKMapItem {
@@ -102,11 +76,6 @@ struct PlaceTests {
         let decoded = try #require(SharedTrail(url: original.appURL))
         #expect(decoded.name == original.name)
         #expect(decoded.destination == original.destination)
-        let message = original.message(condition: "Hero Dirt")
-        #expect(message.contains(original.appURL.absoluteString))
-        #expect(!message.contains("View location"))
-        #expect(!message.contains("maps.apple.com"))
-        #expect(message.contains("Get Hero Dirt: https://apps.apple.com/app/id6770195112"))
     }
 
     @Test func sharingPrefersApplePlaceIDWithoutCoordinatesOrName() throws {
@@ -117,7 +86,6 @@ struct PlaceTests {
         #expect(components.queryItems == [URLQueryItem(name: "placeID", value: "I1234567890")])
         let parsed = try #require(SharedTrail(url: original.appURL))
         #expect(parsed.destination == .placeID("I1234567890"))
-        #expect(original.message(condition: "Hero Dirt").hasPrefix("My Custom Trail Name — Hero Dirt"))
     }
 
     @Test func blankPlaceIDFallsBackToCoordinates() throws {

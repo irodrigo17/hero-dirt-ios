@@ -1,30 +1,20 @@
 # Trail sharing
 
-Implemented locally:
+## Current v1 behavior
 
-- More → Share Trail uses `UIActivityItemSource` and `LPLinkMetadata` to provide a native rich-link preview with the trail title, condition image, icon, and actual Hero Dirt URL. All preview data is prepared locally; no metadata fetch or image upload is needed.
-- Messages receives one URL plus its preview metadata, without separate photo/text attachments. Copy copies the link. Image-saving activities still receive the condition image; Mail retains the image and explanatory text with the App Store link. Other receiving apps control their own rendering.
-- The image includes the destination name, estimated conditions, outlook, recent rain, and sharing time.
-- `herodirt://trail?placeID=...` shares only the Apple Maps place identifier when available. The receiving app resolves it asynchronously through MapKit before opening details, with a loading indicator and an error if lookup fails.
-- When no place identifier is available, the link uses `herodirt://trail?lat=...&lon=...&name=...`. Previously shared coordinate links remain supported. Opening either kind of link does not automatically save it.
-- Shared text no longer includes the separate “View location” / Apple Maps link.
-- The email fallback text includes [Get Hero Dirt](https://apps.apple.com/app/id6770195112), using the Apple ID supplied by the developer. This URL can ship before release; recipients can use the listing once it is public, including an approved pre-order listing.
-- Link parsing rejects empty/duplicate place IDs, mixed ID-and-coordinate payloads, and missing, duplicate, non-finite, or out-of-range coordinates. Names and query values are encoded with URLComponents.
+More → Share Trail opens the standard iOS share sheet with two items:
 
-The simulator verifies the native share-sheet preview and the per-activity payloads, but does not expose Messages as a sharing target. The delivered Messages card still needs a physical-iPhone check, especially with the current custom URL scheme. Copying/pasting the URL alone does not carry the locally supplied preview metadata. A hosted HTTPS share page with web metadata is still needed for reliable previews across apps and app-install fallback.
+1. The generated condition image as an actual image attachment.
+2. The download URL: `https://apps.apple.com/app/id6770195112`.
 
-The app does not send a message itself. The person sharing chooses a destination and completes the action in the system share sheet.
+The image includes the trail name, estimated condition, outlook, recent rain, and sharing time. No trail deep link, Apple Maps link, or long explanatory text is added to the outgoing share. The image itself carries the estimate disclaimer. The download link uses the assigned Apple ID; recipients can download once the App Store listing is public.
 
-## Remaining: one HTTPS link with installation fallback
+There is no upload, hosted sharing page, or Cloudflare service in v1. The app does not send messages itself; the person sharing chooses the recipient/app and completes the action in the system share sheet.
 
-A custom scheme cannot take an uninstalled app to the App Store automatically. The App Store URL is now configured as `https://apps.apple.com/app/id6770195112`. A controlled HTTPS host for a landing page/universal links is still needed. Listing availability has not been verified; an absent public lookup result does not prevent assigning or configuring the app's Apple ID before release.
+Previously distributed `herodirt://trail?...` links remain accepted, including Apple place-ID and coordinate/name forms. Their existing asynchronous resolution and error handling remain available for compatibility, but v1 no longer generates them from Share Trail.
 
-After a host is available:
+## Deferred v2
 
-1. Choose the owned HTTPS route, for example `/trail` on the selected domain; validate and URL-encode the destination payload.
-2. Host the Apple App Site Association file with the actual app identifier, and add the corresponding Associated Domains entitlement.
-3. Extend the parser to accept that exact trusted HTTPS host and path, then handle universal links as well as the existing custom scheme.
-4. Make the landing page show the destination, an Open in Hero Dirt button, the actual App Store link, and an Apple Maps alternative. Ensure displayed names are escaped and coordinates validated.
-5. Share that HTTPS link, and verify installed/uninstalled behavior on physical iPhones, including cold and warm launches, denied app-opening prompts, and return from the App Store.
+The user tested Link Presentation metadata on a physical iPhone: the condition card appeared in the composer but delivered as a bare custom-scheme URL. That experiment is not the shipping v1 approach. Actual image attachments avoid relying on the survival of a link preview.
 
-No website has been published and no Associated Domains entitlement has been added without a verified host.
+Universal HTTPS links, app/store routing, public preview metadata/images, and optional dated snapshots are deferred until the product needs them. The detailed [Cloudflare v2 plan](cloudflare-deep-links-v2-plan.md) covers the API contract, parallel Cloudflare/iOS workstreams, storage/privacy choices, deployment, device tests, and rollback. No Cloudflare resources have been provisioned and no Associated Domains entitlement has been added.

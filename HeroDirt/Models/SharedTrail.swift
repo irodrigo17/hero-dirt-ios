@@ -72,10 +72,6 @@ struct SharedTrail: Identifiable, Sendable {
         }
         return url.url!
     }
-
-    func message(condition: String) -> String {
-        "\(name) — \(condition)\nTrail conditions estimated by Hero Dirt.\n\nOpen in Hero Dirt: \(appURL.absoluteString)\nGet Hero Dirt: \(Self.appStoreURL.absoluteString)"
-    }
 }
 
 protocol SharedTrailResolving: Sendable {

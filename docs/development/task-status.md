@@ -15,7 +15,7 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 | Tone down bright colors | Condition and rain-map colors adjusted roughly halfway between the original bright palette and the first muted version, with adaptive light/dark condition colors. No condition thresholds or meanings changed. |
 | Main search at bottom | Native iOS bottom-toolbar search, with the standard keyboard and Dictation. |
 | Voice search | Uses existing system keyboard Dictation; no custom audio recorder, speech engine, or app-specific audio permissions. The Dictate control is verified in main and map search keyboards; speech itself needs a physical-device check. |
-| Share trail and condition image | More → Share Trail supplies native Link Presentation metadata with the condition image and a single Hero Dirt URL for Messages. The URL uses an Apple Maps place ID when available (coordinates/name otherwise). Image export remains available, and the email fallback includes the App Store link using Apple ID `6770195112`. See [sharing implementation and remaining setup](trail-sharing.md). An HTTPS universal link with automatic App Store fallback still requires an owned domain; the listing must be public for recipients to use it. |
+| Share trail and condition image | Simplified v1: the generated condition image as an actual attachment plus the App Store download URL (`6770195112`). No outgoing trail link or long text. Universal links and hosted previews are deferred to v2; see [the detailed Cloudflare plan](cloudflare-deep-links-v2-plan.md). Legacy incoming trail links remain supported. |
 | Driving ETA | Car button shows driving time when available, falls back to Directions, and still opens driving navigation. |
 | Open in Apple Maps / Weather | Open in Maps is under More. Apple Weather remains deferred as agreed because location-specific link behavior is unverified and the app is not bundled with the iOS simulator. A generic launcher that may display the wrong location has not been added. |
 | Place website | Website under More when Apple Places provides an HTTP(S) URL. |
@@ -26,7 +26,7 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 ## Remaining external setup and decisions
 
 - Approve a supported MTB data source and obtain appropriate API access before implementing recommendations. Current plan prioritizes access certainty and genuine rating/popularity signals.
-- Choose a controlled HTTPS host to finish install fallback/universal links. The developer-supplied App Store URL is configured; public listing availability remains unverified.
+- Universal-link hosting is deferred to v2. Choose a controlled HTTPS host and revisit the decisions in the Cloudflare plan only when that project starts. Public App Store listing availability remains unverified.
 - Verify a location-specific Apple Weather opening mechanism on a physical iPhone before adding its dedicated button.
 - Decide whether the observed calendar should load older months on demand; the current implementation intentionally labels its available history rather than presenting missing dates as dry weather.
 
