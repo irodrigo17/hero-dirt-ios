@@ -518,7 +518,11 @@ struct PlaceDetailsView: View {
             name: placeName, coordinate: coordinate,
             mapItemID: savedPlace?.mapItemIdString ?? effectiveMapItem?.identifier?.rawValue
         )
-        sharePayload = TrailSharePayload(image: image, text: trail.message(condition: summary.dirtCondition(soil: soilData).label))
+        let condition = summary.dirtCondition(soil: soilData).label
+        sharePayload = TrailSharePayload(
+            image: image, text: trail.message(condition: condition),
+            url: trail.appURL, title: "\(placeName) — \(condition)"
+        )
     }
 
     private func openDirections() {

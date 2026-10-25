@@ -58,6 +58,10 @@ final class TrailDetailsTests: XCTestCase {
         let copy = app.descendants(matching: .any).matching(identifier: "Copy").firstMatch
         if !copy.waitForExistence(timeout: 8) { print(app.debugDescription) }
         XCTAssertTrue(copy.exists)
+        let previewTitle = app.otherElements["LP.CaptionBar.TopCaption"]
+        XCTAssertTrue(previewTitle.waitForExistence(timeout: 5))
+        XCTAssertTrue(previewTitle.label.contains("Rancho San Antonio"))
+        XCTAssertTrue(previewTitle.label.contains("Hero Dirt"))
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = "Native trail share sheet"
         shot.lifetime = .keepAlways

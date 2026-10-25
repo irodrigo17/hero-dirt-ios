@@ -8,7 +8,7 @@ The developer does not collect or sell your personal data. There are no accounts
 
 **Place search.** Search text and the relevant map region are sent to Apple Maps to find matching places. Native keyboard Dictation follows your iOS settings; Hero Dirt does not implement its own audio recording.
 
-**Sharing.** When you choose Share Trail, a condition image, the selected trail's name, an app link, and an App Store link are passed to the iOS share sheet. You choose where to send them. The app link contains an Apple Maps place identifier when available, or the trail's name and coordinates otherwise. Opening a place-ID link sends that identifier to Apple Maps to retrieve the place. Private saved-place identifiers are not included, and Hero Dirt does not upload the image to a developer server.
+**Sharing.** When you choose Share Trail, the iOS share sheet receives the selected trail's app link and locally prepared preview metadata (name, conditions image, and icon). Messages receives the link with preview metadata; image export receives the image, and the email fallback also includes an App Store link. You choose where to send the content. The app link contains an Apple Maps place identifier when available, or the trail's name and coordinates otherwise. Opening a place-ID link sends that identifier to Apple Maps to retrieve the place. Private saved-place identifiers are not included, and Hero Dirt does not upload the image to a developer server.
 
 **Saved places.** The places you save are stored on your device and in your own iCloud account (iCloud key-value storage) so they sync across your devices. The developer can't access your iCloud data.
 

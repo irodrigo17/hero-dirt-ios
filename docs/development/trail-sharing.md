@@ -2,13 +2,16 @@
 
 Implemented locally:
 
-- More → Share Trail opens the native iOS share sheet with a rendered condition image and text.
+- More → Share Trail uses `UIActivityItemSource` and `LPLinkMetadata` to provide a native rich-link preview with the trail title, condition image, icon, and actual Hero Dirt URL. All preview data is prepared locally; no metadata fetch or image upload is needed.
+- Messages receives one URL plus its preview metadata, without separate photo/text attachments. Copy copies the link. Image-saving activities still receive the condition image; Mail retains the image and explanatory text with the App Store link. Other receiving apps control their own rendering.
 - The image includes the destination name, estimated conditions, outlook, recent rain, and sharing time.
 - `herodirt://trail?placeID=...` shares only the Apple Maps place identifier when available. The receiving app resolves it asynchronously through MapKit before opening details, with a loading indicator and an error if lookup fails.
 - When no place identifier is available, the link uses `herodirt://trail?lat=...&lon=...&name=...`. Previously shared coordinate links remain supported. Opening either kind of link does not automatically save it.
 - Shared text no longer includes the separate “View location” / Apple Maps link.
-- Shared text also includes [Get Hero Dirt](https://apps.apple.com/app/id6770195112), using the Apple ID supplied by the developer. This URL can ship before release; recipients can use the listing once it is public, including an approved pre-order listing.
+- The email fallback text includes [Get Hero Dirt](https://apps.apple.com/app/id6770195112), using the Apple ID supplied by the developer. This URL can ship before release; recipients can use the listing once it is public, including an approved pre-order listing.
 - Link parsing rejects empty/duplicate place IDs, mixed ID-and-coordinate payloads, and missing, duplicate, non-finite, or out-of-range coordinates. Names and query values are encoded with URLComponents.
+
+The simulator verifies the native share-sheet preview and the per-activity payloads, but does not expose Messages as a sharing target. The delivered Messages card still needs a physical-iPhone check, especially with the current custom URL scheme. Copying/pasting the URL alone does not carry the locally supplied preview metadata. A hosted HTTPS share page with web metadata is still needed for reliable previews across apps and app-install fallback.
 
 The app does not send a message itself. The person sharing chooses a destination and completes the action in the system share sheet.
 
