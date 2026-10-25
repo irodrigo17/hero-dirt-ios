@@ -36,7 +36,7 @@ struct PlaceDetailsView: View {
     @State private var drivingSeconds: TimeInterval?
     @State private var drivingTimeTask: Task<Void, Never>?
     @State private var drivingTimeKey: LoadKey?
-    @State private var placeName = String(localized: "Loading…")
+    @State private var placeName = ""
     @State private var rainfallSummary: RainfallSummary?
     @State private var rainForecast: RainForecast?
     @State private var soilData: SoilData?
@@ -166,7 +166,7 @@ struct PlaceDetailsView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle(
-                Text(placeName)
+                Text(savedPlace?.name ?? mapItem?.name ?? placeName)
             )
             .toolbar {
                 switch style {
@@ -364,7 +364,7 @@ struct PlaceDetailsView: View {
     }
 
     private func loadData() async {
-        placeName = String(localized: "Loading…")
+        placeName = savedPlace?.name ?? mapItem?.name ?? ""
         rainfallSummary = nil
         rainForecast = nil
         soilData = nil
