@@ -92,6 +92,10 @@ struct TrailCard: View {
                 Spacer(minLength: 8)
                 if let rainfall, !isLoading {
                     ConditionBadge(condition: rainfall.dirtCondition(soil: soil))
+                } else if isLoading || (rainfall == nil && error == nil) {
+                    SkeletonBlock(width: 90, height: 28, cornerRadius: 14)
+                        .shimmering()
+                        .accessibilityHidden(true)
                 }
             }
 
