@@ -1,6 +1,5 @@
 import SwiftUI
 import UIKit
-import os
 
 struct TrailSharePayload: Identifiable {
     let id = UUID()
@@ -14,9 +13,7 @@ struct TrailShareSheet: UIViewControllerRepresentable {
     let payload: TrailSharePayload
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        SharePerformance.measure("create_share_controller") {
-            UIActivityViewController(activityItems: payload.activityItems, applicationActivities: nil)
-        }
+        UIActivityViewController(activityItems: payload.activityItems, applicationActivities: nil)
     }
 
     func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
@@ -83,24 +80,5 @@ struct TrailSharingCard: View {
         .frame(width: 420, alignment: .leading)
         .background(Color.white)
         .environment(\.colorScheme, .light)
-    }
-}
-
-/// Debug-only timing with no trail names, coordinates, or image contents.
-/// Separates our rendering work from construction of Apple's share controller.
-enum SharePerformance {
-    private static let logger = Logger(subsystem: "com.herodirt.app", category: "Sharing")
-
-    @MainActor
-    static func measure<Value>(_ phase: String, operation: () -> Value) -> Value {
-        #if DEBUG
-        let start = ContinuousClock.now
-        defer {
-            let elapsed = start.duration(to: .now).components
-            let milliseconds = Double(elapsed.seconds) * 1_000 + Double(elapsed.attoseconds) / 1e15
-            logger.info("sharing phase=\(phase, privacy: .public) elapsed_ms=\(milliseconds, privacy: .public)")
-        }
-        #endif
-        return operation()
     }
 }
