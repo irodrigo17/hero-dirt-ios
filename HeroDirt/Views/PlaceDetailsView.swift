@@ -509,11 +509,14 @@ struct PlaceDetailsView: View {
 
     private func shareTrail() {
         guard let summary = rainfallSummary else { return }
-        let renderer = ImageRenderer(content: TrailSharingCard(
-            name: placeName, summary: summary, soil: soilData, sharedAt: .now
-        ).environment(\.rainUnit, rainUnit))
-        renderer.scale = 3
-        guard let image = renderer.uiImage else { shareError = true; return }
+        let image = SharePerformance.measure("render_condition_image") {
+            let renderer = ImageRenderer(content: TrailSharingCard(
+                name: placeName, summary: summary, soil: soilData, sharedAt: .now
+            ).environment(\.rainUnit, rainUnit))
+            renderer.scale = 3
+            return renderer.uiImage
+        }
+        guard let image else { shareError = true; return }
         sharePayload = TrailSharePayload(image: image)
     }
 
