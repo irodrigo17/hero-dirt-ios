@@ -1,48 +1,74 @@
 {
-  "sourceLanguage": "en",
-  "version": "1.0",
-  "strings": {
-    "NSLocationWhenInUseUsageDescription": {
-      "extractionState": "manual",
-      "comment": "Explains optional location use for map centering and driving ETA.",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hero Dirt can use your location to center the map and estimate driving time to trails."
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "shouldTranslate" : false,
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hero Dirt"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "shouldTranslate" : false,
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "HeroDirt"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Explains optional location use for map centering and driving ETA.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hero Dirt kann deinen Standort verwenden, um die Karte zu zentrieren und die Fahrzeit zu Trails zu schätzen."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hero Dirt puede usar tu ubicación para centrar el mapa y estimar el tiempo en coche hasta los senderos."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hero Dirt can use your location to center the map and estimate driving time to trails."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hero Dirt peut utiliser votre position pour centrer la carte et estimer le temps de trajet en voiture vers les sentiers."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hero Dirt puede usar tu ubicación para centrar el mapa y estimar el tiempo en coche hasta los senderos."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hero Dirt kann deinen Standort verwenden, um die Karte zu zentrieren und die Fahrzeit zu Trails zu schätzen."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hero Dirt peut utiliser votre position pour centrer la carte et estimer le temps de trajet en voiture vers les sentiers."
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Hero Dirt pode usar sua localização para centralizar o mapa e estimar o tempo de carro até as trilhas."
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hero Dirtは現在地を使用して、地図の中心を合わせたり、トレイルまでの車での所要時間を推定したりできます。"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hero Dirtは現在地を使用して、地図の中心を合わせたり、トレイルまでの車での所要時間を推定したりできます。"
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hero Dirt pode usar sua localização para centralizar o mapa e estimar o tempo de carro até as trilhas."
           }
         }
       }
     }
-  }
+  },
+  "version" : "1.0"
 }
