@@ -4,57 +4,49 @@ import SwiftUI
 extension MKPointOfInterestCategory {
     var displayName: String {
         switch self {
-        case .amusementPark: return "Amusement Park"
-        case .aquarium: return "Aquarium"
-        case .atm: return "ATM"
-        case .bakery: return "Bakery"
-        case .bank: return "Bank"
-        case .beach: return "Beach"
-        case .brewery: return "Brewery"
-        case .cafe: return "Café"
-        case .campground: return "Campground"
-        case .carRental: return "Car Rental"
-        case .evCharger: return "EV Charger"
-        case .fireStation: return "Fire Station"
-        case .fitnessCenter: return "Fitness Center"
-        case .foodMarket: return "Food Market"
-        case .gasStation: return "Gas Station"
-        case .hospital: return "Hospital"
-        case .hotel: return "Hotel"
-        case .laundry: return "Laundry"
-        case .library: return "Library"
-        case .marina: return "Marina"
-        case .movieTheater: return "Movie Theater"
-        case .museum: return "Museum"
-        case .nationalPark: return "National Park"
-        case .nightlife: return "Nightlife"
-        case .park: return "Park"
-        case .parking: return "Parking"
-        case .pharmacy: return "Pharmacy"
-        case .police: return "Police"
-        case .postOffice: return "Post Office"
-        case .publicTransport: return "Public Transport"
-        case .restaurant: return "Restaurant"
-        case .restroom: return "Restroom"
-        case .school: return "School"
-        case .stadium: return "Stadium"
-        case .store: return "Store"
-        case .theater: return "Theater"
-        case .university: return "University"
-        case .winery: return "Winery"
-        case .zoo: return "Zoo"
+        case .amusementPark: return String(localized: "Amusement Park")
+        case .aquarium: return String(localized: "Aquarium")
+        case .atm: return String(localized: "ATM")
+        case .bakery: return String(localized: "Bakery")
+        case .bank: return String(localized: "Bank")
+        case .beach: return String(localized: "Beach")
+        case .brewery: return String(localized: "Brewery")
+        case .cafe: return String(localized: "Café")
+        case .campground: return String(localized: "Campground")
+        case .carRental: return String(localized: "Car Rental")
+        case .evCharger: return String(localized: "EV Charger")
+        case .fireStation: return String(localized: "Fire Station")
+        case .fitnessCenter: return String(localized: "Fitness Center")
+        case .foodMarket: return String(localized: "Food Market")
+        case .gasStation: return String(localized: "Gas Station")
+        case .hospital: return String(localized: "Hospital")
+        case .hotel: return String(localized: "Hotel")
+        case .laundry: return String(localized: "Laundry")
+        case .library: return String(localized: "Library")
+        case .marina: return String(localized: "Marina")
+        case .movieTheater: return String(localized: "Movie Theater")
+        case .museum: return String(localized: "Museum")
+        case .nationalPark: return String(localized: "National Park")
+        case .nightlife: return String(localized: "Nightlife")
+        case .park: return String(localized: "Park")
+        case .parking: return String(localized: "Parking")
+        case .pharmacy: return String(localized: "Pharmacy")
+        case .police: return String(localized: "Police")
+        case .postOffice: return String(localized: "Post Office")
+        case .publicTransport: return String(localized: "Public Transport")
+        case .restaurant: return String(localized: "Restaurant")
+        case .restroom: return String(localized: "Restroom")
+        case .school: return String(localized: "School")
+        case .stadium: return String(localized: "Stadium")
+        case .store: return String(localized: "Store")
+        case .theater: return String(localized: "Theater")
+        case .university: return String(localized: "University")
+        case .winery: return String(localized: "Winery")
+        case .zoo: return String(localized: "Zoo")
         default:
-            let raw = rawValue.replacingOccurrences(
-                of: "MKPOICategory",
-                with: ""
-            )
-            return raw.unicodeScalars.reduce("") { result, scalar in
-                let char = Character(scalar)
-                return result.isEmpty
-                    ? String(char)
-                    : char.isUppercase
-                        ? "\(result) \(char)" : "\(result)\(char)"
-            }
+            // Unknown/new MapKit categories have no app-owned translation.
+            // Keep a localized fallback instead of exposing a raw API name.
+            return String(localized: "Place")
         }
     }
 

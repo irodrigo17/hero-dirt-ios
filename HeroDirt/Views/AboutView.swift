@@ -38,7 +38,7 @@ struct AboutView: View {
                 Section("Settings") {
                     Picker(selection: $unitPreference) {
                         ForEach(RainUnitPreference.allCases) { pref in
-                            Text(pref == .automatic ? "Automatic (\(pref.resolved().symbol))" : pref.label)
+                            Text(pref == .automatic ? String(localized: "Automatic (\(pref.resolved().symbol))") : pref.label)
                                 .tag(pref)
                         }
                     } label: {
@@ -147,8 +147,8 @@ struct AboutView: View {
         components.scheme = "mailto"
         components.path = feedbackEmailAddress
         components.queryItems = [
-            URLQueryItem(name: "subject", value: "Hero Dirt Feedback"),
-            URLQueryItem(name: "body", value: "What would you like to share?\n\n\n---\n" + AppInfo.diagnosticsSummary)
+            URLQueryItem(name: "subject", value: String(localized: "Hero Dirt Feedback")),
+            URLQueryItem(name: "body", value: String(localized: "What would you like to share?\n\n\n---\n") + AppInfo.diagnosticsSummary)
         ]
         return components.url!
     }
@@ -160,9 +160,9 @@ struct AboutView: View {
     private func openIssue(kind: FeedbackKind) {
         Telemetry.signal(.feedbackOpened, ["kind": kind == .bug ? "bug" : "idea"])
         let body = kind == .bug
-            ? "**What happened?**\n\n\n**What did you expect to happen?**\n\n\n---\n"
+            ? String(localized: "**What happened?**\n\n\n**What did you expect to happen?**\n\n\n---\n")
                 + AppInfo.diagnosticsSummary
-            : "**What would make Hero Dirt better for you?**\n\n"
+            : String(localized: "**What would make Hero Dirt better for you?**\n\n")
         var components = URLComponents(string: "https://github.com/irodrigo17/hero-dirt-ios/issues/new")!
         components.queryItems = [URLQueryItem(name: "body", value: body)]
         if let url = components.url {
@@ -187,27 +187,27 @@ struct AboutView: View {
 
     private func statusLabel(_ status: CKAccountStatus) -> String {
         switch status {
-        case .available: return "Enabled"
-        case .noAccount: return "Not signed in"
-        case .restricted: return "Restricted"
-        case .temporarilyUnavailable: return "Unavailable"
-        case .couldNotDetermine: return "Unknown"
-        @unknown default: return "Unknown"
+        case .available: return String(localized: "Enabled")
+        case .noAccount: return String(localized: "Not signed in")
+        case .restricted: return String(localized: "Restricted")
+        case .temporarilyUnavailable: return String(localized: "Unavailable")
+        case .couldNotDetermine: return String(localized: "Unknown")
+        @unknown default: return String(localized: "Unknown")
         }
     }
 
     private var statusDescription: String {
         switch iCloudStatus {
         case .available:
-            return "Saved places are syncing across your devices."
+            return String(localized: "Saved places are syncing across your devices.")
         case .noAccount:
-            return "Sign in to iCloud in Settings to sync saved places across your devices."
+            return String(localized: "Sign in to iCloud in Settings to sync saved places across your devices.")
         case .restricted:
-            return "iCloud access is restricted. Saved places are stored locally only."
+            return String(localized: "iCloud access is restricted. Saved places are stored locally only.")
         case .temporarilyUnavailable:
-            return "iCloud is temporarily unavailable. Saved places are stored locally and will sync when it recovers."
+            return String(localized: "iCloud is temporarily unavailable. Saved places are stored locally and will sync when it recovers.")
         default:
-            return "Saved places are stored in your personal iCloud account (if enabled) and sync automatically across all your iOS devices."
+            return String(localized: "Saved places are stored in your personal iCloud account (if enabled) and sync automatically across all your iOS devices.")
         }
     }
 }

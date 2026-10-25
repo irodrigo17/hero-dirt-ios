@@ -20,6 +20,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Check localization coverage and format arguments
+        run: python3 scripts/check-localizations.py
+
       - name: Select an available iPhone simulator
         run: |
           xcodebuild -version

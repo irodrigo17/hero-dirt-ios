@@ -34,7 +34,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Hero Dirt can use your location to center the map.</string>
+	<string>Hero Dirt can use your location to center the map and estimate driving time to trails.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

@@ -10,10 +10,10 @@ enum RainfallTimeframe: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .oneDay: return "1 Day"
-        case .twoDays: return "2 Days"
-        case .threeDays: return "3 Days"
-        case .sevenDays: return "7 Days"
+        case .oneDay: return String(localized: "1 Day")
+        case .twoDays: return String(localized: "2 Days")
+        case .threeDays: return String(localized: "3 Days")
+        case .sevenDays: return String(localized: "7 Days")
         }
     }
 

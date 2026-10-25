@@ -106,7 +106,7 @@ struct RainHistoryCalendarView: View {
         .frame(maxWidth: .infinity, minHeight: 60)
         .background(record == nil ? Color.clear : Color.blue.opacity(record!.amount > 0 ? 0.14 : 0.04), in: RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(date.formatted(date: .complete, time: .omitted)), \(record.map { unit.accessibilityText($0.amount) } ?? "No observed data")")
+        .accessibilityLabel("\(date.formatted(date: .complete, time: .omitted)), \(record.map { unit.accessibilityText($0.amount) } ?? String(localized: "No observed data"))")
     }
 
     private func changeMonth(_ delta: Int) {

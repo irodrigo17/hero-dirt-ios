@@ -10,11 +10,11 @@ enum DirtCondition {
 
     var label: String {
         switch self {
-        case .veryWet: return "Soaked"
-        case .wet: return "Muddy"
-        case .heroDirt: return "Hero Dirt"
-        case .dry: return "Dry"
-        case .veryDry: return "Dusty"
+        case .veryWet: return String(localized: "Soaked")
+        case .wet: return String(localized: "Muddy")
+        case .heroDirt: return String(localized: "Hero Dirt")
+        case .dry: return String(localized: "Dry")
+        case .veryDry: return String(localized: "Dusty")
         }
     }
 
@@ -62,22 +62,22 @@ enum DirtCondition {
 
     var description: String {
         switch self {
-        case .veryWet: return "Puddles and peanut butter mud. Give the trails a few days."
-        case .wet: return "Riding now can leave ruts. Give it a day or so."
-        case .heroDirt: return "Tacky and grippy. Go ride!"
-        case .dry: return "Firm and fast, getting loose in spots."
-        case .veryDry: return "Loose and dusty. Expect sketchy corners."
+        case .veryWet: return String(localized: "Puddles and peanut butter mud. Give the trails a few days.")
+        case .wet: return String(localized: "Riding now can leave ruts. Give it a day or so.")
+        case .heroDirt: return String(localized: "Tacky and grippy. Go ride!")
+        case .dry: return String(localized: "Firm and fast, getting loose in spots.")
+        case .veryDry: return String(localized: "Loose and dusty. Expect sketchy corners.")
         }
     }
 
     /// Short line used in compact rows.
     var shortDescription: String {
         switch self {
-        case .veryWet: return "Give it a few days"
-        case .wet: return "Likely muddy"
-        case .heroDirt: return "Go ride!"
-        case .dry: return "Firm and fast"
-        case .veryDry: return "Loose and dusty"
+        case .veryWet: return String(localized: "Give it a few days")
+        case .wet: return String(localized: "Likely muddy")
+        case .heroDirt: return String(localized: "Go ride!")
+        case .dry: return String(localized: "Firm and fast")
+        case .veryDry: return String(localized: "Loose and dusty")
         }
     }
 }

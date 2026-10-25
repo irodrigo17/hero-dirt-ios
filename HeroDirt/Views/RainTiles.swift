@@ -76,22 +76,22 @@ struct RainTilesRow: View {
 
 extension RainfallSummary {
     var pastTiles: [(label: String, mm: Double)] {
-        [("Today", last1Day), ("2 days", last2Days), ("3 days", last3Days), ("7 days", last7Days)]
+        [(String(localized: "Today"), last1Day), (String(localized: "2 days"), last2Days), (String(localized: "3 days"), last3Days), (String(localized: "7 days"), last7Days)]
     }
 
     var lastRainText: String {
-        guard let days = daysSinceLastRain else { return "Over a month ago" }
+        guard let days = daysSinceLastRain else { return String(localized: "Over a month ago") }
         switch days {
-        case 0: return "Today"
-        case 1: return "Yesterday"
-        default: return "\(days) days ago"
+        case 0: return String(localized: "Today")
+        case 1: return String(localized: "Yesterday")
+        default: return String(localized: "\(days) days ago")
         }
     }
 }
 
 extension RainForecast {
     var nextTiles: [(label: String, mm: Double)] {
-        [("Today", next1Day), ("2 days", next2Days), ("3 days", next3Days), ("7 days", next7Days)]
+        [(String(localized: "Today"), next1Day), (String(localized: "2 days"), next2Days), (String(localized: "3 days"), next3Days), (String(localized: "7 days"), next7Days)]
     }
 }
 

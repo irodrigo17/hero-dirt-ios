@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct CardHeader: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
 
     var body: some View {
         HStack {

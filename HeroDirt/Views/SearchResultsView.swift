@@ -23,7 +23,7 @@ struct SearchResultsView: View {
                                 category: item.pointOfInterestCategory
                             )
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(item.name ?? "Unknown")
+                                Text(item.name ?? String(localized: "Unknown"))
                                     .font(.subheadline)
                                     .foregroundStyle(.primary)
                                 let subtitle =

@@ -30,7 +30,7 @@ struct TrailSharingCard: View {
     var body: some View {
         let condition = summary.dirtCondition(soil: soil)
         VStack(alignment: .leading, spacing: 22) {
-            Label("HERO DIRT", systemImage: "mountain.2.fill")
+            Label { Text(verbatim: "HERO DIRT") } icon: { Image(systemName: "mountain.2.fill") }
                 .font(.caption.weight(.bold))
                 .foregroundStyle(ConditionPalette.hero)
             Text(name)

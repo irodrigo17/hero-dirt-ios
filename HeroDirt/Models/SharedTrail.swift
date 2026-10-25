@@ -38,14 +38,14 @@ struct SharedTrail: Identifiable, Sendable {
             guard let placeID = value("placeID"), Self.validPlaceID(placeID),
                   !items.contains(where: { ["lat", "lon", "name"].contains($0.name) }) else { return nil }
             destination = .placeID(placeID)
-            name = "Shared Trail"
+            name = String(localized: "Shared Trail")
         } else {
             guard let lat = value("lat").flatMap(Double.init),
                   let lon = value("lon").flatMap(Double.init),
                   lat.isFinite, lon.isFinite,
                   (-90...90).contains(lat), (-180...180).contains(lon) else { return nil }
-            let title = (value("name") ?? "Shared Trail").trimmingCharacters(in: .whitespacesAndNewlines)
-            name = title.isEmpty ? "Shared Trail" : String(title.prefix(200))
+            let title = (value("name") ?? String(localized: "Shared Trail")).trimmingCharacters(in: .whitespacesAndNewlines)
+            name = title.isEmpty ? String(localized: "Shared Trail") : String(title.prefix(200))
             destination = .coordinates(latitude: lat, longitude: lon)
         }
     }

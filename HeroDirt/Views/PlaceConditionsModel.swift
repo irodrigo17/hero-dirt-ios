@@ -102,13 +102,12 @@ final class PlaceConditionsModel {
     }
 
     nonisolated static func friendlyMessage(for error: Error, includeRetryHint: Bool = true) -> String {
-        let hint = includeRetryHint ? " Pull down to try again." : ""
         if let urlError = error as? URLError {
             switch urlError.code {
             case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed:
-                return "You're offline." + hint
+                return includeRetryHint ? String(localized: "You're offline. Pull down to try again.") : String(localized: "You're offline.")
             case .timedOut:
-                return "The weather service is slow right now." + hint
+                return includeRetryHint ? String(localized: "The weather service is slow right now. Pull down to try again.") : String(localized: "The weather service is slow right now.")
             default:
                 break
             }
@@ -116,8 +115,8 @@ final class PlaceConditionsModel {
         if let weatherError = error as? WeatherService.WeatherError,
            case .httpError(429) = weatherError
         {
-            return "Too many requests. Try again in a minute."
+            return String(localized: "Too many requests. Try again in a minute.")
         }
-        return "Couldn't load conditions." + hint
+        return includeRetryHint ? String(localized: "Couldn't load conditions. Pull down to try again.") : String(localized: "Couldn't load conditions.")
     }
 }

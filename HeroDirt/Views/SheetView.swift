@@ -168,7 +168,7 @@ struct SheetView: View {
             activeSearch = nil
             searchResults = []
             isSearchLoading = false
-            searchError = "Search is unavailable right now. Please try again."
+            searchError = String(localized: "Search is unavailable right now. Please try again.")
         }
     }
 }

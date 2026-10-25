@@ -10,7 +10,10 @@ enum RainfallColorScale {
         var inchLabel: String = ""
 
         func label(for unit: RainUnit) -> String {
-            unit == .inches ? inchLabel : label
+            let value = unit == .inches ? inchLabel : label
+            let hasPlus = value.hasSuffix("+")
+            guard let amount = Double(value.replacingOccurrences(of: "+", with: "")) else { return value }
+            return amount.formatted(.number.grouping(.never).precision(.fractionLength(0...2))) + (hasPlus ? "+" : "")
         }
     }
 

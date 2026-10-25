@@ -213,7 +213,7 @@ struct TrailsHomeView: View {
                     HStack(spacing: 10) {
                         POICategoryIcon(category: item.pointOfInterestCategory)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(item.name ?? "Unknown")
+                            Text(item.name ?? String(localized: "Unknown"))
                                 .font(.subheadline)
                             if let subtitle = item.addressRepresentations?.cityWithContext
                                 ?? item.pointOfInterestCategory?.displayName
@@ -321,7 +321,7 @@ struct TrailsHomeView: View {
                 activeSearch = nil
                 searchResults = []
                 isSearchLoading = false
-                searchError = "Search is unavailable right now. Please try again."
+                searchError = String(localized: "Search is unavailable right now. Please try again.")
             }
         }
     }

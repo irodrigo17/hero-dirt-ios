@@ -42,7 +42,7 @@ struct DirtConditionCardView: View {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Text(showDetails ? "Less" : "Why?")
+                        Text(showDetails ? String(localized: "Less") : String(localized: "Why?"))
                         Image(systemName: "chevron.down")
                             .rotationEffect(.degrees(showDetails ? 180 : 0))
                     }
@@ -51,7 +51,7 @@ struct DirtConditionCardView: View {
                     .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(showDetails ? "Hide details" : "Show details")
+                .accessibilityLabel(showDetails ? String(localized: "Hide details") : String(localized: "Show details"))
             } else {
                 Text("Estimate")
                     .font(.caption)
@@ -95,7 +95,7 @@ struct DirtConditionCardView: View {
                 HStack(spacing: 10) {
                     detailTile(
                         label: "Wetness",
-                        value: "\(Int((index * 100).rounded()))%",
+                        value: index.formatted(.percent.precision(.fractionLength(0))),
                         valueColor: result.condition.color
                     )
                     detailTile(
@@ -110,7 +110,7 @@ struct DirtConditionCardView: View {
                 if let onCustomize {
                     Button(action: onCustomize) {
                         Label(
-                            isOverridden ? "Edit trail settings" : "Know this trail? Tune it",
+                            isOverridden ? String(localized: "Edit trail settings") : String(localized: "Know this trail? Tune it"),
                             systemImage: isOverridden ? "pencil.circle.fill" : "slider.horizontal.3"
                         )
                         .labelStyle(.titleAndIcon)
@@ -127,14 +127,14 @@ struct DirtConditionCardView: View {
     /// Turns reference evapotranspiration (mm/day) into a rider-friendly word.
     static func dryingLabel(et0: Double) -> String {
         switch et0 {
-        case ..<1.5: return "Slow"
-        case ..<3.5: return "Moderate"
-        default: return "Fast"
+        case ..<1.5: return String(localized: "Slow")
+        case ..<3.5: return String(localized: "Moderate")
+        default: return String(localized: "Fast")
         }
     }
 
     private func detailTile(
-        label: String,
+        label: LocalizedStringKey,
         value: String,
         valueColor: Color = .primary
     ) -> some View {

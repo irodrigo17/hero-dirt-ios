@@ -16,6 +16,7 @@ Development branch: `codex/dev`. This tracks the user's screenshot list and subs
 | Main search at bottom | Native iOS bottom-toolbar search, with the standard keyboard and Dictation. |
 | Voice search | Uses existing system keyboard Dictation; no custom audio recorder, speech engine, or app-specific audio permissions. The Dictate control is verified in main and map search keyboards; speech itself needs a physical-device check. |
 | Share trail and condition image | Simplified v1: the generated condition image as an actual attachment plus the App Store download URL (`6770195112`). No outgoing trail link or long text. Universal links and hosted previews are deferred to v2; see [the detailed Cloudflare plan](cloudflare-deep-links-v2-plan.md). Legacy incoming trail links remain supported. |
+| App localization | English plus Spanish, French, German, Brazilian Portuguese, and Japanese. Native String Catalogs cover the interface, condition summaries, accessibility, permission text, and share-card captions. See [localization notes](localization.md). |
 | Driving ETA | Car button shows driving time when available, falls back to Directions, and still opens driving navigation. |
 | Open in Apple Maps / Weather | Open in Maps is under More. Apple Weather remains deferred as agreed because location-specific link behavior is unverified and the app is not bundled with the iOS simulator. A generic launcher that may display the wrong location has not been added. |
 | Place website | Website under More when Apple Places provides an HTTP(S) URL. |

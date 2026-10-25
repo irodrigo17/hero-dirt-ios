@@ -36,7 +36,7 @@ struct PlaceDetailsView: View {
     @State private var drivingSeconds: TimeInterval?
     @State private var drivingTimeTask: Task<Void, Never>?
     @State private var drivingTimeKey: LoadKey?
-    @State private var placeName = "Loading…"
+    @State private var placeName = String(localized: "Loading…")
     @State private var rainfallSummary: RainfallSummary?
     @State private var rainForecast: RainForecast?
     @State private var soilData: SoilData?
@@ -289,7 +289,7 @@ struct PlaceDetailsView: View {
             if savedPlace == nil {
                 SheetActionButton(
                     icon: "star",
-                    label: "Save",
+                    label: String(localized: "Save"),
                     isPrimary: true,
                     isDisabled: isLoading,
                     action: savePlace
@@ -304,7 +304,7 @@ struct PlaceDetailsView: View {
                 action: openDirections
             )
             .accessibilityIdentifier("Driving Directions")
-            .accessibilityLabel(drivingSeconds == nil ? "Directions" : "Driving time: \(DrivingTimeLabel.text(for: drivingSeconds))")
+            .accessibilityLabel(drivingSeconds == nil ? String(localized: "Directions") : String(localized: "Driving time: \(DrivingTimeLabel.text(for: drivingSeconds))"))
             .accessibilityHint("Opens driving directions in Apple Maps")
             moreMenu
         }
@@ -344,7 +344,7 @@ struct PlaceDetailsView: View {
                 }
             }
         } label: {
-            SheetActionLabel(icon: "ellipsis", label: "More", isPrimary: false)
+            SheetActionLabel(icon: "ellipsis", label: String(localized: "More"), isPrimary: false)
         }
         .accessibilityIdentifier("Trail Options")
     }
@@ -364,7 +364,7 @@ struct PlaceDetailsView: View {
     }
 
     private func loadData() async {
-        placeName = "Loading…"
+        placeName = String(localized: "Loading…")
         rainfallSummary = nil
         rainForecast = nil
         soilData = nil
@@ -573,6 +573,8 @@ private struct SheetActionLabel: View {
             Text(label)
                 .font(.caption)
                 .fontWeight(.medium)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(isPrimary ? .white : .blue)
         .frame(maxWidth: .infinity, minHeight: 44)

@@ -35,8 +35,8 @@ struct ConditionTrendView: View {
 
             Chart {
                 RectangleMark(
-                    yStart: .value("Low", Self.heroBand.lowerBound * 100),
-                    yEnd: .value("High", Self.heroBand.upperBound * 100)
+                    yStart: .value(String(localized: "Low"), Self.heroBand.lowerBound * 100),
+                    yEnd: .value(String(localized: "High"), Self.heroBand.upperBound * 100)
                 )
                 .foregroundStyle(DirtCondition.heroDirt.color.opacity(0.14))
                 .annotation(position: .overlay, alignment: .topLeading) {
@@ -48,9 +48,9 @@ struct ConditionTrendView: View {
 
                 ForEach(timeline) { day in
                     LineMark(
-                        x: .value("Day", day.date, unit: .day),
-                        y: .value("Wetness", day.moistureIndex * 100),
-                        series: .value("Kind", day.isForecast ? "Forecast" : "Observed")
+                        x: .value(String(localized: "Day"), day.date, unit: .day),
+                        y: .value(String(localized: "Wetness"), day.moistureIndex * 100),
+                        series: .value(String(localized: "Kind"), day.isForecast ? String(localized: "Forecast") : String(localized: "Observed"))
                     )
                     .interpolationMethod(.monotone)
                     .foregroundStyle(day.isForecast ? Color.secondary : Color.blue)
@@ -60,12 +60,12 @@ struct ConditionTrendView: View {
                 // Today: a dashed rule and a dot in the current condition's
                 // color; the dashed line after it is the forecast.
                 if let lastObserved = timeline.last(where: { !$0.isForecast }) {
-                    RuleMark(x: .value("Day", lastObserved.date, unit: .day))
+                    RuleMark(x: .value(String(localized: "Day"), lastObserved.date, unit: .day))
                         .foregroundStyle(Color.secondary.opacity(0.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
                     PointMark(
-                        x: .value("Day", lastObserved.date, unit: .day),
-                        y: .value("Wetness", lastObserved.moistureIndex * 100)
+                        x: .value(String(localized: "Day"), lastObserved.date, unit: .day),
+                        y: .value(String(localized: "Wetness"), lastObserved.moistureIndex * 100)
                     )
                     .foregroundStyle(lastObserved.condition.color)
                     .symbolSize(70)
@@ -77,7 +77,7 @@ struct ConditionTrendView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let v = value.as(Int.self) {
-                            Text(v == 0 ? "Dry" : v == 100 ? "Soaked" : "")
+                            Text(v == 0 ? String(localized: "Dry") : v == 100 ? String(localized: "Soaked") : "")
                         }
                     }
                 }
@@ -88,8 +88,8 @@ struct ConditionTrendView: View {
 
             Chart(timeline) { day in
                 BarMark(
-                    x: .value("Day", day.date, unit: .day),
-                    y: .value("Rain", day.rain)
+                    x: .value(String(localized: "Day"), day.date, unit: .day),
+                    y: .value(String(localized: "Rain"), day.rain)
                 )
                 .foregroundStyle(day.isForecast ? Color.blue.opacity(0.35) : Color.blue)
                 .cornerRadius(2)

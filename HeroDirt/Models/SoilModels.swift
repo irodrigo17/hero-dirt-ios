@@ -17,21 +17,21 @@ struct SoilOverride: Codable, Hashable, Sendable {
         /// Rider-friendly name. `rawValue` is persisted, so it must not change.
         var displayName: String {
             switch self {
-            case .sand: return "Sandy"
-            case .sandyLoam: return "Mostly sandy"
-            case .loam: return "Loamy"
-            case .clayLoam: return "Some clay"
-            case .clay: return "Clay"
+            case .sand: return String(localized: "Sandy")
+            case .sandyLoam: return String(localized: "Mostly sandy")
+            case .loam: return String(localized: "Loamy")
+            case .clayLoam: return String(localized: "Some clay")
+            case .clay: return String(localized: "Clay")
             }
         }
 
         var hint: String {
             switch self {
-            case .sand: return "Drains fast, dries out quickly"
-            case .sandyLoam: return "Drains well"
-            case .loam: return "Classic brown dirt, a bit of everything"
-            case .clayLoam: return "Gets sticky when wet"
-            case .clay: return "Peanut butter when wet, slow to dry"
+            case .sand: return String(localized: "Drains fast, dries out quickly")
+            case .sandyLoam: return String(localized: "Drains well")
+            case .loam: return String(localized: "Classic brown dirt, a bit of everything")
+            case .clayLoam: return String(localized: "Gets sticky when wet")
+            case .clay: return String(localized: "Peanut butter when wet, slow to dry")
             }
         }
 
@@ -63,9 +63,9 @@ struct SoilOverride: Codable, Hashable, Sendable {
 
         var displayName: String {
             switch self {
-            case .sunny: return "Sunny"
-            case .partial: return "Some shade"
-            case .shaded: return "Shady"
+            case .sunny: return String(localized: "Sunny")
+            case .partial: return String(localized: "Some shade")
+            case .shaded: return String(localized: "Shady")
             }
         }
 
@@ -136,11 +136,11 @@ struct SoilData: Codable, Hashable, Sendable {
     /// Rider-friendly version of `textureLabel`.
     var riderLabel: String {
         switch textureLabel {
-        case "Sand", "Loamy Sand": return "Sandy"
-        case "Sandy Loam": return "Mostly sandy"
-        case "Clay Loam", "Sandy Clay": return "Some clay"
-        case "Clay": return "Clay"
-        default: return "Loamy"
+        case "Sand", "Loamy Sand": return String(localized: "Sandy")
+        case "Sandy Loam": return String(localized: "Mostly sandy")
+        case "Clay Loam", "Sandy Clay": return String(localized: "Some clay")
+        case "Clay": return String(localized: "Clay")
+        default: return String(localized: "Loamy")
         }
     }
 

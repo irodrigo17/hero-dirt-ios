@@ -199,7 +199,7 @@ final class RainfallGridService {
                 guard !Task.isCancelled else { return }
                 Self.logger.error("rain grid fetch failed: \(error.localizedDescription, privacy: .public)")
                 errorMessage = (error as? WeatherService.WeatherError)?.errorDescription
-                    ?? "Couldn't load rain data. Check your connection."
+                    ?? String(localized: "Couldn't load rain data. Check your connection.")
                 // Fall through: render whatever cells are cached.
             }
         }

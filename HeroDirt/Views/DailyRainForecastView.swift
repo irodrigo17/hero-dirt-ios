@@ -15,7 +15,7 @@ struct DailyRainForecastView: View {
                                 .foregroundStyle(.blue)
                                 .frame(width: 28)
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(Calendar.current.isDateInToday(day.date) ? "Today" : day.date.formatted(.dateTime.weekday(.wide)))
+                                Text(Calendar.current.isDateInToday(day.date) ? String(localized: "Today") : day.date.formatted(.dateTime.weekday(.wide)))
                                     .fontWeight(.medium)
                                 Text(day.date.formatted(.dateTime.month(.abbreviated).day()))
                                     .font(.caption)

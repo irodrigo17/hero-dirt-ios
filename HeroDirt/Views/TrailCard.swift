@@ -50,15 +50,16 @@ struct ConditionStrip: View {
     }
 
     private func label(for day: DayCondition, index: Int) -> String {
-        if index == 0 && !day.isForecast { return "Now" }
+        if index == 0 && !day.isForecast { return String(localized: "Now") }
         return day.date.formatted(.dateTime.weekday(style == .compact ? .narrow : .abbreviated))
     }
 
     private func accessibilityText(for day: DayCondition, index: Int) -> String {
-        let name = index == 0 && !day.isForecast ? "Today" : day.date.formatted(.dateTime.weekday(.wide))
-        var text = "\(name): \(day.condition.label)"
-        if day.rain >= 0.5 { text += ", \(unit.accessibilityText(day.rain)) of rain" }
-        return text
+        let name = index == 0 && !day.isForecast ? String(localized: "Today") : day.date.formatted(.dateTime.weekday(.wide))
+        if day.rain >= 0.5 {
+            return String(localized: "\(name): \(day.condition.label), \(unit.accessibilityText(day.rain)) of rain")
+        }
+        return String(localized: "\(name): \(day.condition.label)")
     }
 }
 
@@ -119,7 +120,7 @@ struct TrailCard: View {
     /// "Hero dirt by Sat · last rain yesterday".
     private func headline(condition: DirtCondition, rainfall: RainfallSummary, strip: [DayCondition]) -> String {
         let outlook = OutlookSummary.text(current: condition, upcoming: strip.filter(\.isForecast))
-        let lastRain = "last rain \(rainfall.lastRainText.lowercased())"
+        let lastRain = String(localized: "Last rain: \(rainfall.lastRainText)")
         if let outlook { return "\(outlook) · \(lastRain)" }
         return "\(condition.shortDescription) · \(lastRain)"
     }

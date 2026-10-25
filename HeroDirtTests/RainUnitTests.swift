@@ -13,7 +13,7 @@ struct RainUnitTests {
 
     @Test func inchesFormatting() {
         #expect(RainUnit.inches.format(0) == "0")
-        #expect(RainUnit.inches.format(0.1) == "<.01")
+        #expect(RainUnit.inches.format(0.1) == "<0.01")
         #expect(RainUnit.inches.format(18.0) == "0.71")
         #expect(RainUnit.inches.format(50.8) == "2.0")
         #expect(RainUnit.inches.formatWithUnit(25.4) == "1.0 in")

@@ -185,16 +185,16 @@ enum WeatherService {
         var errorDescription: String? {
             switch self {
             case .invalidURL:
-                return "Could not build request URL."
+                return String(localized: "Could not build request URL.")
             case .httpError(let statusCode):
                 switch statusCode {
-                case 429: return "Too many requests. Please try again in a minute."
+                case 429: return String(localized: "Too many requests. Please try again in a minute.")
                 case 500...599:
-                    return "Weather service is temporarily unavailable."
-                default: return "Weather service error (HTTP \(statusCode))."
+                    return String(localized: "Weather service is temporarily unavailable.")
+                default: return String(localized: "Weather service error (HTTP \(statusCode)).")
                 }
             case .invalidResponse:
-                return "Invalid response from weather service."
+                return String(localized: "Invalid response from weather service.")
             }
         }
     }

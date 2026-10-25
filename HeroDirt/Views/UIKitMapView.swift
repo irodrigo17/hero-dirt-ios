@@ -39,7 +39,7 @@ private final class PlaceAnnotation: NSObject, MKAnnotation {
 
 private final class NewPinAnnotation: NSObject, MKAnnotation {
     @objc dynamic var coordinate: CLLocationCoordinate2D
-    @objc dynamic var title: String? = "New place"
+    @objc dynamic var title: String? = String(localized: "New place")
 
     init(coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate

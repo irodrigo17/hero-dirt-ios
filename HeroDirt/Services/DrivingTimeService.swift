@@ -71,12 +71,12 @@ enum DrivingLocationRequest {
 
 enum DrivingTimeLabel {
     static func text(for seconds: TimeInterval?) -> String {
-        guard let seconds, seconds.isFinite, seconds >= 0 else { return "Directions" }
+        guard let seconds, seconds.isFinite, seconds >= 0 else { return String(localized: "Directions") }
         let formatter = DateComponentsFormatter()
         // Round up so a short drive never reads as zero minutes.
         let roundedSeconds = max(60, ceil(seconds / 60) * 60)
         formatter.allowedUnits = roundedSeconds < 3600 ? [.minute] : [.hour, .minute]
         formatter.unitsStyle = .short
-        return formatter.string(from: roundedSeconds) ?? "Directions"
+        return formatter.string(from: roundedSeconds) ?? String(localized: "Directions")
     }
 }

@@ -74,41 +74,55 @@ enum OutlookSummary {
         calendar: Calendar = .current
     ) -> String? {
         guard !upcoming.isEmpty else { return nil }
-        func by(_ day: DayCondition) -> String {
-            isTomorrow(day.date, today: today, calendar: calendar) ? "by tomorrow" : "by \(weekday(day.date))"
-        }
-        func on(_ day: DayCondition) -> String {
-            isTomorrow(day.date, today: today, calendar: calendar) ? "tomorrow" : weekday(day.date)
-        }
-
         switch current {
         case .veryWet, .wet:
             guard let ridable = upcoming.first(where: { $0.condition.wetness <= DirtCondition.heroDirt.wetness }) else {
-                return "Muddy all week"
+                return String(localized: "Muddy all week")
             }
-            return ridable.condition == .heroDirt ? "Hero dirt \(by(ridable))" : "Ridable \(by(ridable))"
+            if ridable.condition == .heroDirt {
+                return isTomorrow(ridable.date, today: today, calendar: calendar)
+                    ? String(localized: "Hero dirt by tomorrow")
+                    : String(localized: "Hero dirt by \(weekday(ridable.date))")
+            }
+            return isTomorrow(ridable.date, today: today, calendar: calendar)
+                ? String(localized: "Ridable by tomorrow")
+                : String(localized: "Ridable by \(weekday(ridable.date))")
 
         case .heroDirt:
             if let wet = upcoming.first(where: { $0.condition.wetness >= DirtCondition.wet.wetness }) {
                 return isTomorrow(wet.date, today: today, calendar: calendar)
-                    ? "Rain tomorrow, ride today"
-                    : "Ride before \(weekday(wet.date))'s rain"
+                    ? String(localized: "Rain tomorrow, ride today")
+                    : String(localized: "Ride before \(weekday(wet.date))'s rain")
             }
             if let dry = upcoming.first(where: { $0.condition.wetness < DirtCondition.heroDirt.wetness }) {
-                return "Drying out \(by(dry))"
+                return isTomorrow(dry.date, today: today, calendar: calendar)
+                    ? String(localized: "Drying out by tomorrow")
+                    : String(localized: "Drying out by \(weekday(dry.date))")
             }
-            return "Hero dirt all week"
+            return String(localized: "Hero dirt all week")
 
         case .dry, .veryDry:
             let hero = upcoming.firstIndex { $0.condition == .heroDirt }
             let wet = upcoming.firstIndex { $0.condition.wetness >= DirtCondition.wet.wetness }
             switch (hero, wet) {
-            case let (h?, w?) where h < w: return "Hero dirt \(on(upcoming[h]))"
-            case let (_, w?): return "Rain \(on(upcoming[w])), hero dirt after"
-            case let (h?, nil): return "Hero dirt \(on(upcoming[h]))"
-            case (nil, nil): return current == .veryDry ? "Dusty all week" : "Dry all week"
+            case let (h?, w?) where h < w:
+                return heroText(for: upcoming[h], today: today, calendar: calendar)
+            case let (_, w?):
+                return isTomorrow(upcoming[w].date, today: today, calendar: calendar)
+                    ? String(localized: "Rain tomorrow, hero dirt after")
+                    : String(localized: "Rain \(weekday(upcoming[w].date)), hero dirt after")
+            case let (h?, nil):
+                return heroText(for: upcoming[h], today: today, calendar: calendar)
+            case (nil, nil):
+                return current == .veryDry ? String(localized: "Dusty all week") : String(localized: "Dry all week")
             }
         }
+    }
+
+    private static func heroText(for day: DayCondition, today: Date, calendar: Calendar) -> String {
+        isTomorrow(day.date, today: today, calendar: calendar)
+            ? String(localized: "Hero dirt tomorrow")
+            : String(localized: "Hero dirt \(weekday(day.date))")
     }
 
     static func isTomorrow(_ date: Date, today: Date, calendar: Calendar) -> Bool {
@@ -119,6 +133,6 @@ enum OutlookSummary {
     }
 
     static func weekday(_ date: Date) -> String {
-        date.formatted(.dateTime.weekday(.abbreviated))
+        date.formatted(.dateTime.weekday(.wide))
     }
 }
