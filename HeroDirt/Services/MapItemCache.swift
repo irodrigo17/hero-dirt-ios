@@ -34,10 +34,7 @@ final class MapItemCache {
         if let task = inFlight[place.id] { return await task.value }
         let id = place.id
         let task = Task<MKMapItem?, Never> {
-            let request = NavigationPerformance.measure("map_request_setup") {
-                MKMapItemRequest(mapItemIdentifier: mapItemId)
-            }
-            let item = try? await request.mapItem
+            let item = try? await MKMapItemRequest(mapItemIdentifier: mapItemId).mapItem
             self.inFlight[id] = nil
             if let item { self.items[id] = item }
             return item

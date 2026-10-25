@@ -75,7 +75,6 @@ struct PlaceDetailsView: View {
                 NavigationStack { page }
             }
         }
-        .onAppear { NavigationPerformance.mark("detail_appeared") }
         .presentationDetents([.medium, .large])
         .task(id: loadKey) {
             startLoading()
@@ -114,7 +113,6 @@ struct PlaceDetailsView: View {
 
                     if isLoading {
                         PlaceDetailsSkeleton()
-                            .onAppear { NavigationPerformance.mark("skeleton_appeared") }
                             .transition(.opacity)
                     } else if let errorMessage {
                         ContentUnavailableView {
@@ -137,27 +135,20 @@ struct PlaceDetailsView: View {
                             .buttonStyle(.bordered)
                         }
                     } else if let summary = rainfallSummary {
-                        let result = NavigationPerformance.measure("condition_model") {
-                            summary.dirtConditionResult(soil: soilData)
-                        }
+                        let result = summary.dirtConditionResult(soil: soilData)
                         DirtConditionCardView(
                             result: result,
                             onCustomize: savedPlace != nil
                                 ? { showSoilOverrideSheet = true } : nil,
                             isOverridden: savedPlace?.soilOverride != nil
                         )
-                        let strip = NavigationPerformance.measure("outlook_model") {
-                            summary.strip(soil: soilData)
-                        }
+                        let strip = summary.strip(soil: soilData)
                         if strip.count > 1 {
                             OutlookCardView(current: result.condition, days: strip)
                         }
-                        let timeline = NavigationPerformance.measure("trend_model") {
-                            summary.timeline(soil: soilData)
-                        }
+                        let timeline = summary.timeline(soil: soilData)
                         if !timeline.isEmpty {
                             ConditionTrendView(timeline: timeline)
-                                .onAppear { NavigationPerformance.mark("chart_appeared") }
                         }
                         RainfallCardView(summary: summary)
                         if let forecast = rainForecast {
@@ -244,9 +235,7 @@ struct PlaceDetailsView: View {
         // Keep preparation independent of SwiftUI task cancellation during a push.
         // Menu construction only reads the prepared URL, never lazy MapKit data.
         websiteTask = Task {
-            let url = await NavigationPerformance.measureAsync("website_metadata") {
-                await PlaceWebsite.url(for: item)
-            }
+            let url = await PlaceWebsite.url(for: item)
             guard !Task.isCancelled else { return }
             websiteURL = url
             websiteTask = nil
@@ -270,9 +259,7 @@ struct PlaceDetailsView: View {
         drivingSeconds = nil
         let destination = coordinate
         let task = Task {
-            let seconds = await NavigationPerformance.measureAsync("driving_eta") {
-                await drivingTime.travelTime(to: destination)
-            }
+            let seconds = await drivingTime.travelTime(to: destination)
             guard !Task.isCancelled else { return }
             drivingSeconds = seconds
             drivingTimeTask = nil
@@ -377,7 +364,6 @@ struct PlaceDetailsView: View {
     }
 
     private func loadData() async {
-        NavigationPerformance.mark("conditions_load_started")
         placeName = savedPlace?.name ?? mapItem?.name ?? ""
         rainfallSummary = nil
         rainForecast = nil
@@ -385,11 +371,7 @@ struct PlaceDetailsView: View {
         isLoading = true
         errorMessage = nil
 
-        if let saved = savedPlace {
-            _ = await NavigationPerformance.measureAsync("map_metadata") {
-                await mapItemCache.fetch(for: saved)
-            }
-        }
+        if let saved = savedPlace { await mapItemCache.fetch(for: saved) }
         guard !Task.isCancelled else { return }
 
         if let saved = savedPlace {
@@ -424,16 +406,12 @@ struct PlaceDetailsView: View {
 
         onNameResolved?(placeName)
         guard !Task.isCancelled else { return }
-        await NavigationPerformance.measureAsync("weather_and_soil_load") {
-            await fetchWeatherAndSoil()
-        }
+        await fetchWeatherAndSoil()
         // A cancelled load (the view disappeared, or a newer load started)
         // must not end the loading state with no data: that left a blank
         // screen. The load that is still running finishes it.
         guard !Task.isCancelled else { return }
-        NavigationPerformance.monitor()
         isLoading = false
-        NavigationPerformance.mark("conditions_state_applied")
     }
 
     private func reload() async {
@@ -466,9 +444,7 @@ struct PlaceDetailsView: View {
             rainfallSummary = try await rainfallTask
             errorMessage = nil
             if let summary = rainfallSummary {
-                NavigationPerformance.measure("conditions_telemetry") {
-                    Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
-                }
+                Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
             }
         } catch {
             guard !Task.isCancelled, !PlaceConditionsModel.isCancellation(error) else { return }
@@ -481,14 +457,12 @@ struct PlaceDetailsView: View {
 
     private func loadSoil() async {
         let place = savedPlace
-        let resolved = await NavigationPerformance.measureAsync("soil_lookup") {
-            await soil.resolve(
-                override: place?.soilOverride,
-                stored: place?.soil,
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            )
-        }
+        let resolved = await soil.resolve(
+            override: place?.soilOverride,
+            stored: place?.soil,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
         soilData = resolved
         if let place, place.soil == nil, place.soilOverride == nil, !resolved.isEstimated {
             placeStore.updateSoil(resolved, for: place.id)
