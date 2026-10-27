@@ -305,7 +305,7 @@ struct PlaceDetailsView: View {
             )
             .accessibilityIdentifier("Driving Directions")
             .accessibilityLabel(drivingSeconds == nil ? String(localized: "Directions") : String(localized: "Driving time: \(DrivingTimeLabel.text(for: drivingSeconds))"))
-            .accessibilityHint("Opens driving directions in Apple Maps")
+            .accessibilityHint("Opens directions in your default navigation app")
             moreMenu
         }
         .animation(.smooth(duration: 0.3), value: savedPlace != nil)
@@ -518,8 +518,11 @@ struct PlaceDetailsView: View {
     }
 
     private func openDirections() {
-        Telemetry.signal(.directionsOpened)
-        openMapItem(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+        let item = effectiveMapItem ?? MKMapItem(
+            location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil
+        )
+        item.name = placeName
+        DrivingDirections.open(to: item)
     }
 
     private func openInMaps() {

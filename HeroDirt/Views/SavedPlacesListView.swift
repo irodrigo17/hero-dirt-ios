@@ -46,7 +46,7 @@ struct SavedPlacesListView: View {
                         } label: {
                             Label("Directions", systemImage: "car.fill")
                         }
-                        .accessibilityHint("Opens driving directions in Apple Maps")
+                        .accessibilityHint("Opens directions in your default navigation app")
                         .tint(.blue)
                     }
                 }

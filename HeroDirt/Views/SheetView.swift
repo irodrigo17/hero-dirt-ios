@@ -148,27 +148,23 @@ struct SheetView: View {
     }
 
     private func runSearch(query: String) async {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
-        if let region = visibleRegion {
-            request.region = region
-        }
-        request.resultTypes = [.pointOfInterest, .physicalFeature]
+        let request = OutdoorPlaceSearch.request(query: query, region: visibleRegion)
         do {
             let operation = MKLocalSearch(request: request)
             activeSearch = operation
             let response = try await operation.start()
             guard !Task.isCancelled else { return }
             activeSearch = nil
-            searchResults = response.mapItems
+            searchResults = OutdoorPlaceSearch.results(from: response.mapItems)
             isSearchLoading = false
-            Telemetry.signal(.searchPerformed, ["results": "\(response.mapItems.count)"])
+            Telemetry.signal(.searchPerformed, ["results": "\(searchResults.count)"])
         } catch {
             guard !Task.isCancelled else { return }
             activeSearch = nil
             searchResults = []
             isSearchLoading = false
-            searchError = String(localized: "Search is unavailable right now. Please try again.")
+            searchError = OutdoorPlaceSearch.isNoResults(error)
+                    ? nil : String(localized: "Search is unavailable right now. Please try again.")
         }
     }
 }

@@ -7036,42 +7036,42 @@
         }
       }
     },
-    "Opens driving directions in Apple Maps" : {
+    "Opens directions in your default navigation app" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffnet die Autoroute in Apple Karten"
+            "value" : "Öffnet die Route in deiner Standard-Navigationsapp"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Opens driving directions in Apple Maps"
+            "value" : "Opens directions in your default navigation app"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre una ruta en coche en Mapas de Apple"
+            "value" : "Abre la ruta en tu app de navegación predeterminada"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ouvre l’itinéraire en voiture dans Plans d’Apple"
+            "value" : "Ouvre l’itinéraire dans votre app de navigation par défaut"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appleマップで車の経路を開きます"
+            "value" : "デフォルトのナビゲーションアプリで経路を開きます"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre a rota de carro no Mapas da Apple"
+            "value" : "Abre a rota no seu app de navegação padrão"
           }
         }
       }

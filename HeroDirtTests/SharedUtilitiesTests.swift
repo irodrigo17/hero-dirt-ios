@@ -1,10 +1,53 @@
 import CoreLocation
 import Foundation
+import MapKit
 import Testing
 
 @testable import HeroDirt
 
 struct SharedUtilitiesTests {
+    @Test func outdoorSearchExpandsDemoAndPreservesRegion() {
+        let region = MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 37, longitude: -122),
+            span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1)
+        )
+        let request = OutdoorPlaceSearch.request(query: " Demo ", region: region)
+        #expect(request.naturalLanguageQuery == "Soquel Demonstration State Forest")
+        #expect(request.region.center.latitude == 37)
+        // A server-side category filter makes MapKit reject the actual
+        // uncategorized forest. Business filtering happens on the response.
+        #expect(request.pointOfInterestFilter == nil)
+        #expect(request.resultTypes.contains(.physicalFeature))
+        #expect(OutdoorPlaceSearch.request(query: " Mount Tam ", region: nil).naturalLanguageQuery == "Mount Tam")
+    }
+
+    @Test func searchDistinguishesNoResultsFromServiceFailures() {
+        #expect(OutdoorPlaceSearch.isNoResults(MKError(.placemarkNotFound)))
+        #expect(!OutdoorPlaceSearch.isNoResults(MKError(.serverFailure)))
+        #expect(!OutdoorPlaceSearch.isNoResults(URLError(.notConnectedToInternet)))
+        #expect(!OutdoorPlaceSearch.isNoResults(NSError(domain: "Other", code: 4)))
+    }
+
+    @Test func outdoorSearchRejectsBusinessesAndKeepsNaturalFeatures() {
+        func item(_ name: String, _ category: MKPointOfInterestCategory?) -> MKMapItem {
+            let item = MKMapItem(location: CLLocation(latitude: 37, longitude: -122), address: nil)
+            item.name = name
+            item.pointOfInterestCategory = category
+            return item
+        }
+        let items = [item("Dyson", .store), item("Forest", .park),
+                     item("Restaurant", .restaurant), item("Mountain", nil), item("Trail", .hiking)]
+        #expect(OutdoorPlaceSearch.results(from: items).compactMap(\.name) == ["Forest", "Mountain", "Trail"])
+    }
+
+    @Test func directionsHandOffExactCoordinateToSystemDefault() {
+        let url = DrivingDirections.navigationURL(to: CLLocationCoordinate2D(latitude: 37.08, longitude: -121.91))
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        #expect(components?.scheme == "geo-navigation")
+        #expect(components?.path == "/directions")
+        #expect(components?.queryItems == [URLQueryItem(name: "destination", value: "37.08,-121.91")])
+    }
+
     private static func isMainThread() -> Bool { Thread.isMainThread }
 
     @MainActor

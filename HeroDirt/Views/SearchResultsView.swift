@@ -1,6 +1,38 @@
 import MapKit
 import SwiftUI
 
+/// Shared policy for both search entry points. Keep physical features (which
+/// often have no POI category), while excluding unrelated businesses.
+enum OutdoorPlaceSearch {
+    static let categories: [MKPointOfInterestCategory] = [
+        .park, .nationalPark, .hiking, .campground, .beach
+    ]
+
+    static func request(query: String, region: MKCoordinateRegion?) -> MKLocalSearch.Request {
+        let request = MKLocalSearch.Request()
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        request.naturalLanguageQuery = trimmed.compare("demo", options: .caseInsensitive) == .orderedSame
+            ? "Soquel Demonstration State Forest" : trimmed
+        request.resultTypes = [.pointOfInterest, .physicalFeature]
+        // Filter the response instead: MapKit's server-side category filter
+        // rejects uncategorized physical features, including Soquel Demo.
+        if let region { request.region = region }
+        return request
+    }
+
+    static func isNoResults(_ error: Error) -> Bool {
+        let error = error as NSError
+        return error.domain == MKErrorDomain && error.code == MKError.Code.placemarkNotFound.rawValue
+    }
+
+    static func results(from items: [MKMapItem]) -> [MKMapItem] {
+        items.filter { item in
+            guard let category = item.pointOfInterestCategory else { return true }
+            return categories.contains(category)
+        }
+    }
+}
+
 struct SearchResultsView: View {
     let searchResults: [MKMapItem]
     var query = ""

@@ -1,5 +1,6 @@
 import CoreLocation
 import MapKit
+import UIKit
 
 protocol DrivingTimeProviding: Sendable {
     @MainActor func travelTime(to destination: CLLocationCoordinate2D) async -> TimeInterval?
@@ -88,7 +89,31 @@ enum DrivingDirections {
     static func open(to place: Place) {
         let item = MKMapItem(location: CLLocation(latitude: place.latitude, longitude: place.longitude), address: nil)
         item.name = place.name
+        open(to: item)
+    }
+
+    static func navigationURL(to coordinate: CLLocationCoordinate2D) -> URL {
+        var components = URLComponents()
+        components.scheme = "geo-navigation"
+        components.host = ""
+        components.path = "/directions"
+        components.queryItems = [URLQueryItem(
+            name: "destination", value: "\(coordinate.latitude),\(coordinate.longitude)"
+        )]
+        return components.url!
+    }
+
+    @MainActor
+    static func open(to item: MKMapItem) {
         Telemetry.signal(.directionsOpened)
-        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+        // Let iOS resolve the user's default navigation app where supported.
+        // Attempt directly: canOpenURL would require a query-scheme allowlist.
+        UIApplication.shared.open(navigationURL(to: item.location.coordinate)) { success in
+            if !success {
+                item.openInMaps(launchOptions: [
+                    MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
+                ])
+            }
+        }
     }
 }

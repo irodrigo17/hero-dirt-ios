@@ -170,7 +170,7 @@ struct TrailsHomeView: View {
                         } label: {
                             Label("Directions", systemImage: "car.fill")
                         }
-                        .accessibilityHint("Opens driving directions in Apple Maps")
+                        .accessibilityHint("Opens directions in your default navigation app")
                         .tint(.blue)
                     }
                 }
@@ -284,16 +284,12 @@ struct TrailsHomeView: View {
                 try? await Task.sleep(for: .milliseconds(350))
             }
             guard !Task.isCancelled else { return }
-            let request = MKLocalSearch.Request()
-            request.naturalLanguageQuery = query
-            request.resultTypes = [.pointOfInterest, .physicalFeature]
-            if let region = searchRegion {
-                request.region = region
-            }
+            let request = OutdoorPlaceSearch.request(query: query, region: searchRegion)
             do {
                 let operation = MKLocalSearch(request: request)
                 activeSearch = operation
-                let items = try await operation.start().mapItems
+                let response = try await operation.start()
+                let items = OutdoorPlaceSearch.results(from: response.mapItems)
                 guard !Task.isCancelled else { return }
                 activeSearch = nil
                 searchResults = items
@@ -304,7 +300,8 @@ struct TrailsHomeView: View {
                 activeSearch = nil
                 searchResults = []
                 isSearchLoading = false
-                searchError = String(localized: "Search is unavailable right now. Please try again.")
+                searchError = OutdoorPlaceSearch.isNoResults(error)
+                    ? nil : String(localized: "Search is unavailable right now. Please try again.")
             }
         }
     }
