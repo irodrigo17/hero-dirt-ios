@@ -80,6 +80,122 @@ struct RainGridLattice: Equatable, Sendable {
     }
 }
 
+/// Persists sampled totals, not rendered images. A fresh cell can be rendered
+/// for any rainfall timeframe after the map screen or the app is recreated.
+actor RainGridDiskCache {
+    static let shared = RainGridDiskCache()
+    static let ttl: TimeInterval = 60 * 60
+    static let maximumEntries = 20_000
+    private static let maximumFileBytes = 8 * 1024 * 1024
+
+    struct Key: Hashable, Codable, Sendable {
+        let step: Double
+        let row: Int
+        let col: Int
+    }
+
+    struct Entry: Codable, Sendable {
+        let last1Day: Double
+        let last2Days: Double
+        let last3Days: Double
+        let last7Days: Double
+        let timestamp: Date
+
+        init(summary: RainfallSummary, timestamp: Date = Date()) {
+            last1Day = summary.last1Day
+            last2Days = summary.last2Days
+            last3Days = summary.last3Days
+            last7Days = summary.last7Days
+            self.timestamp = timestamp
+        }
+
+        var summary: RainfallSummary {
+            RainfallSummary(last1Day: last1Day, last2Days: last2Days,
+                            last3Days: last3Days, last7Days: last7Days, daysSinceLastRain: nil)
+        }
+
+        func isFresh(at now: Date) -> Bool {
+            let age = now.timeIntervalSince(timestamp)
+            return age >= 0 && age < RainGridDiskCache.ttl
+                && [last1Day, last2Days, last3Days, last7Days].allSatisfy { $0.isFinite && $0 >= 0 }
+        }
+    }
+
+    private struct Record: Codable {
+        let key: Key
+        let entry: Entry
+    }
+
+    private struct Snapshot: Codable {
+        let version: Int
+        let records: [Record]
+    }
+
+    let fileURL: URL?
+    private let capacity: Int
+    private var entries: [Key: Entry] = [:]
+    private var isLoaded = false
+
+    /// A nil directory gives tests an isolated memory cache with the same API.
+    init(directory: URL? = .cachesDirectory, capacity: Int = RainGridDiskCache.maximumEntries) {
+        fileURL = directory?.appending(path: "hero_dirt_rain_grid_v1.json")
+        self.capacity = capacity
+    }
+
+    func load(now: Date = Date()) -> [Key: Entry] {
+        loadIfNeeded(now: now)
+        prune(now: now)
+        return entries
+    }
+
+    /// Commit each completed network batch before requesting the next one.
+    /// This actor keeps encoding and atomic file I/O off the main actor.
+    func store(_ additions: [Key: Entry], now: Date = Date()) {
+        loadIfNeeded(now: now)
+        for (key, entry) in additions where entry.isFresh(at: now) {
+            if entries[key].map({ $0.timestamp > entry.timestamp }) != true {
+                entries[key] = entry
+            }
+        }
+        prune(now: now)
+        guard let fileURL else { return }
+        do {
+            let snapshot = Snapshot(version: 1, records: entries.map { Record(key: $0.key, entry: $0.value) })
+            let data = try JSONEncoder().encode(snapshot)
+            guard data.count <= Self.maximumFileBytes else { return }
+            try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try data.write(to: fileURL, options: .atomic)
+        } catch {
+            // Cache failures must never prevent displaying fetched rainfall.
+        }
+    }
+
+    private func loadIfNeeded(now: Date) {
+        guard !isLoaded else { return }
+        isLoaded = true
+        guard let fileURL,
+              let attributes = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
+              let size = attributes[.size] as? NSNumber, size.intValue <= Self.maximumFileBytes,
+              let data = try? Data(contentsOf: fileURL),
+              let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data),
+              snapshot.version == 1 else { return }
+        for record in snapshot.records where record.entry.isFresh(at: now) {
+            guard RainGridLattice.steps.contains(record.key.step),
+                  abs((Double(record.key.row) + 0.5) * record.key.step) <= 90 else { continue }
+            if entries[record.key].map({ $0.timestamp > record.entry.timestamp }) != true {
+                entries[record.key] = record.entry
+            }
+        }
+    }
+
+    private func prune(now: Date) {
+        entries = entries.filter { $0.value.isFresh(at: now) }
+        if entries.count > capacity {
+            entries = Dictionary(uniqueKeysWithValues: entries.sorted { $0.value.timestamp > $1.value.timestamp }.prefix(capacity).map { ($0.key, $0.value) })
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class RainfallGridService {
@@ -103,20 +219,13 @@ final class RainfallGridService {
 
     // MARK: - Cache
 
-    private struct CacheKey: Hashable {
-        let step: Double
-        let row: Int
-        let col: Int
-    }
-
-    private struct CacheEntry {
-        let summary: RainfallSummary
-        let timestamp: Date
-    }
-
+    private typealias CacheKey = RainGridDiskCache.Key
+    private typealias CacheEntry = RainGridDiskCache.Entry
     @ObservationIgnored private var cache: [CacheKey: CacheEntry] = [:]
-    @ObservationIgnored private let cacheTTL: TimeInterval = 60 * 60
-    @ObservationIgnored private let maxCacheEntries = 20_000
+    @ObservationIgnored private let cacheTTL = RainGridDiskCache.ttl
+    @ObservationIgnored private let maxCacheEntries = RainGridDiskCache.maximumEntries
+    @ObservationIgnored private let diskCache: RainGridDiskCache
+    @ObservationIgnored private var didLoadDiskCache = false
 
     // MARK: - Tasks
 
@@ -135,7 +244,8 @@ final class RainfallGridService {
     typealias BatchFetcher = @Sendable (_ points: [(lat: Double, lon: Double)], _ pastDays: Int) async throws -> [RainfallSummary?]
     @ObservationIgnored private let fetchBatch: BatchFetcher
 
-    init(fetchBatch: BatchFetcher? = nil) {
+    init(diskCache: RainGridDiskCache = .shared, fetchBatch: BatchFetcher? = nil) {
+        self.diskCache = diskCache
         let session = gridSession
         self.fetchBatch = fetchBatch ?? { points, pastDays in
             try await WeatherService.fetchRainfallBatch(points: points, pastDays: pastDays, session: session)
@@ -192,6 +302,12 @@ final class RainfallGridService {
         isZoomLimited = false
         errorMessage = nil
         let lattice = RainGridLattice(region: region)
+        if !didLoadDiskCache {
+            let stored = await diskCache.load()
+            cache.merge(stored) { current, disk in current.timestamp >= disk.timestamp ? current : disk }
+            didLoadDiskCache = true
+        }
+        guard !Task.isCancelled else { return }
         pruneCache()
 
         var missing: [(row: Int, col: Int)] = []
@@ -216,10 +332,15 @@ final class RainfallGridService {
                     let cells = Array(missing[start..<min(start + 16, missing.count)])
                     let points = cells.map { lattice.center(row: $0.row, col: $0.col) }
                     let summaries = try await fetchBatch(points, 7)
+                    var completed: [CacheKey: CacheEntry] = [:]
                     for (cell, summary) in zip(cells, summaries) {
                         guard let summary else { continue }
-                        cache[key(lattice, cell.row, cell.col)] = CacheEntry(summary: summary, timestamp: Date())
+                        let entry = CacheEntry(summary: summary)
+                        let cellKey = key(lattice, cell.row, cell.col)
+                        cache[cellKey] = entry
+                        completed[cellKey] = entry
                     }
+                    if !completed.isEmpty { await diskCache.store(completed) }
                     // Give queued place details a chance to take the next slot.
                     await Task.yield()
                 }

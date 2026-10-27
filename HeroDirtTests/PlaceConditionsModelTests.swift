@@ -70,7 +70,7 @@ struct RainfallGridServiceTests {
     }
 
     @Test func rendersOverlayFromFetchedGrid() async throws {
-        let service = RainfallGridService { points, _ in points.map { _ in SampleData.muddy } }
+        let service = RainfallGridService(diskCache: RainGridDiskCache(directory: nil)) { points, _ in points.map { _ in SampleData.muddy } }
         service.updateRegion(region)
         try await waitForOverlay(service)
         #expect(service.overlay != nil)
@@ -78,7 +78,7 @@ struct RainfallGridServiceTests {
     }
 
     @Test func surfacesFetchErrors() async throws {
-        let service = RainfallGridService { _, _ in throw WeatherService.WeatherError.httpError(statusCode: 429) }
+        let service = RainfallGridService(diskCache: RainGridDiskCache(directory: nil)) { _, _ in throw WeatherService.WeatherError.httpError(statusCode: 429) }
         service.updateRegion(region)
         try await waitForOverlay(service)
         #expect(service.errorMessage?.contains("Too many requests") == true)
