@@ -188,7 +188,7 @@ final class TrailDetailsTests: XCTestCase {
         let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
         XCTAssertTrue(trail.waitForExistence(timeout: 10))
         XCTAssertTrue(trail.label.contains("Today:"))
-        XCTAssertTrue(trail.label.contains("last rain"))
+        XCTAssertTrue(trail.label.contains("Last rain:"))
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = "Map sheet trail cards"
         shot.lifetime = .keepAlways
