@@ -1,6 +1,86 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Weather requests are paused. Please try again later." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather requests are paused. Please try again later."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las consultas del tiempo están en pausa. Inténtalo más tarde."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les requêtes météo sont en pause. Réessayez plus tard."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetteranfragen sind pausiert. Bitte versuche es später erneut."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As consultas de clima estão pausadas. Tente novamente mais tarde."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天気データの取得を一時停止しています。しばらくしてからお試しください。"
+          }
+        }
+      }
+    },
+    "Zoom in to see rainfall near trails." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoom in to see rainfall near trails."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acércate para ver la lluvia cerca de los senderos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoomez pour voir les précipitations près des sentiers."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoome hinein, um Regen in Trailnähe zu sehen."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aproxime o mapa para ver a chuva perto das trilhas."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡大するとトレイル付近の降雨量が表示されます。"
+          }
+        }
+      }
+    },
     "**What happened?**\n\n\n**What did you expect to happen?**\n\n\n---\n" : {
       "localizations" : {
         "de" : {

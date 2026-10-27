@@ -143,7 +143,7 @@ struct MapView: View {
         .ignoresSafeArea()
         .overlay(alignment: .top) {
             if model.overlayVisible, let message = gridService.errorMessage {
-                Label(message, systemImage: "exclamationmark.triangle.fill")
+                Label(message, systemImage: gridService.isZoomLimited ? "plus.magnifyingglass" : "exclamationmark.triangle.fill")
                     .labelStyle(.titleAndIcon)
                     .font(.footnote.weight(.medium))
                     .padding(.horizontal, 14)
@@ -152,8 +152,9 @@ struct MapView: View {
                     .padding(.top, 8)
                     .padding(.horizontal)
                     .transition(.move(edge: .top).combined(with: .opacity))
-                    .onTapGesture { gridService.refetch() }
-                    .accessibilityHint("Double tap to try again")
+                    .onTapGesture { if !gridService.isZoomLimited { gridService.refetch() } }
+                    .accessibilityHint(gridService.isZoomLimited
+                        ? Text("Zoom in to see rainfall near trails.") : Text("Double tap to try again"))
             }
         }
         .animation(.easeInOut(duration: 0.25), value: gridService.errorMessage)

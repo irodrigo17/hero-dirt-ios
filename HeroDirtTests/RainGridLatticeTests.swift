@@ -56,3 +56,82 @@ struct RainGridLatticeTests {
         #expect(image?.cgImage?.height == 16)
     }
 }
+
+@MainActor
+struct RainMapBudgetTests {
+    private actor Recorder {
+        var batches: [Int] = []
+        var days: [Int] = []
+        var requests: [[String]] = []
+        var failAfterFirst = false
+        func fetch(_ points: [(lat: Double, lon: Double)], days: Int) throws -> [RainfallSummary?] {
+            requests.append(points.map { "\($0.lat),\($0.lon)" })
+            let count = points.count
+            if failAfterFirst && !batches.isEmpty { throw WeatherService.WeatherError.httpError(statusCode: 503) }
+            batches.append(count)
+            self.days.append(days)
+            return Array(repeating: SampleData.muddy, count: count)
+        }
+        func failLater() { failAfterFirst = true }
+    }
+
+    @Test func continentalViewMakesNoRequestsAndLocalGridIsBounded() async {
+        let recorder = Recorder()
+        let service = RainfallGridService { points, days in try await recorder.fetch(points, days: days) }
+        let usa = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 39, longitude: -98),
+                                     span: MKCoordinateSpan(latitudeDelta: 30, longitudeDelta: 65))
+        await service.load(region: usa, pastDays: 3)
+        #expect(await recorder.batches.isEmpty)
+        #expect(service.overlay == nil)
+        #expect(service.errorMessage != nil)
+        for span in [0.1, 1, 5, 20, 65, 180, 360] as [Double] {
+            let region = MKCoordinateRegion(center: .init(latitude: 0, longitude: 0),
+                                            span: .init(latitudeDelta: min(180, span), longitudeDelta: span))
+            let grid = RainGridLattice(region: region)
+            #expect(grid.rows * grid.cols <= 81)
+            for row in grid.rowRange {
+                #expect(abs(grid.center(row: row, col: grid.colRange.lowerBound).lat) <= 90)
+            }
+        }
+    }
+
+    @Test func rapidBrowsingDoesNotStartRequestsBeforeSettling() async throws {
+        let recorder = Recorder()
+        let service = RainfallGridService { points, days in try await recorder.fetch(points, days: days) }
+        let region = MKCoordinateRegion(center: .init(latitude: 37.4, longitude: -122.2),
+                                       span: .init(latitudeDelta: 0.5, longitudeDelta: 0.3))
+        for _ in 0..<5 { service.updateRegion(region) }
+        try await Task.sleep(for: .milliseconds(150))
+        #expect(await recorder.requests.isEmpty)
+        service.cancelUpdate()
+        try await Task.sleep(for: .milliseconds(950))
+        #expect(await recorder.requests.isEmpty)
+        #expect(!service.isLoading)
+    }
+
+    @Test func timeframesReuseCacheAndCompletedBatchesSurviveLaterFailure() async throws {
+        let recorder = Recorder()
+        let service = RainfallGridService { points, days in try await recorder.fetch(points, days: days) }
+        let region = MKCoordinateRegion(center: .init(latitude: 37.4, longitude: -122.2),
+                                       span: .init(latitudeDelta: 0.5, longitudeDelta: 0.3))
+        await recorder.failLater()
+        await service.load(region: region, pastDays: 1)
+        #expect(await recorder.batches == [16])
+        await service.load(region: region, pastDays: 7)
+        // The second attempt still fails, but does not re-request the first
+        // successful batch. Allow a later retry to complete for reuse checks.
+        #expect(await recorder.batches == [16])
+        let requests = await recorder.requests
+        #expect(requests.count == 3)
+        #expect(requests[0] != requests[1])
+        #expect(requests[1] == requests[2])
+        let successful = Recorder()
+        let cached = RainfallGridService { points, days in try await successful.fetch(points, days: days) }
+        await cached.load(region: region, pastDays: 1)
+        let calls = await successful.batches.count
+        #expect(await successful.batches.allSatisfy { $0 <= 16 })
+        #expect(await successful.days.allSatisfy { $0 == 7 })
+        await cached.load(region: region, pastDays: 7)
+        #expect(await successful.batches.count == calls)
+    }
+}

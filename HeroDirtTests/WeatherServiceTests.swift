@@ -153,3 +153,93 @@ struct WeatherServiceTests {
         )
     }
 }
+
+struct WeatherRequestBudgetTests {
+    private actor Order {
+        var entries: [Int] = []
+        func add(_ entry: Int) { entries.append(entry) }
+    }
+
+    @Test func overlayBudgetReservesCapacityForDetails() async throws {
+        let budget = WeatherRequestBudget(minuteLimit: 10, overlayLimit: 6)
+        _ = try await budget.run(cost: 6, overlay: true) { 1 }
+        do {
+            _ = try await budget.run(cost: 1, overlay: true) { Issue.record("Overlay should be paused"); return 1 }
+            Issue.record("Expected overlay budget error")
+        } catch let error as WeatherService.WeatherError {
+            guard case .rateLimited = error else { Issue.record("Wrong error"); return }
+        }
+        #expect(try await budget.run(cost: 3) { 42 } == 42)
+    }
+
+    @Test func serverCooldownBlocksBothRequestTypes() async throws {
+        let budget = WeatherRequestBudget()
+        await budget.pause(until: Date().addingTimeInterval(300))
+        for overlay in [false, true] {
+            do {
+                _ = try await budget.run(cost: 1, overlay: overlay) { Issue.record("No network during cooldown"); return 1 }
+                Issue.record("Expected cooldown")
+            } catch let error as WeatherService.WeatherError {
+                guard case .rateLimited = error else { Issue.record("Wrong error"); return }
+            }
+        }
+    }
+
+    @Test func minuteBudgetRecoversAfterWindowExpires() async throws {
+        let budget = WeatherRequestBudget(minuteLimit: 1, overlayLimit: 1, window: 0.05)
+        _ = try await budget.run(cost: 1) { 1 }
+        try await Task.sleep(for: .milliseconds(60))
+        #expect(try await budget.run(cost: 1) { 2 } == 2)
+    }
+
+    @Test func selectedPlaceRunsBeforeQueuedOverlayAndCancelledWorkNeverStarts() async throws {
+        let budget = WeatherRequestBudget()
+        let (started, start) = AsyncStream<Void>.makeStream()
+        let (release, unblock) = AsyncStream<Void>.makeStream()
+        let first = Task {
+            try await budget.run(cost: 1, overlay: true) {
+                start.yield()
+                for await _ in release { break }
+                return 1
+            }
+        }
+        for await _ in started { break }
+        let order = Order()
+        let map = Task { try await budget.run(cost: 1, overlay: true) { await order.add(2); return 2 } }
+        let detail = Task { try await budget.run(cost: 1) { await order.add(3); return 3 } }
+        for _ in 0..<100 {
+            if await budget.waitingDetails > 0 { break }
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        #expect(await budget.waitingDetails == 1)
+        let cancelled = Task {
+            try await budget.run(cost: 1) { Issue.record("Cancelled request must not start"); return 4 }
+        }
+        cancelled.cancel()
+        unblock.yield()
+        _ = try await first.value
+        #expect(try await detail.value == 3)
+        #expect(try await map.value == 2)
+        #expect(await order.entries == [3, 2])
+        do { _ = try await cancelled.value; Issue.record("Expected cancellation") }
+        catch is CancellationError { }
+    }
+
+    @Test func retryAfterSupportsSecondsDatesAndLongerQuotaWindows() throws {
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let url = URL(string: "https://example.com")!
+        func response(_ header: String?) throws -> HTTPURLResponse {
+            try #require(HTTPURLResponse(url: url, statusCode: 429, httpVersion: nil,
+                                        headerFields: header.map { ["Retry-After": $0] }))
+        }
+        #expect(WeatherService.retryDate(response: try response("120"), data: Data(), now: now) == now.addingTimeInterval(120))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss z"
+        let date = now.addingTimeInterval(600)
+        #expect(WeatherService.retryDate(response: try response(formatter.string(from: date)), data: Data(), now: now) == date)
+        let hourly = Data(#"{"reason":"Hourly API request limit exceeded"}"#.utf8)
+        #expect(WeatherService.retryDate(response: try response(nil), data: hourly, now: now) == now.addingTimeInterval(3600))
+    }
+}

@@ -2,6 +2,65 @@ import CoreLocation
 import Foundation
 import WeatherKit
 
+/// Serializes weather work, reserves capacity for selected places, and shares
+/// server cooldowns between the rain map and place details. Costs are
+/// conservative location equivalents, rather than HTTP request counts.
+actor WeatherRequestBudget {
+    private struct Charge {
+        let date: Date
+        let cost: Int
+        let overlay: Bool
+    }
+    private var charges: [Charge] = []
+    private var running = false
+    private(set) var waitingDetails = 0
+    private var cooldownUntil = Date.distantPast
+    private let minuteLimit: Int
+    private let overlayLimit: Int
+    private let window: TimeInterval
+
+    init(minuteLimit: Int = 300, overlayLimit: Int = 180, window: TimeInterval = 60) {
+        self.minuteLimit = minuteLimit
+        self.overlayLimit = overlayLimit
+        self.window = window
+    }
+
+    func pause(until date: Date) { cooldownUntil = max(cooldownUntil, date) }
+
+    func run<T: Sendable>(cost: Int, overlay: Bool = false,
+                         operation: @Sendable () async throws -> T) async throws -> T {
+        if !overlay { waitingDetails += 1 }
+        defer { if !overlay { waitingDetails -= 1 } }
+        while true {
+            try Task.checkCancellation()
+            let now = Date()
+            charges.removeAll { now.timeIntervalSince($0.date) >= window * 1440 }
+            if cooldownUntil > now {
+                throw WeatherService.WeatherError.rateLimited(until: cooldownUntil)
+            }
+            let recent = charges.filter { now.timeIntervalSince($0.date) < window }
+            let hourly = charges.filter { now.timeIntervalSince($0.date) < window * 60 }
+            for (entries, limit, duration) in [(charges, 8000, window * 1440), (hourly, 4000, window * 60)] {
+                if entries.reduce(0, { $0 + $1.cost }) + cost > limit {
+                    throw WeatherService.WeatherError.rateLimited(until: (entries.first?.date ?? now).addingTimeInterval(duration))
+                }
+            }
+            let total = recent.reduce(0) { $0 + $1.cost }
+            let mapTotal = recent.filter(\.overlay).reduce(0) { $0 + $1.cost }
+            if total + cost > minuteLimit || (overlay && mapTotal + cost > overlayLimit) {
+                let retry = (recent.first?.date ?? now).addingTimeInterval(window)
+                throw WeatherService.WeatherError.rateLimited(until: retry)
+            }
+            if !running && (!overlay || waitingDetails == 0) { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        running = true
+        charges.append(Charge(date: Date(), cost: cost, overlay: overlay))
+        defer { running = false }
+        return try await operation()
+    }
+}
+
 // MARK: - WeatherCache
 
 actor WeatherCache {
@@ -131,6 +190,8 @@ actor WeatherCache {
 enum WeatherService {
 
     static let cache = WeatherCache()
+    static let requestBudget = WeatherRequestBudget()
+    private static let forecastBudget = WeatherRequestBudget()
 
     // MARK: - API Response
 
@@ -181,9 +242,12 @@ enum WeatherService {
         case invalidURL
         case httpError(statusCode: Int)
         case invalidResponse
+        case rateLimited(until: Date)
 
         var errorDescription: String? {
             switch self {
+            case .rateLimited:
+                return String(localized: "Weather requests are paused. Please try again later.")
             case .invalidURL:
                 return String(localized: "Could not build request URL.")
             case .httpError(let statusCode):
@@ -292,6 +356,40 @@ enum WeatherService {
         return URLSession(configuration: config)
     }()
 
+    static func retryDate(response: HTTPURLResponse, data: Data, now: Date = Date()) -> Date {
+        if let value = response.value(forHTTPHeaderField: "Retry-After") {
+            if let seconds = TimeInterval(value), seconds.isFinite, seconds >= 0 {
+                return now.addingTimeInterval(max(1, seconds))
+            }
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss z"
+            if let date = formatter.date(from: value), date > now { return date }
+        }
+        let reason = ((try? JSONSerialization.jsonObject(with: data)) as? [String: Any])?["reason"] as? String ?? ""
+        // Without a Retry-After header, use a conservative window based on
+        // the provider's error reason; do not promise a one-minute reset.
+        let delay: TimeInterval = reason.localizedCaseInsensitiveContains("daily") ? 86400
+            : reason.localizedCaseInsensitiveContains("hourly") ? 3600 : 60
+        return now.addingTimeInterval(delay)
+    }
+
+    private static func requestData(url: URL, session: URLSession) async throws -> Data {
+        try Task.checkCancellation()
+        let (data, response) = try await session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw WeatherError.invalidResponse }
+        if http.statusCode == 429 {
+            let until = retryDate(response: http, data: data)
+            await requestBudget.pause(until: until)
+            throw WeatherError.rateLimited(until: until)
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw WeatherError.httpError(statusCode: http.statusCode)
+        }
+        return data
+    }
+
     /// Rain for many points at once (rain map grid). Each point gets rolling
     /// 24-hour totals for the last `pastDays` days, observed rain only.
     /// Throws on HTTP errors (e.g. 429) so the caller can tell the user.
@@ -321,10 +419,8 @@ enum WeatherService {
 
             guard let url = components.url else { throw WeatherError.invalidURL }
 
-            let (data, response) = try await session.data(from: url)
-            guard let http = response as? HTTPURLResponse else { throw WeatherError.invalidResponse }
-            guard (200...299).contains(http.statusCode) else {
-                throw WeatherError.httpError(statusCode: http.statusCode)
+            let data = try await requestBudget.run(cost: chunk.count, overlay: true) {
+                try await requestData(url: url, session: session)
             }
 
             let responses: [HourlyResponse]
@@ -373,19 +469,16 @@ enum WeatherService {
             throw WeatherError.invalidURL
         }
 
-        let (data, response) = try await (session ?? detailSession).data(from: url)
-
-        guard let http = response as? HTTPURLResponse else {
-            throw WeatherError.invalidResponse
+        return try await requestBudget.run(cost: 3) {
+            // A prior caller may have filled the cache while this one queued.
+            if let cached = await cache.getRainfall(key) {
+                return RainfallSummary(daily: cached)
+            }
+            let data = try await requestData(url: url, session: session ?? detailSession)
+            let summary = try parseResponse(data)
+            await cache.setRainfall(key, summary.dailyHistory + summary.upcoming)
+            return summary
         }
-
-        guard (200...299).contains(http.statusCode) else {
-            throw WeatherError.httpError(statusCode: http.statusCode)
-        }
-
-        let summary = try parseResponse(data)
-        await cache.setRainfall(key, summary.dailyHistory + summary.upcoming)
-        return summary
     }
 
     // MARK: - WeatherKit Forecast
@@ -396,30 +489,34 @@ enum WeatherService {
         let key = WeatherCache.key(latitude: latitude, longitude: longitude)
         if let cached = await cache.getForecast(key), cached.daily != nil { return cached }
 
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        let daily = try await WeatherKit.WeatherService.shared.weather(
-            for: location,
-            including: .daily
-        )
-
-        let days = daily.forecast.map {
-            DailyRainForecast(
-                date: $0.date,
-                amount: $0.precipitationAmountByType.rainfall.converted(to: .millimeters).value,
-                precipitationChance: $0.precipitationChance
+        return try await forecastBudget.run(cost: 1) {
+            if let cached = await cache.getForecast(key), cached.daily != nil { return cached }
+            try Task.checkCancellation()
+            let location = CLLocation(latitude: latitude, longitude: longitude)
+            let daily = try await WeatherKit.WeatherService.shared.weather(
+                for: location,
+                including: .daily
             )
+
+            let days = daily.forecast.map {
+                DailyRainForecast(
+                    date: $0.date,
+                    amount: $0.precipitationAmountByType.rainfall.converted(to: .millimeters).value,
+                    precipitationChance: $0.precipitationChance
+                )
+            }
+
+            func sum(_ n: Int) -> Double { days.prefix(n).reduce(0) { $0 + $1.amount } }
+
+            let result = RainForecast(
+                next1Day: sum(1),
+                next2Days: sum(2),
+                next3Days: sum(3),
+                next7Days: sum(7),
+                daily: days
+            )
+            await cache.setForecast(key, result)
+            return result
         }
-
-        func sum(_ n: Int) -> Double { days.prefix(n).reduce(0) { $0 + $1.amount } }
-
-        let result = RainForecast(
-            next1Day: sum(1),
-            next2Days: sum(2),
-            next3Days: sum(3),
-            next7Days: sum(7),
-            daily: days
-        )
-        await cache.setForecast(key, result)
-        return result
     }
 }

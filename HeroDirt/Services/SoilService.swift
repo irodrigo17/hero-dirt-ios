@@ -68,28 +68,28 @@ enum SoilService {
         ]
         guard let url = components.url else { return nil }
 
-        for attempt in 0..<2 {
-            do {
-                let (data, response) = try await session.data(from: url)
-                guard let http = response as? HTTPURLResponse else { return nil }
-                if http.statusCode == 429, attempt == 0 {
-                    logger.info("SoilGrids rate limited; retrying")
-                    try await Task.sleep(for: .seconds(15))
-                    continue
-                }
-                guard (200...299).contains(http.statusCode) else {
-                    logger.error("SoilGrids HTTP \(http.statusCode)")
-                    return nil
-                }
-                return try parseResponse(data)
-            } catch {
-                if !(error is CancellationError) {
-                    logger.error("SoilGrids request failed: \(error.localizedDescription, privacy: .public)")
-                }
+        do {
+            try Task.checkCancellation()
+            let (data, response) = try await session.data(from: url)
+            guard let http = response as? HTTPURLResponse else { return nil }
+            if http.statusCode == 429 {
+                // Do not bypass the store's five-per-minute budget with an
+                // automatic retry. Pause all queued soil work together.
+                let until = WeatherService.retryDate(response: http, data: data)
+                await store.pause(until: until)
                 return nil
             }
+            guard (200...299).contains(http.statusCode) else {
+                logger.error("SoilGrids HTTP \(http.statusCode)")
+                return nil
+            }
+            return try parseResponse(data)
+        } catch {
+            if !Task.isCancelled {
+                logger.error("SoilGrids request failed: \(error.localizedDescription, privacy: .public)")
+            }
+            return nil
         }
-        return nil
     }
 
     // MARK: - Parsing (internal for testability)
@@ -138,8 +138,16 @@ actor SoilStore {
     private let fileURL: URL
     private var entries: [String: SoilData] = [:]
     private var loaded = false
-    private var inFlight: [Key: Task<SoilData?, Never>] = [:]
+    private struct Flight {
+        let id: UUID
+        let task: Task<SoilData?, Never>
+        var waiters: Set<UUID>
+    }
+    private var inFlight: [Key: Flight] = [:]
     private var requestTimes: [Date] = []
+    private var cooldownUntil = Date.distantPast
+
+    func pause(until date: Date) { cooldownUntil = max(cooldownUntil, date) }
 
     /// SoilGrids fair use: about 5 requests per minute.
     private let maxRequests: Int
@@ -173,32 +181,60 @@ actor SoilStore {
         loadIfNeeded()
         let key = Key(latitude: latitude, longitude: longitude)
         if let hit = entries[Self.storageKey(key)] { return hit }
-        if let task = inFlight[key] { return await task.value }
-
-        let task = Task<SoilData?, Never> {
-            await self.waitForSlot()
-            return await fetch()
+        let waiter = UUID()
+        let flight: Flight
+        if var existing = inFlight[key] {
+            existing.waiters.insert(waiter)
+            inFlight[key] = existing
+            flight = existing
+        } else {
+            let task = Task<SoilData?, Never> {
+                do { try await self.waitForSlot() } catch { return nil }
+                guard !Task.isCancelled else { return nil }
+                return await fetch()
+            }
+            flight = Flight(id: UUID(), task: task, waiters: [waiter])
+            inFlight[key] = flight
         }
-        inFlight[key] = task
-        let result = await task.value
-        inFlight[key] = nil
-        if let result {
-            entries[Self.storageKey(key)] = result
-            persist()
+        let result = await withTaskCancellationHandler {
+            await flight.task.value
+        } onCancel: {
+            Task { await self.cancelWaiter(waiter, key: key, flightID: flight.id) }
         }
-        return result
+        if inFlight[key]?.id == flight.id {
+            inFlight[key] = nil
+            if let result {
+                entries[Self.storageKey(key)] = result
+                persist()
+            }
+        }
+        return Task.isCancelled ? nil : result
     }
 
-    private func waitForSlot() async {
+    private func cancelWaiter(_ waiter: UUID, key: Key, flightID: UUID) {
+        guard var flight = inFlight[key], flight.id == flightID else { return }
+        flight.waiters.remove(waiter)
+        if flight.waiters.isEmpty {
+            inFlight[key] = nil
+            flight.task.cancel()
+        } else {
+            inFlight[key] = flight
+        }
+    }
+
+    private func waitForSlot() async throws {
         while true {
+            try Task.checkCancellation()
             let now = Date()
             requestTimes.removeAll { now.timeIntervalSince($0) >= window }
-            if requestTimes.count < maxRequests {
+            if requestTimes.count < maxRequests && now >= cooldownUntil {
                 requestTimes.append(now)
                 return
             }
-            let wait = window - now.timeIntervalSince(requestTimes[0]) + 0.1
-            try? await Task.sleep(for: .seconds(wait))
+            let quotaWait = requestTimes.count >= maxRequests
+                ? window - now.timeIntervalSince(requestTimes[0]) + 0.1 : 0
+            let wait = max(0.01, quotaWait, cooldownUntil.timeIntervalSince(now))
+            try await Task.sleep(for: .seconds(wait))
         }
     }
 

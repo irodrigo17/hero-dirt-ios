@@ -32,9 +32,18 @@ struct RainfallOverlayImage: Equatable {
 struct RainGridLattice: Equatable, Sendable {
     /// Allowed cell sizes in degrees, finest first. A small fixed set keeps
     /// cache hits high across zoom levels.
-    static let steps: [Double] = [0.05, 0.1, 0.2, 0.5, 1, 2, 5]
+    static let steps: [Double] = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 45, 90]
     /// Target number of cells across the longer side of the visible region.
-    static let targetCells = 12.0
+    static let targetCells = 6.0
+    /// Continental views are too broad for a useful trail rainfall layer.
+    static let maximumSpan = 20.0
+
+    static func supports(_ region: MKCoordinateRegion) -> Bool {
+        CLLocationCoordinate2DIsValid(region.center)
+            && region.span.latitudeDelta.isFinite && region.span.longitudeDelta.isFinite
+            && region.span.latitudeDelta > 0 && region.span.longitudeDelta > 0
+            && max(region.span.latitudeDelta, region.span.longitudeDelta) <= maximumSpan
+    }
 
     let step: Double
     let rowRange: ClosedRange<Int>  // latitude indices, south → north
@@ -49,7 +58,7 @@ struct RainGridLattice: Equatable, Sendable {
         let maxLat = region.center.latitude + region.span.latitudeDelta / 2
         let minLon = region.center.longitude - region.span.longitudeDelta / 2
         let maxLon = region.center.longitude + region.span.longitudeDelta / 2
-        rowRange = (Int(floor(minLat / step)) - padding)...(Int(floor(maxLat / step)) + padding)
+        rowRange = max(Int(floor(-90 / step)), Int(floor(minLat / step)) - padding)...min(Int(ceil(90 / step)) - 1, Int(floor(maxLat / step)) + padding)
         colRange = (Int(floor(minLon / step)) - padding)...(Int(floor(maxLon / step)) + padding)
     }
 
@@ -57,7 +66,8 @@ struct RainGridLattice: Equatable, Sendable {
     var cols: Int { colRange.count }
 
     func center(row: Int, col: Int) -> (lat: Double, lon: Double) {
-        ((Double(row) + 0.5) * step, (Double(col) + 0.5) * step)
+        ((Double(row) + 0.5) * step,
+         ((Double(col) + 0.5) * step + 540).truncatingRemainder(dividingBy: 360) - 180)
     }
 
     var bounds: RainfallGridBounds {
@@ -87,6 +97,7 @@ final class RainfallGridService {
     private(set) var overlay: RainfallOverlayImage?
     /// Set when the last fetch failed (e.g. rate limited); cleared on success.
     private(set) var errorMessage: String?
+    private(set) var isZoomLimited = false
 
     @ObservationIgnored var timeframe: RainfallTimeframe = .threeDays
 
@@ -96,11 +107,10 @@ final class RainfallGridService {
         let step: Double
         let row: Int
         let col: Int
-        let pastDays: Int
     }
 
     private struct CacheEntry {
-        let amount: Double
+        let summary: RainfallSummary
         let timestamp: Date
     }
 
@@ -137,8 +147,12 @@ final class RainfallGridService {
     func updateRegion(_ region: MKCoordinateRegion) {
         lastRegion = region
         updateTask?.cancel()
+        guard RainGridLattice.supports(region) else {
+            pauseForZoom()
+            return
+        }
         updateTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(400))
+            try? await Task.sleep(for: .milliseconds(900))
             guard !Task.isCancelled, let self else { return }
             await self.load(region: region, pastDays: self.timeframe.pastDays)
         }
@@ -147,6 +161,7 @@ final class RainfallGridService {
     func cancelUpdate() {
         updateTask?.cancel()
         updateTask = nil
+        isLoading = false
     }
 
     func refetch() {
@@ -158,16 +173,31 @@ final class RainfallGridService {
         }
     }
 
+    private func pauseForZoom() {
+        renderTask?.cancel()
+        renderGeneration += 1
+        overlay = nil
+        isLoading = false
+        isZoomLimited = true
+        errorMessage = String(localized: "Zoom in to see rainfall near trails.")
+    }
+
     // MARK: - Loading
 
-    private func load(region: MKCoordinateRegion, pastDays: Int) async {
+    func load(region: MKCoordinateRegion, pastDays: Int) async {
+        guard RainGridLattice.supports(region) else {
+            pauseForZoom()
+            return
+        }
+        isZoomLimited = false
+        errorMessage = nil
         let lattice = RainGridLattice(region: region)
         pruneCache()
 
         var missing: [(row: Int, col: Int)] = []
         for row in lattice.rowRange {
             for col in lattice.colRange
-            where cache[key(lattice, row, col, pastDays)] == nil {
+            where cache[key(lattice, row, col)] == nil {
                 missing.append((row, col))
             }
         }
@@ -175,20 +205,23 @@ final class RainfallGridService {
         Self.logger.info("rain grid: \(lattice.rows * lattice.cols) cells at \(lattice.step)°, fetching \(missing.count)")
         if !missing.isEmpty {
             isLoading = true
-            defer { isLoading = false }
+            defer { if !Task.isCancelled { isLoading = false } }
             let state = Self.signposter.beginInterval("Fetch rain grid", "\(missing.count) points")
             defer { Self.signposter.endInterval("Fetch rain grid", state) }
             do {
-                let points = missing.map { lattice.center(row: $0.row, col: $0.col) }
-                let summaries = try await fetchBatch(
-                    points.map { (lat: $0.lat, lon: $0.lon) },
-                    pastDays
-                )
-                let now = Date()
-                for (i, cell) in missing.enumerated() {
-                    guard let summary = summaries[i] else { continue }
-                    let amount = Self.amount(summary, pastDays: pastDays)
-                    cache[key(lattice, cell.row, cell.col, pastDays)] = CacheEntry(amount: amount, timestamp: now)
+                // Keep completed batches even if a later batch fails or the
+                // map moves. Always fetch 7 days so timeframe changes reuse it.
+                for start in stride(from: 0, to: missing.count, by: 16) {
+                    try Task.checkCancellation()
+                    let cells = Array(missing[start..<min(start + 16, missing.count)])
+                    let points = cells.map { lattice.center(row: $0.row, col: $0.col) }
+                    let summaries = try await fetchBatch(points, 7)
+                    for (cell, summary) in zip(cells, summaries) {
+                        guard let summary else { continue }
+                        cache[key(lattice, cell.row, cell.col)] = CacheEntry(summary: summary, timestamp: Date())
+                    }
+                    // Give queued place details a chance to take the next slot.
+                    await Task.yield()
                 }
                 errorMessage = nil
             } catch is CancellationError {
@@ -212,14 +245,14 @@ final class RainfallGridService {
         )
         for (r, row) in lattice.rowRange.enumerated() {
             for (c, col) in lattice.colRange.enumerated() {
-                values[r][c] = cache[key(lattice, row, col, pastDays)]?.amount
+                values[r][c] = cache[key(lattice, row, col)].map { Self.amount($0.summary, pastDays: pastDays) }
             }
         }
         render(values: values, bounds: lattice.bounds)
     }
 
-    private func key(_ lattice: RainGridLattice, _ row: Int, _ col: Int, _ pastDays: Int) -> CacheKey {
-        CacheKey(step: lattice.step, row: row, col: col, pastDays: pastDays)
+    private func key(_ lattice: RainGridLattice, _ row: Int, _ col: Int) -> CacheKey {
+        CacheKey(step: lattice.step, row: row, col: col)
     }
 
     private static func amount(_ summary: RainfallSummary, pastDays: Int) -> Double {

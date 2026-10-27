@@ -117,6 +117,10 @@ final class PlaceConditionsModel {
         {
             return String(localized: "Too many requests. Try again in a minute.")
         }
+        if let weatherError = error as? WeatherService.WeatherError,
+           case .rateLimited = weatherError {
+            return weatherError.localizedDescription
+        }
         return includeRetryHint ? String(localized: "Couldn't load conditions. Pull down to try again.") : String(localized: "Couldn't load conditions.")
     }
 }

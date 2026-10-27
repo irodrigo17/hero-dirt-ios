@@ -51,6 +51,7 @@ struct PlaceDetailsView: View {
     /// left the screen stuck loading or blank).
     @State private var loadTask: Task<Void, Never>?
     @State private var loadedKey: LoadKey?
+    @State private var loadGeneration = 0
     private var savedPlace: Place? {
         if let placeID,
             let place = placeStore.places.first(where: { $0.id == placeID })
@@ -79,9 +80,23 @@ struct PlaceDetailsView: View {
         .task(id: loadKey) {
             startLoading()
         }
+        .task(id: loadKey) {
+            // A structured task follows this selection's lifetime instead of
+            // leaving soil lookups queued for pins the rider already left.
+            do { try await Task.sleep(for: .milliseconds(700)) } catch { return }
+            await loadSoil()
+        }
         .task(id: DrivingTimeLoadKey(place: loadKey, isActive: scenePhase == .active)) {
             guard scenePhase == .active else { return }
             startDrivingTimeLoad()
+        }
+        .onDisappear {
+            loadGeneration += 1
+            loadTask?.cancel()
+            loadTask = nil
+            loadedKey = nil
+            drivingTimeTask?.cancel()
+            drivingTimeTask = nil
         }
         .onChange(of: effectiveMapItem.map(ObjectIdentifier.init), initial: true) { _, _ in
             prepareWebsite(for: effectiveMapItem)
@@ -259,6 +274,7 @@ struct PlaceDetailsView: View {
         drivingSeconds = nil
         let destination = coordinate
         let task = Task {
+            do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
             let seconds = await drivingTime.travelTime(to: destination)
             guard !Task.isCancelled else { return }
             drivingSeconds = seconds
@@ -357,13 +373,16 @@ struct PlaceDetailsView: View {
         }
         loadedKey = loadKey
         loadTask?.cancel()
+        loadGeneration += 1
+        let generation = loadGeneration
         loadTask = Task {
             await loadData()
-            loadTask = nil
+            if generation == loadGeneration { loadTask = nil }
         }
     }
 
     private func loadData() async {
+        do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
         placeName = savedPlace?.name ?? mapItem?.name ?? ""
         rainfallSummary = nil
         rainForecast = nil
@@ -427,10 +446,6 @@ struct PlaceDetailsView: View {
     }
 
     private func fetchWeatherAndSoil() async {
-        // Soil can be slow (throttled SoilGrids); don't hold the screen for
-        // it. Conditions show with estimated loam and refine when it lands.
-        Task { await loadSoil() }
-
         async let rainfallTask = weather.rainfall(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
@@ -441,7 +456,9 @@ struct PlaceDetailsView: View {
         )
 
         do {
-            rainfallSummary = try await rainfallTask
+            let summary = try await rainfallTask
+            guard !Task.isCancelled else { return }
+            rainfallSummary = summary
             errorMessage = nil
             if let summary = rainfallSummary {
                 Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
@@ -452,7 +469,9 @@ struct PlaceDetailsView: View {
         }
 
         guard !Task.isCancelled else { return }
-        rainForecast = try? await forecastTask
+        let forecast = try? await forecastTask
+        guard !Task.isCancelled else { return }
+        rainForecast = forecast
     }
 
     private func loadSoil() async {
@@ -463,6 +482,7 @@ struct PlaceDetailsView: View {
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
+        guard !Task.isCancelled else { return }
         soilData = resolved
         if let place, place.soil == nil, place.soilOverride == nil, !resolved.isEstimated {
             placeStore.updateSoil(resolved, for: place.id)

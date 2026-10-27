@@ -83,3 +83,74 @@ struct SoilStoreTests {
         #expect(decoded.soil == sandy)
     }
 }
+
+struct SoilCancellationTests {
+    private actor Counter {
+        var count = 0
+        func increment() { count += 1 }
+    }
+
+    @Test func serverCooldownPausesQueuedSoilWork() async throws {
+        let directory = URL.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = SoilStore(directory: directory)
+        let counter = Counter()
+        await store.pause(until: Date().addingTimeInterval(0.1))
+        let task = Task {
+            await store.soil(latitude: 1, longitude: 1) {
+                await counter.increment()
+                return SoilData(sandFraction: 0.8, clayFraction: 0.1)
+            }
+        }
+        try await Task.sleep(for: .milliseconds(20))
+        #expect(await counter.count == 0)
+        #expect(await task.value != nil)
+        #expect(await counter.count == 1)
+    }
+
+    @Test func abandonedPinDoesNotConsumeAQueuedSoilRequest() async throws {
+        let directory = URL.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = SoilStore(directory: directory, maxRequestsPerWindow: 1, window: 0.2)
+        let soil = SoilData(sandFraction: 0.8, clayFraction: 0.1)
+        _ = await store.soil(latitude: 0, longitude: 0) { soil }
+        let counter = Counter()
+        let abandoned = Task {
+            await store.soil(latitude: 1, longitude: 1) { await counter.increment(); return soil }
+        }
+        try await Task.sleep(for: .milliseconds(20))
+        abandoned.cancel()
+        #expect(await abandoned.value == nil)
+        try await Task.sleep(for: .milliseconds(220))
+        #expect(await counter.count == 0)
+        let next = await store.soil(latitude: 1, longitude: 1) { await counter.increment(); return soil }
+        #expect(next == soil)
+        #expect(await counter.count == 1)
+    }
+
+    @Test func cancellingOneWaiterKeepsASharedLookupAlive() async throws {
+        let directory = URL.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = SoilStore(directory: directory)
+        let soil = SoilData(sandFraction: 0.8, clayFraction: 0.1)
+        let counter = Counter()
+        let (started, ready) = AsyncStream<Void>.makeStream()
+        let first = Task {
+            await store.soil(latitude: 1, longitude: 1) {
+                await counter.increment()
+                ready.yield()
+                do { try await Task.sleep(for: .milliseconds(150)) } catch { return nil }
+                return soil
+            }
+        }
+        for await _ in started { break }
+        let second = Task {
+            await store.soil(latitude: 1, longitude: 1) { Issue.record("Shared lookup should be reused"); return nil }
+        }
+        try await Task.sleep(for: .milliseconds(30))
+        first.cancel()
+        #expect(await first.value == nil)
+        #expect(await second.value == soil)
+        #expect(await counter.count == 1)
+    }
+}
