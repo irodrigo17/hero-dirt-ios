@@ -59,3 +59,21 @@ extension EnvironmentValues {
     @Entry var drivingTime: any DrivingTimeProviding = LiveDrivingTimeProvider()
     @Entry var soil: any SoilProviding = LiveSoilProvider()
 }
+
+/// Bounds the primary conditions request, including time waiting for a request
+/// slot. URLSession and the request budget both cooperate with cancellation.
+enum WeatherRequestDeadline {
+    static func run<T: Sendable>(timeout: Duration = .seconds(25),
+                                 operation: @escaping @Sendable () async throws -> T) async throws -> T {
+        try Task.checkCancellation()
+        return try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { try await operation() }
+            group.addTask {
+                try await Task.sleep(for: timeout)
+                throw URLError(.timedOut)
+            }
+            defer { group.cancelAll() }
+            return try await group.next()!
+        }
+    }
+}

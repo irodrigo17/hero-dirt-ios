@@ -85,6 +85,8 @@ xcodebuild -scheme HeroDirt -destination 'platform=iOS Simulator,name=iPhone 16 
 
 Or open `HeroDirt.xcodeproj` in Xcode after running `xcodegen generate`.
 
+Before committing, run `bash scripts/check-ci.sh` to execute the same localization check, simulator build, and complete unit/UI test suite as GitHub Actions. It selects an available iPhone simulator and writes diagnostics to a new temporary folder. Set `SIMULATOR_UDID` to test a specific installed runtime; optional `CI_OUTPUT_DIR`, `CI_DERIVED_DATA_PATH`, and `CI_RESULT_BUNDLE_PATH` override artifact locations. Use a fresh result-bundle path for each run.
+
 ## APIs
 
 | API | Purpose |

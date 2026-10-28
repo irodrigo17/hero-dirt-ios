@@ -107,6 +107,7 @@ enum SampleData {
 struct FakeWeatherProvider: WeatherProviding {
     var delay: Duration = .zero
     var failure: (any Error)? = nil
+    var forecastDelay: Duration = .zero
 
     func rainfall(latitude: Double, longitude: Double) async throws -> RainfallSummary {
         try await Task.sleep(for: delay)
@@ -115,7 +116,7 @@ struct FakeWeatherProvider: WeatherProviding {
     }
 
     func forecast(latitude: Double, longitude: Double) async throws -> RainForecast {
-        try await Task.sleep(for: delay)
+        try await Task.sleep(for: delay + forecastDelay)
         if let failure { throw failure }
         return SampleData.forecast
     }

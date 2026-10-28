@@ -8,7 +8,9 @@ struct HeroDirtApp: App {
     private static let useFakeServices = ProcessInfo.processInfo.arguments.contains("-useFakeServices")
 
     private static let weather: any WeatherProviding =
-        useFakeServices ? FakeWeatherProvider() : LiveWeatherProvider()
+        useFakeServices ? FakeWeatherProvider(
+            forecastDelay: ProcessInfo.processInfo.arguments.contains("-slowForecast") ? .seconds(60) : .zero
+        ) : LiveWeatherProvider()
     private static let drivingTime: any DrivingTimeProviding = useFakeServices
         ? FakeDrivingTimeProvider(
             seconds: ProcessInfo.processInfo.arguments.contains("-noDrivingETA") ? nil : 25 * 60,

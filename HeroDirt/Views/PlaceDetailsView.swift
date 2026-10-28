@@ -47,11 +47,15 @@ struct PlaceDetailsView: View {
     @State private var showSoilOverrideSheet = false
     @State private var editingName = ""
     /// The load runs in its own task rather than the view's `.task`, which
-    /// SwiftUI can cancel while the view is being pushed or rebuilt (that
-    /// left the screen stuck loading or blank).
+    /// SwiftUI can cancel while the view is being pushed or rebuilt. Do not
+    /// cancel it from onDisappear: NavigationSplitView can send disappearance
+    /// callbacks for a replaced view sharing this state with the visible one.
+    /// Reusing this view for a new location cancels the old load; the primary
+    /// request also has a deadline so a service cannot keep the skeleton alive.
     @State private var loadTask: Task<Void, Never>?
     @State private var loadedKey: LoadKey?
     @State private var loadGeneration = 0
+    @State private var forecastRefreshID = UUID()
     private var savedPlace: Place? {
         if let placeID,
             let place = placeStore.places.first(where: { $0.id == placeID })
@@ -77,8 +81,17 @@ struct PlaceDetailsView: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .onAppear { startLoading() }
+        .task(id: loadKey) { startLoading() }
         .task(id: loadKey) {
-            startLoading()
+            do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
+            await resolvePlaceName()
+        }
+        .task(id: ForecastLoadKey(place: loadKey, refreshID: forecastRefreshID)) {
+            do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
+            let forecast = try? await weather.forecast(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            guard !Task.isCancelled else { return }
+            rainForecast = forecast
         }
         .task(id: loadKey) {
             // A structured task follows this selection's lifetime instead of
@@ -89,14 +102,6 @@ struct PlaceDetailsView: View {
         .task(id: DrivingTimeLoadKey(place: loadKey, isActive: scenePhase == .active)) {
             guard scenePhase == .active else { return }
             startDrivingTimeLoad()
-        }
-        .onDisappear {
-            loadGeneration += 1
-            loadTask?.cancel()
-            loadTask = nil
-            loadedKey = nil
-            drivingTimeTask?.cancel()
-            drivingTimeTask = nil
         }
         .onChange(of: effectiveMapItem.map(ObjectIdentifier.init), initial: true) { _, _ in
             prepareWebsite(for: effectiveMapItem)
@@ -128,6 +133,7 @@ struct PlaceDetailsView: View {
 
                     if isLoading {
                         PlaceDetailsSkeleton()
+                            .accessibilityIdentifier("Trail Conditions Loading")
                             .transition(.opacity)
                     } else if let errorMessage {
                         ContentUnavailableView {
@@ -157,6 +163,7 @@ struct PlaceDetailsView: View {
                                 ? { showSoilOverrideSheet = true } : nil,
                             isOverridden: savedPlace?.soilOverride != nil
                         )
+                        .accessibilityIdentifier("Trail Conditions")
                         let strip = summary.strip(soil: soilData)
                         if strip.count > 1 {
                             OutlookCardView(current: result.condition, days: strip)
@@ -176,7 +183,7 @@ struct PlaceDetailsView: View {
             }
             .refreshable {
                 async let estimate: () = refreshDrivingTime()
-                await refreshData()
+                await reload()
                 await estimate
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -298,6 +305,11 @@ struct PlaceDetailsView: View {
         )
     }
 
+    private struct ForecastLoadKey: Hashable {
+        let place: LoadKey
+        let refreshID: UUID
+    }
+
     // MARK: - Action Bar
 
     private var actionBar: some View {
@@ -367,29 +379,47 @@ struct PlaceDetailsView: View {
 
     // MARK: - Data Loading
 
-    private func startLoading() {
-        if loadedKey == loadKey, loadTask != nil || rainfallSummary != nil || errorMessage != nil {
-            return
+    @discardableResult
+    private func startLoading(forceRefresh: Bool = false) -> Task<Void, Never> {
+        if !forceRefresh, loadedKey == loadKey {
+            if let loadTask { return loadTask }
+            if rainfallSummary != nil || errorMessage != nil { return Task {} }
+        }
+        if loadedKey != loadKey {
+            rainForecast = nil
+            soilData = nil
+        }
+        if loadedKey != loadKey || placeName.isEmpty {
+            placeName = savedPlace?.name ?? mapItem?.name ?? formatCoordinate()
         }
         loadedKey = loadKey
         loadTask?.cancel()
         loadGeneration += 1
         let generation = loadGeneration
-        loadTask = Task {
-            await loadData()
-            if generation == loadGeneration { loadTask = nil }
-        }
-    }
-
-    private func loadData() async {
-        do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
-        placeName = savedPlace?.name ?? mapItem?.name ?? ""
         rainfallSummary = nil
-        rainForecast = nil
-        soilData = nil
         isLoading = true
         errorMessage = nil
+        let task = Task {
+            defer {
+                if generation == loadGeneration {
+                    isLoading = false
+                    loadTask = nil
+                }
+            }
+            do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
+            if forceRefresh {
+                await weather.invalidate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                guard !Task.isCancelled else { return }
+                forecastRefreshID = UUID()
+            }
+            await fetchRainfall()
+        }
+        loadTask = task
+        return task
+    }
 
+    /// Names and website metadata refine independently of trail conditions.
+    private func resolvePlaceName() async {
         if let saved = savedPlace { await mapItemCache.fetch(for: saved) }
         guard !Task.isCancelled else { return }
 
@@ -423,55 +453,30 @@ struct PlaceDetailsView: View {
             }
         }
 
+        guard !Task.isCancelled else { return }
         onNameResolved?(placeName)
-        guard !Task.isCancelled else { return }
-        await fetchWeatherAndSoil()
-        // A cancelled load (the view disappeared, or a newer load started)
-        // must not end the loading state with no data: that left a blank
-        // screen. The load that is still running finishes it.
-        guard !Task.isCancelled else { return }
-        isLoading = false
     }
 
     private func reload() async {
-        isLoading = true
-        errorMessage = nil
-        await refreshData()
-        isLoading = false
+        await startLoading(forceRefresh: true).value
     }
 
-    private func refreshData() async {
-        await weather.invalidate(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        await fetchWeatherAndSoil()
-    }
-
-    private func fetchWeatherAndSoil() async {
-        async let rainfallTask = weather.rainfall(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-        async let forecastTask = weather.forecast(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        )
-
+    private func fetchRainfall() async {
+        let provider = weather
+        let latitude = coordinate.latitude
+        let longitude = coordinate.longitude
         do {
-            let summary = try await rainfallTask
+            let summary = try await WeatherRequestDeadline.run {
+                try await provider.rainfall(latitude: latitude, longitude: longitude)
+            }
             guard !Task.isCancelled else { return }
             rainfallSummary = summary
             errorMessage = nil
-            if let summary = rainfallSummary {
-                Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
-            }
+            Telemetry.signal(.conditionsViewed, ["condition": summary.dirtCondition().label])
         } catch {
-            guard !Task.isCancelled, !PlaceConditionsModel.isCancellation(error) else { return }
+            guard !Task.isCancelled else { return }
             errorMessage = PlaceConditionsModel.friendlyMessage(for: error, includeRetryHint: false)
         }
-
-        guard !Task.isCancelled else { return }
-        let forecast = try? await forecastTask
-        guard !Task.isCancelled else { return }
-        rainForecast = forecast
     }
 
     private func loadSoil() async {

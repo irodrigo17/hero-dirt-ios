@@ -64,14 +64,18 @@ struct RainfallGridServiceTests {
     )
 
     private func waitForOverlay(_ service: RainfallGridService) async throws {
-        for _ in 0..<200 where service.overlay == nil && service.errorMessage == nil {
-            try await Task.sleep(for: .milliseconds(10))
+        // Core Image's first render runs off the main actor and can take
+        // longer on shared CI runners. Wait for its result, independently of
+        // the map interaction debounce (covered by RainMapBudgetTests).
+        let deadline = ContinuousClock.now.advanced(by: .seconds(10))
+        while service.overlay == nil && service.errorMessage == nil && ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
         }
     }
 
     @Test func rendersOverlayFromFetchedGrid() async throws {
         let service = RainfallGridService(diskCache: RainGridDiskCache(directory: nil)) { points, _ in points.map { _ in SampleData.muddy } }
-        service.updateRegion(region)
+        await service.load(region: region, pastDays: 3)
         try await waitForOverlay(service)
         #expect(service.overlay != nil)
         #expect(service.errorMessage == nil)
@@ -79,8 +83,7 @@ struct RainfallGridServiceTests {
 
     @Test func surfacesFetchErrors() async throws {
         let service = RainfallGridService(diskCache: RainGridDiskCache(directory: nil)) { _, _ in throw WeatherService.WeatherError.httpError(statusCode: 429) }
-        service.updateRegion(region)
-        try await waitForOverlay(service)
+        await service.load(region: region, pastDays: 3)
         #expect(service.errorMessage?.contains("Too many requests") == true)
     }
 }

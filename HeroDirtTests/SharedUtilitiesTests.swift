@@ -126,3 +126,38 @@ struct SharedUtilitiesTests {
         #expect(CGFloat.cornerMedium < CGFloat.cornerLarge)
     }
 }
+
+struct WeatherRequestDeadlineTests {
+    @Test func slowConditionsEndInATimeoutRatherThanEndlessLoading() async {
+        do {
+            _ = try await WeatherRequestDeadline.run(timeout: .milliseconds(20)) {
+                try await Task.sleep(for: .seconds(60))
+                Issue.record("Timed-out network work should be cancelled")
+                return 1
+            }
+            Issue.record("Expected timeout")
+        } catch let error as URLError { #expect(error.code == .timedOut) }
+        catch { Issue.record("Wrong error: \(error)") }
+    }
+
+    @Test func completedConditionsCancelTheDeadline() async throws {
+        #expect(try await WeatherRequestDeadline.run(timeout: .seconds(60)) { 42 } == 42)
+    }
+
+    @Test func leavingAPinCancelsItsDeadlineAndRequest() async {
+        let (started, ready) = AsyncStream<Void>.makeStream()
+        let task = Task {
+            try await WeatherRequestDeadline.run {
+                ready.yield()
+                try await Task.sleep(for: .seconds(60))
+                Issue.record("Cancelled pin must not finish fetching")
+                return 1
+            }
+        }
+        for await _ in started { break }
+        task.cancel()
+        do { _ = try await task.value; Issue.record("Expected cancellation") }
+        catch is CancellationError { }
+        catch { Issue.record("Wrong error: \(error)") }
+    }
+}

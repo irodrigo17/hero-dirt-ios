@@ -1,6 +1,31 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testSlowForecastDoesNotBlockConditionsOrReturningToTrail() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-slowForecast", "-startInList"]
+        app.launch()
+        let trail = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rancho San Antonio")).firstMatch
+        XCTAssertTrue(trail.waitForExistence(timeout: 10))
+        trail.tap()
+        XCTAssertTrue(app.staticTexts["Trail Conditions"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.otherElements["Trail Conditions Loading"].exists)
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(trail.waitForExistence(timeout: 5))
+        trail.tap()
+        let returned = app.staticTexts["Trail Conditions"].waitForExistence(timeout: 10)
+        if !returned {
+            print(app.debugDescription)
+            let shot = XCTAttachment(screenshot: app.screenshot())
+            shot.name = "Returning to trail with slow forecast"
+            shot.lifetime = .keepAlways
+            add(shot)
+        }
+        XCTAssertTrue(returned)
+        XCTAssertFalse(app.otherElements["Trail Conditions Loading"].exists)
+    }
+
     func testSharedTrailLinkOpensFromMap() {
         continueAfterFailure = false
         let app = XCUIApplication()
