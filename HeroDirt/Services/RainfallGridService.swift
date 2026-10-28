@@ -233,6 +233,7 @@ final class RainfallGridService {
     @ObservationIgnored private var renderTask: Task<Void, Never>?
     @ObservationIgnored private var lastRegion: MKCoordinateRegion?
     @ObservationIgnored private var renderGeneration = 0
+    @ObservationIgnored private var loadGeneration = 0
 
     @ObservationIgnored private let gridSession: URLSession = {
         let config = URLSessionConfiguration.default
@@ -243,9 +244,12 @@ final class RainfallGridService {
     /// Fetches rain for many points; injectable for tests.
     typealias BatchFetcher = @Sendable (_ points: [(lat: Double, lon: Double)], _ pastDays: Int) async throws -> [RainfallSummary?]
     @ObservationIgnored private let fetchBatch: BatchFetcher
+    typealias Renderer = @Sendable ([[Double?]]) async -> UIImage?
+    @ObservationIgnored private let renderer: Renderer
 
-    init(diskCache: RainGridDiskCache = .shared, fetchBatch: BatchFetcher? = nil) {
+    init(diskCache: RainGridDiskCache = .shared, renderer: Renderer? = nil, fetchBatch: BatchFetcher? = nil) {
         self.diskCache = diskCache
+        self.renderer = renderer ?? { Self.renderImage(values: $0) }
         let session = gridSession
         self.fetchBatch = fetchBatch ?? { points, pastDays in
             try await WeatherService.fetchRainfallBatch(points: points, pastDays: pastDays, session: session)
@@ -271,6 +275,9 @@ final class RainfallGridService {
     func cancelUpdate() {
         updateTask?.cancel()
         updateTask = nil
+        loadGeneration += 1
+        renderTask?.cancel()
+        renderGeneration += 1
         isLoading = false
     }
 
@@ -284,6 +291,7 @@ final class RainfallGridService {
     }
 
     private func pauseForZoom() {
+        loadGeneration += 1
         renderTask?.cancel()
         renderGeneration += 1
         overlay = nil
@@ -301,13 +309,17 @@ final class RainfallGridService {
         }
         isZoomLimited = false
         errorMessage = nil
+        loadGeneration += 1
+        let generation = loadGeneration
+        isLoading = true
+        defer { if !Task.isCancelled, loadGeneration == generation { isLoading = false } }
         let lattice = RainGridLattice(region: region)
         if !didLoadDiskCache {
             let stored = await diskCache.load()
             cache.merge(stored) { current, disk in current.timestamp >= disk.timestamp ? current : disk }
             didLoadDiskCache = true
         }
-        guard !Task.isCancelled else { return }
+        guard !Task.isCancelled, loadGeneration == generation else { return }
         pruneCache()
 
         var missing: [(row: Int, col: Int)] = []
@@ -320,8 +332,6 @@ final class RainfallGridService {
 
         Self.logger.info("rain grid: \(lattice.rows * lattice.cols) cells at \(lattice.step)°, fetching \(missing.count)")
         if !missing.isEmpty {
-            isLoading = true
-            defer { if !Task.isCancelled { isLoading = false } }
             let state = Self.signposter.beginInterval("Fetch rain grid", "\(missing.count) points")
             defer { Self.signposter.endInterval("Fetch rain grid", state) }
             do {
@@ -329,6 +339,7 @@ final class RainfallGridService {
                 // map moves. Always fetch 7 days so timeframe changes reuse it.
                 for start in stride(from: 0, to: missing.count, by: 16) {
                     try Task.checkCancellation()
+                    guard loadGeneration == generation else { return }
                     let cells = Array(missing[start..<min(start + 16, missing.count)])
                     let points = cells.map { lattice.center(row: $0.row, col: $0.col) }
                     let summaries = try await fetchBatch(points, 7)
@@ -350,7 +361,7 @@ final class RainfallGridService {
             } catch let error as URLError where error.code == .cancelled {
                 return
             } catch {
-                guard !Task.isCancelled else { return }
+                guard !Task.isCancelled, loadGeneration == generation else { return }
                 Self.logger.error("rain grid fetch failed: \(error.localizedDescription, privacy: .public)")
                 errorMessage = (error as? WeatherService.WeatherError)?.errorDescription
                     ?? String(localized: "Couldn't load rain data. Check your connection.")
@@ -358,7 +369,7 @@ final class RainfallGridService {
             }
         }
 
-        guard !Task.isCancelled else { return }
+        guard !Task.isCancelled, loadGeneration == generation else { return }
 
         var values = [[Double?]](
             repeating: [Double?](repeating: nil, count: lattice.cols),
@@ -369,7 +380,7 @@ final class RainfallGridService {
                 values[r][c] = cache[key(lattice, row, col)].map { Self.amount($0.summary, pastDays: pastDays) }
             }
         }
-        render(values: values, bounds: lattice.bounds)
+        await render(values: values, bounds: lattice.bounds)
     }
 
     private func key(_ lattice: RainGridLattice, _ row: Int, _ col: Int) -> CacheKey {
@@ -396,18 +407,32 @@ final class RainfallGridService {
 
     // MARK: - Rendering (off the main thread)
 
-    private func render(values: [[Double?]], bounds: RainfallGridBounds) {
+    private func render(values: [[Double?]], bounds: RainfallGridBounds) async {
         renderTask?.cancel()
         renderGeneration += 1
         let generation = renderGeneration
-        renderTask = Task { [weak self] in
-            let image = await Task.detached(priority: .userInitiated) {
+        let renderer = self.renderer
+        let task = Task { [weak self] in
+            let worker = Task.detached(priority: .userInitiated) {
                 let state = Self.signposter.beginInterval("Render rain map")
                 defer { Self.signposter.endInterval("Render rain map", state) }
-                return Self.renderImage(values: values)
-            }.value
+                return await renderer(values)
+            }
+            let image = await withTaskCancellationHandler {
+                await worker.value
+            } onCancel: {
+                worker.cancel()
+            }
             guard !Task.isCancelled, let image, let self, self.renderGeneration == generation else { return }
             self.overlay = RainfallOverlayImage(image: image, bounds: bounds)
+        }
+        renderTask = task
+        // Loading ends when the image is published, not when a detached render
+        // is merely scheduled. Cold Core Image setup can be slow on CI VMs.
+        await withTaskCancellationHandler {
+            await task.value
+        } onCancel: {
+            task.cancel()
         }
     }
 
