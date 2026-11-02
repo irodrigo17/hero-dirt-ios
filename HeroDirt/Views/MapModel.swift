@@ -77,7 +77,7 @@ final class MapModel {
     var isDetailsSheetPresented = false
     var sheetDetent: PresentationDetent = .medium
 
-    var overlayVisible = false
+    var overlayVisible = true
     var overlayTimeframe: RainfallTimeframe = .threeDays
     var overlayOpacity: Double = 0.3
 

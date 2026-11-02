@@ -9,6 +9,12 @@ struct MapModelTests {
     private let place = Place(name: "Skeggs", latitude: 37.41, longitude: -122.30)
     private let pin = CLLocationCoordinate2D(latitude: 37.0, longitude: -122.0)
 
+    @Test func rainOverlayStartsEnabled() {
+        let model = MapModel()
+        #expect(model.overlayVisible)
+        #expect(model.overlayTimeframe == .threeDays)
+    }
+
     @Test func selectingOpensDetailsAndFocuses() {
         let model = MapModel()
         model.select(.saved(place.id), places: [place])
