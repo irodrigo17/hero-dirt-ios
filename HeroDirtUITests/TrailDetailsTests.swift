@@ -1,6 +1,35 @@
 import XCTest
 
 final class TrailDetailsTests: XCTestCase {
+    func testConditionLegendDismissalPersistsAndAboutKeepsLegend() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["-useFakeServices", "-startInList", "-resetConditionLegend"]
+        app.launch()
+        let dismiss = app.buttons["Dismiss color legend"]
+        for _ in 0..<6 where !dismiss.isHittable { app.swipeUp() }
+        XCTAssertTrue(dismiss.isHittable)
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "Trail color legend"
+        shot.lifetime = .keepAlways
+        add(shot)
+        dismiss.tap()
+        XCTAssertFalse(dismiss.exists)
+        app.terminate()
+        app.launchArguments = ["-useFakeServices", "-startInList"]
+        app.launch()
+        for _ in 0..<4 { app.swipeUp() }
+        XCTAssertFalse(app.buttons["Dismiss color legend"].exists)
+        XCTAssertFalse(app.staticTexts["Trail Color Legend"].exists)
+        app.buttons["About Hero Dirt"].tap()
+        let legend = app.staticTexts["Trail Color Legend"]
+        for _ in 0..<4 where !legend.isHittable { app.swipeUp() }
+        XCTAssertTrue(legend.isHittable)
+        legend.tap()
+        XCTAssertTrue(app.staticTexts["Colors estimate trail conditions, from soaked to dusty."].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Dismiss color legend"].exists)
+    }
+
     func testSlowForecastDoesNotBlockConditionsOrReturningToTrail() {
         continueAfterFailure = false
         let app = XCUIApplication()

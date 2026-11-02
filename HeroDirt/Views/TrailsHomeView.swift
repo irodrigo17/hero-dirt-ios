@@ -31,6 +31,7 @@ struct TrailsHomeView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var activeSearch: MKLocalSearch?
     @State private var showingAbout = false
+    @AppStorage("conditionLegendDismissed") private var conditionLegendDismissed = false
     @State private var editMode: EditMode = .inactive
 
     enum TrailSelection: Hashable {
@@ -176,6 +177,15 @@ struct TrailsHomeView: View {
                 }
                 .onMove { placeStore.movePlaces(from: $0, to: $1) }
                 .onDelete { placeStore.removePlaces(at: $0) }
+                if !conditionLegendDismissed {
+                    Section {
+                        ConditionLegendView {
+                            conditionLegendDismissed = true
+                        }
+                        .padding(.vertical, 12)
+                        .listRowSeparator(.hidden)
+                    }
+                }
             }
         }
         .listStyle(.plain)

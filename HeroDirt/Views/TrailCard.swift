@@ -138,3 +138,48 @@ struct TrailCard: View {
     }
     .listStyle(.plain)
 }
+
+/// Shared key for the condition badges and daily strips in the trails list.
+struct ConditionLegendView: View {
+    var onDismiss: (() -> Void)? = nil
+
+    private let conditions: [DirtCondition] = [.veryWet, .wet, .heroDirt, .dry, .veryDry]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Trail Color Legend")
+                    .font(.headline)
+                Spacer()
+                if let onDismiss {
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark")
+                            .font(.body.weight(.semibold))
+                            .padding(8)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Dismiss color legend")
+                }
+            }
+            ForEach(conditions, id: \.wetness) { condition in
+                HStack(spacing: 12) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(condition.color.gradient)
+                        .frame(width: 24, height: 24)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(condition.label)
+                            .font(.subheadline.weight(.semibold))
+                        Text(condition.shortDescription)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            }
+            Text("Colors estimate trail conditions, from soaked to dusty.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}

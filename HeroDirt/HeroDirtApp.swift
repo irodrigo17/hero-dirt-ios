@@ -29,6 +29,9 @@ struct HeroDirtApp: App {
     private let locationManager = CLLocationManager()
 
     init() {
+        if Self.useFakeServices && ProcessInfo.processInfo.arguments.contains("-resetConditionLegend") {
+            UserDefaults.standard.removeObject(forKey: "conditionLegendDismissed")
+        }
         Telemetry.start()
     }
 

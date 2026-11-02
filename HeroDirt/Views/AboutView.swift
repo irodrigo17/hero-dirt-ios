@@ -35,6 +35,19 @@ struct AboutView: View {
                     Text("Opens a new GitHub issue with your app version and device details filled in.")
                 }
 
+                Section {
+                    NavigationLink {
+                        ScrollView {
+                            ConditionLegendView()
+                                .padding()
+                        }
+                        .navigationTitle("Trail Color Legend")
+                        .navigationBarTitleDisplayMode(.inline)
+                    } label: {
+                        Label("Trail Color Legend", systemImage: "paintpalette")
+                    }
+                }
+
                 Section("Settings") {
                     Picker(selection: $unitPreference) {
                         ForEach(RainUnitPreference.allCases) { pref in
